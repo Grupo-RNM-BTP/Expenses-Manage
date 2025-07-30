@@ -18,5 +18,14 @@ sap.ui.define([
             });
         },
 
+        // Format currency
+        formatCurrencyEUR: function (vValue) {
+            var oCurrencyFormat = sap.ui.core.format.NumberFormat.getCurrencyInstance({
+                currencyCode: false
+            });
+
+            return oCurrencyFormat.format(vValue, "EUR");
+        },
+
     });
 });

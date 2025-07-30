@@ -7,7 +7,7 @@
     xmlns:card="sap.f.cards"
     xmlns:smartTable="sap.ui.comp.smarttable"
     xmlns:layout="sap.ui.layout" height="100%">
-    <f:DynamicPage id="dynamicPageId" stickySubheaderProvider="iconTabBar" class="sapUiNoContentPadding" toggleHeaderOnTitleClick="{/titleClickable}">
+    <f:DynamicPage id="dynamicPageId" stickySubheaderProvider="iconTabBar" preserveHeaderStateOnScroll="false" class="sapUiNoContentPadding">
         <f:content>
             <IconTabBar id="iconTabBar" class="sapUiResponsiveContentPadding">
                 <items>
@@ -17,7 +17,7 @@
 
                                 <Title text="{i18n>ManageExpenses}" level="H2" titleStyle="H2" wrapping="true" />
 
-                                <FlexBox justifyContent="SpaceBetween" class="sapUiMediumMarginTop" alignItems="Center">
+                                <FlexBox justifyContent="SpaceBetween" class="sapUiMediumMarginTop" wrap="Wrap" alignItems="Center">
                                     <Title text="{i18n>OverviewExpenses}" titleStyle="H4" />
                                     <Button text="{i18n>btnAdd}" type="Default" press="handleAdd" />
                                 </FlexBox>
@@ -67,10 +67,11 @@
                                         <OverflowToolbar design="Transparent">
                                             <Title text="{i18n>AllExpenses}"/>
                                             <ToolbarSpacer/>
+                                            <Button id="btnEdit" enabled="false" text="{i18n>Edit}" press="handleEdit" />
                                             <Button id="btnDelete" enabled="false" text="{i18n>Delete}" press="handleDelete" />
                                         </OverflowToolbar>
                                     </smartTable:customToolbar>
-                                    <Table id="idOperationsTable" fixedLayout="false" growing="true" growingThreshold="5" mode="MultiSelect" selectionChange="handleSelectionChange">
+                                    <Table id="idTableExpenses" fixedLayout="false" growing="true" growingThreshold="5" mode="SingleSelectLeft" selectionChange="handleSelectionChange">
                                         <columns>
                                             <Column>
                                                 <Text text="{i18n>Document}" />
@@ -98,11 +99,18 @@
                                             <ColumnListItem id="idColumnListItem">
                                                 <cells>
                                                     <VBox>
-                                                        <Image visible="{path: 'Doc', formatter: '.formatter.hasExpDoc'}" src="{Doc}" width="2rem" height="2rem" decorative="false" press="onPressImage"/>
+
+                                                        <Image src="{path: 'Doc', formatter: '.formatter.base64ToSrc'}" visible="{path: 'Doc', formatter: '.formatter.hasExpDoc'}" width="2rem" height="2rem" densityAware="false" class="imgClass">
+                                                            <detailBox>
+                                                                <LightBox>
+                                                                    <LightBoxItem imageSrc="{path: 'Doc', formatter: '.formatter.base64ToSrc'}" />
+                                                                </LightBox>
+                                                            </detailBox>
+                                                        </Image>
                                                         <core:Icon visible="{path: 'Doc', formatter: '.formatter.noExpDoc'}" src="sap-icon://upload-to-cloud" size="2rem" press="onUploadPressed"/>
                                                     </VBox>
                                                     <VBox>
-                                                        <core:Icon visible="{path: 'Reason', formatter: '.formatter.hasReason'}" src="sap-icon://comment" size="1.5rem" press="onPressReason" tooltip="{Reason}" />
+                                                        <core:Icon visible="{path: 'Reason', formatter: '.formatter.hasReason'}" src="sap-icon://comment" size="2rem" press="onPressReason" tooltip="{Reason}" />
                                                     </VBox>
                                                     <Text id="Pymtmeth" text="{PayMethodDsc}" />
                                                     <Text id="Exptype" text="{ExpTypeDsc}" />
