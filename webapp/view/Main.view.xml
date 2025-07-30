@@ -1,0 +1,124 @@
+<mvc:View controllerName="zfiexpensesmanage.controller.Main"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:l="sap.ui.layout"
+    xmlns:core="sap.ui.core"
+    xmlns:card="sap.f.cards"
+    xmlns:smartTable="sap.ui.comp.smarttable"
+    xmlns:layout="sap.ui.layout" height="100%">
+    <f:DynamicPage id="dynamicPageId" stickySubheaderProvider="iconTabBar" class="sapUiNoContentPadding" toggleHeaderOnTitleClick="{/titleClickable}">
+        <f:content>
+            <IconTabBar id="iconTabBar" class="sapUiResponsiveContentPadding">
+                <items>
+                    <IconTabFilter text="{i18n>ManageExpenses}">
+                        <Shell appWidthLimited="true" backgroundColor="transparent">
+                            <VBox class="sapUiMediumMarginBeginEnd">
+
+                                <Title text="{i18n>ManageExpenses}" level="H2" titleStyle="H2" wrapping="true" />
+
+                                <FlexBox justifyContent="SpaceBetween" class="sapUiMediumMarginTop" alignItems="Center">
+                                    <Title text="{i18n>OverviewExpenses}" titleStyle="H4" />
+                                    <Button text="{i18n>btnAdd}" type="Default" press="handleAdd" />
+                                </FlexBox>
+
+                                <Toolbar style="Standard" design="Transparent" height="0.1rem" />
+
+                                <l:Grid defaultSpan="XL4 L6 M12 S12" position="Center" hSpacing="1" vSpacing="1">
+                                    <f:Card class="sapUiSmallMargin">
+                                        <f:header>
+                                            <card:Header title="{i18n>SumOfApprovedExpenses}" />
+                                        </f:header>
+                                        <f:content>
+                                            <VBox class="sapUiSmallMargin">
+                                                <Title id="idSumOfApprovedExpenses" level="H2" titleStyle="H3" />
+                                            </VBox>
+                                        </f:content>
+                                    </f:Card>
+
+                                    <f:Card class="sapUiSmallMargin">
+                                        <f:header>
+                                            <card:Header title="{i18n>SumOfExpensesNoAttach}" />
+                                        </f:header>
+                                        <f:content>
+                                            <VBox class="sapUiSmallMargin">
+                                                <Title id="idSumOfExpensesNoAttach" level="H2" titleStyle="H3" />
+                                            </VBox>
+                                        </f:content>
+                                    </f:Card>
+
+                                    <f:Card class="sapUiSmallMargin">
+                                        <f:header>
+                                            <card:Header title="{i18n>SumOfExpensesLast30Days}" />
+                                        </f:header>
+                                        <f:content>
+                                            <VBox class="sapUiSmallMargin">
+                                                <Title id="idSumOfExpensesLast30Days" level="H2" titleStyle="H3" />
+                                            </VBox>
+                                        </f:content>
+                                    </f:Card>
+                                </l:Grid>
+
+                                <smartTable:SmartTable demandPopin="true" entitySet="ZFI_EXPENSES_MNG" id="operationsTable" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="false" useTablePersonalisation="false" useVariantManagement="false" requestAtLeastFields="Doc,Reason,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="false" class="sapUiResponsiveContentPadding">
+                                    <smartTable:customData>
+                                        <core:CustomData key="p13nDialogSettings" value='\{"columns":\{"visible": true \},"sort":\{"visible": true\},"filter":\{"visible": false\},"group":\{"visible": true\}\}'/>
+                                    </smartTable:customData>
+                                    <smartTable:customToolbar>
+                                        <OverflowToolbar design="Transparent">
+                                            <Title text="{i18n>AllExpenses}"/>
+                                            <ToolbarSpacer/>
+                                            <Button id="btnDelete" enabled="false" text="{i18n>Delete}" press="handleDelete" />
+                                        </OverflowToolbar>
+                                    </smartTable:customToolbar>
+                                    <Table id="idOperationsTable" fixedLayout="false" growing="true" growingThreshold="5" mode="MultiSelect" selectionChange="handleSelectionChange">
+                                        <columns>
+                                            <Column>
+                                                <Text text="{i18n>Document}" />
+                                            </Column>
+                                            <Column>
+                                                <Text text="{i18n>Reason}" />
+                                            </Column>
+                                            <Column>
+                                                <Text text="{i18n>PaymentMethod}" />
+                                            </Column>
+                                            <Column>
+                                                <Text text="{i18n>ExpenseType}" />
+                                            </Column>
+                                            <Column>
+                                                <Text text="{i18n>Date}" />
+                                            </Column>
+                                            <Column>
+                                                <Text text="{i18n>Value}" />
+                                            </Column>
+                                            <Column>
+                                                <Text text="{i18n>Status}" />
+                                            </Column>
+                                        </columns>
+                                        <items>
+                                            <ColumnListItem id="idColumnListItem">
+                                                <cells>
+                                                    <VBox>
+                                                        <Image visible="{path: 'Doc', formatter: '.formatter.hasExpDoc'}" src="{Doc}" width="2rem" height="2rem" decorative="false" press="onPressImage"/>
+                                                        <core:Icon visible="{path: 'Doc', formatter: '.formatter.noExpDoc'}" src="sap-icon://upload-to-cloud" size="2rem" press="onUploadPressed"/>
+                                                    </VBox>
+                                                    <VBox>
+                                                        <core:Icon visible="{path: 'Reason', formatter: '.formatter.hasReason'}" src="sap-icon://comment" size="1.5rem" press="onPressReason" tooltip="{Reason}" />
+                                                    </VBox>
+                                                    <Text id="Pymtmeth" text="{PayMethodDsc}" />
+                                                    <Text id="Exptype" text="{ExpTypeDsc}" />
+                                                    <Text text="{path: 'Erdat', formatter: '.formatter.formatDateTime'}" />
+                                                    <Text id="Totalvalue" text="{Value} {Waers}" />
+                                                    <ObjectStatus text="{path: 'FiStatus', formatter: '.formatter.statusText'}" state="{path: 'FiStatus', formatter: '.formatter.statusState'}" icon="{path: 'FiStatus', formatter: '.formatter.statusIcon'}" iconDensityAware="false" active="false"/>
+                                                </cells>
+                                            </ColumnListItem>
+                                        </items>
+                                    </Table>
+                                </smartTable:SmartTable>
+                            </VBox>
+                        </Shell>
+                    </IconTabFilter>
+                </items>
+            </IconTabBar>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>
