@@ -14,6 +14,10 @@ sap.ui.define([
                     ExpNo: ""
                 });
                 this.getView().setModel(oModel, "Main");
+
+                var oGraficoModel = new sap.ui.model.json.JSONModel({});
+            
+                this.getView().setModel(oGraficoModel, "graficoModel");
                 sap.ui.core.UIComponent.getRouterFor(this).getRoute("RouteMain").attachPatternMatched(this.onObjectMain, this);
             },
 
@@ -29,74 +33,10 @@ sap.ui.define([
                 this.getSumOfApprovedExpenses();
                 this.getSumOfExpensesNoAttach();
                 this.getSumOfExpensesLast30Days();
+                this.getSumMonth();
+                this.getSumYear();
 
                 this.getView().getModel().refresh();
-            },
-
-            // Get sum of approved expenses
-            getSumOfApprovedExpenses: function () {
-                var oModel = this.getView().getModel();
-
-                oModel.read("/ZFI_EXPENSES_APPRVD", {
-                    success: function (oData) {
-                        this.getView().byId("idSumOfApprovedExpenses").setText(this.formatCurrencyEUR(oData.results[0].Totalvalue));
-                    }.bind(this),
-                    error: function (oError) {
-                        var sError = JSON.parse(oError.responseText).error.message.value;
-
-                        sap.m.MessageBox.alert(sError, {
-                            icon: "ERROR",
-                            onClose: null,
-                            styleClass: '',
-                            initialFocus: null,
-                            textDirection: sap.ui.core.TextDirection.Inherit
-                        });
-                    }.bind(this)
-                });
-            },
-
-            // Get sum of expenses without attach
-            getSumOfExpensesNoAttach: function () {
-                var oModel = this.getView().getModel();
-
-                oModel.read("/ZFI_EXPENSES_SUM_NDOC", {
-                    success: function (oData) {
-                        this.getView().byId("idSumOfExpensesNoAttach").setText(this.formatCurrencyEUR(oData.results[0].Totalvalue));
-                    }.bind(this),
-                    error: function (oError) {
-                        var sError = JSON.parse(oError.responseText).error.message.value;
-
-                        sap.m.MessageBox.alert(sError, {
-                            icon: "ERROR",
-                            onClose: null,
-                            styleClass: '',
-                            initialFocus: null,
-                            textDirection: sap.ui.core.TextDirection.Inherit
-                        });
-                    }.bind(this)
-                });
-            },
-
-            // Get sum of expenses last 30 days
-            getSumOfExpensesLast30Days: function () {
-                var oModel = this.getView().getModel();
-
-                oModel.read("/ZFI_EXPENSES_LAST30", {
-                    success: function (oData) {
-                        this.getView().byId("idSumOfExpensesLast30Days").setText(this.formatCurrencyEUR(oData.results[0].Totalvalue));
-                    }.bind(this),
-                    error: function (oError) {
-                        var sError = JSON.parse(oError.responseText).error.message.value;
-
-                        sap.m.MessageBox.alert(sError, {
-                            icon: "ERROR",
-                            onClose: null,
-                            styleClass: '',
-                            initialFocus: null,
-                            textDirection: sap.ui.core.TextDirection.Inherit
-                        });
-                    }.bind(this)
-                });
             },
 
             // Open reason dialog
@@ -305,7 +245,6 @@ sap.ui.define([
 
             // Handle Edit Value
             handleEditValue: function () {
-                debugger;
                 var oModel = this.getView().getModel(),
                     oTable = this.byId("idTableExpenses"),
                     sTablePath = oTable.getSelectedItem().getBindingContext().getPath(),

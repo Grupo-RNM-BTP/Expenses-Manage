@@ -6,6 +6,9 @@
     xmlns:core="sap.ui.core"
     xmlns:card="sap.f.cards"
     xmlns:smartTable="sap.ui.comp.smarttable"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:viz.data="sap.viz.ui5.data"
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
     xmlns:layout="sap.ui.layout" height="100%">
     <f:DynamicPage id="dynamicPageId" stickySubheaderProvider="iconTabBar" preserveHeaderStateOnScroll="false" class="sapUiNoContentPadding">
         <f:content>
@@ -59,13 +62,17 @@
                                     </f:Card>
                                 </l:Grid>
 
+                                <FlexBox justifyContent="SpaceBetween" class="sapUiLargeMarginTop" wrap="Wrap" alignItems="Center">
+                                    <Title text="{i18n>AllExpenses}" titleStyle="H4" />
+                                </FlexBox>
+                                <Toolbar style="Standard" design="Transparent" height="0.1rem" />
+
                                 <smartTable:SmartTable demandPopin="true" entitySet="ZFI_EXPENSES_MNG" id="operationsTable" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="false" useTablePersonalisation="false" useVariantManagement="false" requestAtLeastFields="Doc,Reason,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="false" class="sapUiResponsiveContentPadding">
                                     <smartTable:customData>
                                         <core:CustomData key="p13nDialogSettings" value='\{"columns":\{"visible": true \},"sort":\{"visible": true\},"filter":\{"visible": false\},"group":\{"visible": true\}\}'/>
                                     </smartTable:customData>
                                     <smartTable:customToolbar>
                                         <OverflowToolbar design="Transparent">
-                                            <Title text="{i18n>AllExpenses}"/>
                                             <ToolbarSpacer/>
                                             <Button id="btnEdit" enabled="false" text="{i18n>Edit}" press="handleEdit" />
                                             <Button id="btnDelete" enabled="false" text="{i18n>Delete}" press="handleDelete" />
@@ -120,6 +127,86 @@
                                                 </cells>
                                             </ColumnListItem>
                                         </items>
+                                    </Table>
+                                </smartTable:SmartTable>
+                            </VBox>
+                        </Shell>
+                    </IconTabFilter>
+
+                    <IconTabFilter text="{i18n>CardTransactions}">
+                        <Shell appWidthLimited="true" backgroundColor="transparent">
+                            <VBox class="sapUiMediumMarginBeginEnd">
+
+                                <Title text="{i18n>CardTransactions}" level="H2" titleStyle="H2" wrapping="true" />
+
+                                <FlexBox justifyContent="SpaceBetween" class="sapUiMediumMarginTop" wrap="Wrap" alignItems="Center">
+                                    <Title text="{i18n>OverView}" titleStyle="H4" />
+                                </FlexBox>
+
+                                <Toolbar style="Standard" design="Transparent" height="0.1rem" />
+                                <layout:Grid defaultSpan="XL6 L6 M12 S12" hSpacing="4" vSpacing="4" class="sapUiResponsiveMargin sapUiSmallMarginTopBottom">
+
+                                    <layout:content>
+                                        <f:Card class="sapUiSmallMargin" width="100%">
+
+                                            <f:header>
+                                                <card:Header title="{i18n>ExpensesByMonth}" />
+                                            </f:header>
+                                            <f:content>
+                                                <viz:VizFrame id="barChart" width="100%" height="400px" uiConfig="{applicationSet:'fiori'}" vizType="bar" vizProperties='{ "legend": { "visible": true }, "plotArea": { "dataLabel": { "visible": true } } }'>
+                                                    <viz:dataset>
+                                                        <viz.data:FlattenedDataset data="{graficoModel>/gastosPorMes}">
+                                                            <viz.data:dimensions>
+                                                                <viz.data:DimensionDefinition name="Mes" value="{path: 'graficoModel>YearMonth', formatter: '.formatter.formatYearMonth'}" />
+                                                            </viz.data:dimensions>
+                                                            <viz.data:measures>
+                                                                <viz.data:MeasureDefinition name="Valor" value="{graficoModel>Amount}" />
+                                                            </viz.data:measures>
+                                                        </viz.data:FlattenedDataset>
+                                                    </viz:dataset>
+                                                    <viz:feeds>
+                                                        <viz.feeds:FeedItem uid="valueAxis" type="Measure" values="Valor" />
+                                                        <viz.feeds:FeedItem uid="categoryAxis" type="Dimension" values="Mes" />
+                                                    </viz:feeds>
+                                                </viz:VizFrame>
+                                            </f:content>
+                                        </f:Card>
+                                    </layout:content>
+
+                                    <layout:content>
+                                        <VBox width="100%">
+                                            <f:Card class="sapUiSmallMargin" width="80%">
+                                                <f:header>
+                                                    <card:Header title="{i18n>TotalYear}" />
+                                                </f:header>
+                                                <f:content>
+                                                    <VBox class="sapUiSmallMargin">
+                                                        <Title level="H2" titleStyle="H3" text="{graficoModel>/totalAno} €" />
+                                                    </VBox>
+                                                </f:content>
+                                            </f:Card>
+
+                                            <f:Card class="sapUiSmallMargin" width="80%">
+                                                <f:header>
+                                                    <card:Header title="{i18n>ExpensesMonth}" />
+                                                </f:header>
+                                                <f:content>
+                                                    <VBox class="sapUiSmallMargin">
+                                                        <Title level="H2" titleStyle="H3" text="{graficoModel>/gastoMesAtual} €" />
+                                                    </VBox>
+                                                </f:content>
+                                            </f:Card>
+                                        </VBox>
+                                    </layout:content>
+                                </layout:Grid>
+
+
+                                <Toolbar style="Standard" design="Transparent" height="0.1rem" />
+
+                                <smartTable:SmartTable id="smartTable" entitySet="ZFI_BCP_MOVCC" tableType="ResponsiveTable" demandPopin="true" useVariantManagement="false" useTablePersonalisation="false" header="{i18n>CardTransactions}" showRowCount="true" persistencyKey="SmartTable" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
+                                    <Table mode="None" growing="true" growingThreshold="10">
+                                        <ColumnListItem vAlign="Middle">
+                                        </ColumnListItem>
                                     </Table>
                                 </smartTable:SmartTable>
                             </VBox>
