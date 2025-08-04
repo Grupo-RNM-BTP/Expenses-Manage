@@ -16,7 +16,7 @@ sap.ui.define([
                 this.getView().setModel(oModel, "Main");
 
                 var oGraficoModel = new sap.ui.model.json.JSONModel({});
-            
+
                 this.getView().setModel(oGraficoModel, "graficoModel");
                 sap.ui.core.UIComponent.getRouterFor(this).getRoute("RouteMain").attachPatternMatched(this.onObjectMain, this);
             },
@@ -195,50 +195,57 @@ sap.ui.define([
 
             // Open Edit Dialog change Value
             handleEdit: function () {
-                if (!this._editDialog) {
-                    var oLabel = new sap.m.Label({
-                        text: this.getResourceBundle().getText("labelValue")
-                    });
+                debugger;
+                if (this._editDialog) {
+                    this._editDialog = null;
+                }
+                var oLabel = new sap.m.Label({
+                    text: this.getResourceBundle().getText("labelValue")
+                });
 
-                    var oInput = new sap.m.Input({
-                        id: "idInputValue",
-                        placeholder: this.getResourceBundle().getText("placeholderValue"),
-                        width: "100%"
-                    });
+                var oInput = new sap.m.Input({
+                    id: "idInputValue",
+                    placeholder: this.getResourceBundle().getText("placeholderValue"),
+                    width: "100%"
+                });
 
-                    oLabel.setLabelFor(oInput);
+                oLabel.setLabelFor(oInput);
 
-                    var oForm = new sap.ui.layout.form.SimpleForm({
-                        layout: "ResponsiveGridLayout",
-                        content: [
-                            oLabel,
-                            oInput
-                        ]
-                    });
+                var oForm = new sap.ui.layout.form.SimpleForm({
+                    layout: "ResponsiveGridLayout",
+                    content: [
+                        oLabel,
+                        oInput
+                    ]
+                });
 
-                    this._editDialog = new sap.m.Dialog({
-                        title: this.getResourceBundle().getText("editValue"),
-                        contentWidth: "300px",
-                        contentHeight: "auto",
-                        content: [oForm],
-                        beginButton: new sap.m.Button({
-                            text: this.getResourceBundle().getText("btnOk"),
-                            type: "Emphasized",
-                            press: this.handleEditValue.bind(this)
-                        }),
-                        endButton: new sap.m.Button({
-                            text: this.getResourceBundle().getText("btnCancel"),
-                            press: function () {
-                                this._editDialog.close();
-                                this._editDialog.destroy();
-                            }.bind(this)
-                        }),
-                        afterClose: function () {
+                this._editDialog = new sap.m.Dialog({
+                    title: this.getResourceBundle().getText("editValue"),
+                    contentWidth: "300px",
+                    contentHeight: "auto",
+                    content: [oForm],
+                    beginButton: new sap.m.Button({
+                        text: this.getResourceBundle().getText("btnOk"),
+                        type: "Emphasized",
+                        press: this.handleEditValue.bind(this)
+                    }),
+                    endButton: new sap.m.Button({
+                        text: this.getResourceBundle().getText("btnCancel"),
+                        press: function () {
+                            this._editDialog.close();
                             this._editDialog.destroy();
                             this._editDialog = null;
+
                         }.bind(this)
-                    });
-                }
+                    }),
+                    afterClose: function () {
+                        this._editDialog.close();
+                        this._editDialog.destroy();
+                        this._editDialog = null;
+
+                    }.bind(this)
+                });
+
 
                 this._editDialog.open();
             },
@@ -289,6 +296,7 @@ sap.ui.define([
                 this.byId("btnEdit").setEnabled(true);
             },
 
+            // Handle Delete
             handleDelete: function () {
                 var oModel = this.getView().getModel(),
                     oTable = this.byId("idTableExpenses"),

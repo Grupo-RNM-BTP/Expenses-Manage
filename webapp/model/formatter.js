@@ -119,7 +119,6 @@ sap.ui.define([], function () {
         },
 
         formatAmountEuro: function(fAmount) {
-            debugger;
             if (typeof fAmount !== "number") {
               return fAmount;
             }

@@ -93,10 +93,11 @@ sap.ui.define([
             });
         },
 
+        // Get sum of expenses year
         getSumYear: function () {
-            var oModel = this.getView().getModel();
-            var oGraficoModel = this.getView().getModel("graficoModel");
-            var iAnoAtual = new Date().getFullYear();
+            var oModel = this.getView().getModel(),
+                oGraficoModel = this.getView().getModel("graficoModel"),
+                iAnoAtual = new Date().getFullYear();
 
             oModel.read("/ZFI_EXPENSES_BCP2", {
                 success: function (oData) {
@@ -121,6 +122,7 @@ sap.ui.define([
             });
         },
 
+        // Get sum of expenses month
         getSumMonth: function () {
             var oModel = this.getView().getModel(),
                 oGraficoModel = this.getView().getModel("graficoModel"),
