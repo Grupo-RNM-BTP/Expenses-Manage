@@ -29,148 +29,184 @@ sap.ui.define([
 
         // Get sum of approved expenses
         getSumOfApprovedExpenses: function () {
-            var oModel = this.getView().getModel();
+            try {
+                var oModel = this.getView().getModel();
 
-            oModel.read("/ZFI_EXPENSES_APPRVD", {
-                success: function (oData) {
-                    this.getView().byId("idSumOfApprovedExpenses").setText(this.formatCurrencyEUR(oData.results[0].Totalvalue));
-                }.bind(this),
-                error: function (oError) {
-                    var sError = JSON.parse(oError.responseText).error.message.value;
+                oModel.read("/ZFI_EXPENSES_APPRVD", {
+                    success: function (oData) {
+                        this.getView().byId("idSumOfApprovedExpenses").setText(this.formatCurrencyEUR(oData.results[0].Totalvalue));
+                    }.bind(this),
+                    error: function (oError) {
+                        var sError = JSON.parse(oError.responseText).error.message.value;
 
-                    sap.m.MessageBox.alert(sError, {
-                        icon: "ERROR",
-                        onClose: null,
-                        styleClass: '',
-                        initialFocus: null,
-                        textDirection: sap.ui.core.TextDirection.Inherit
-                    });
-                }.bind(this)
-            });
+                        sap.m.MessageBox.alert(sError, {
+                            icon: "ERROR",
+                            onClose: null,
+                            styleClass: '',
+                            initialFocus: null,
+                            textDirection: sap.ui.core.TextDirection.Inherit
+                        });
+                    }.bind(this)
+                });
+            } catch (error) {
+                this.showErrorMessage({
+                    oText: error.message,
+                    oTitle: this.getResourceBundle().getText("errorTitle")
+                });
+            }
         },
 
         // Get sum of expenses without attach
         getSumOfExpensesNoAttach: function () {
-            var oModel = this.getView().getModel();
+            try {
+                var oModel = this.getView().getModel();
 
-            oModel.read("/ZFI_EXPENSES_SUM_NDOC", {
-                success: function (oData) {
-                    this.getView().byId("idSumOfExpensesNoAttach").setText(this.formatCurrencyEUR(oData.results[0].Totalvalue));
-                }.bind(this),
-                error: function (oError) {
-                    var sError = JSON.parse(oError.responseText).error.message.value;
+                oModel.read("/ZFI_EXPENSES_SUM_NDOC", {
+                    success: function (oData) {
+                        this.getView().byId("idSumOfExpensesNoAttach").setText(this.formatCurrencyEUR(oData.results[0].Totalvalue));
+                    }.bind(this),
+                    error: function (oError) {
+                        var sError = JSON.parse(oError.responseText).error.message.value;
 
-                    sap.m.MessageBox.alert(sError, {
-                        icon: "ERROR",
-                        onClose: null,
-                        styleClass: '',
-                        initialFocus: null,
-                        textDirection: sap.ui.core.TextDirection.Inherit
-                    });
-                }.bind(this)
-            });
+                        sap.m.MessageBox.alert(sError, {
+                            icon: "ERROR",
+                            onClose: null,
+                            styleClass: '',
+                            initialFocus: null,
+                            textDirection: sap.ui.core.TextDirection.Inherit
+                        });
+                    }.bind(this)
+                });
+            } catch (error) {
+                this.showErrorMessage({
+                    oText: error.message,
+                    oTitle: this.getResourceBundle().getText("errorTitle")
+                });
+            }
         },
 
         // Get sum of expenses last 30 days
         getSumOfExpensesLast30Days: function () {
-            var oModel = this.getView().getModel();
+            try {
+                var oModel = this.getView().getModel();
 
-            oModel.read("/ZFI_EXPENSES_LAST30", {
-                success: function (oData) {
-                    this.getView().byId("idSumOfExpensesLast30Days").setText(this.formatCurrencyEUR(oData.results[0].Totalvalue));
-                }.bind(this),
-                error: function (oError) {
-                    var sError = JSON.parse(oError.responseText).error.message.value;
+                oModel.read("/ZFI_EXPENSES_LAST30", {
+                    success: function (oData) {
+                        this.getView().byId("idSumOfExpensesLast30Days").setText(this.formatCurrencyEUR(oData.results[0].Totalvalue));
+                    }.bind(this),
+                    error: function (oError) {
+                        var sError = JSON.parse(oError.responseText).error.message.value;
 
-                    sap.m.MessageBox.alert(sError, {
-                        icon: "ERROR",
-                        onClose: null,
-                        styleClass: '',
-                        initialFocus: null,
-                        textDirection: sap.ui.core.TextDirection.Inherit
-                    });
-                }.bind(this)
-            });
+                        sap.m.MessageBox.alert(sError, {
+                            icon: "ERROR",
+                            onClose: null,
+                            styleClass: '',
+                            initialFocus: null,
+                            textDirection: sap.ui.core.TextDirection.Inherit
+                        });
+                    }.bind(this)
+                });
+            } catch (error) {
+                this.showErrorMessage({
+                    oText: error.message,
+                    oTitle: this.getResourceBundle().getText("errorTitle")
+                });
+            }
         },
 
         // Get sum of expenses year
         getSumYear: function () {
-            var oModel = this.getView().getModel(),
-                oGraficoModel = this.getView().getModel("graficoModel"),
-                iAnoAtual = new Date().getFullYear();
+            try {
+                var oModel = this.getView().getModel(),
+                    oGraficoModel = this.getView().getModel("graficoModel"),
+                    iAnoAtual = new Date().getFullYear();
 
-            oModel.read("/ZFI_EXPENSES_BCP2", {
-                success: function (oData) {
-                    var aResults = oData.results;
+                oModel.read("/ZFI_EXPENSES_BCP2", {
+                    success: function (oData) {
+                        var aResults = oData.results;
 
-                    var oAnoAtual = aResults.find(function (entry) {
-                        return parseInt(entry.VYear) === iAnoAtual;
-                    });
+                        var oAnoAtual = aResults.find(function (entry) {
+                            return parseInt(entry.VYear) === iAnoAtual;
+                        });
 
-                    if (oAnoAtual) {
-                        oGraficoModel.setProperty("/totalAno", parseFloat(oAnoAtual.Amount));
-                        oGraficoModel.setProperty("/moeda", oAnoAtual.Currency);
-                    } else {
-                        oGraficoModel.setProperty("/totalAno", 0);
-                    }
-                }.bind(this),
+                        if (oAnoAtual) {
+                            oGraficoModel.setProperty("/totalAno", parseFloat(oAnoAtual.Amount));
+                            oGraficoModel.setProperty("/moeda", oAnoAtual.Currency);
+                        } else {
+                            oGraficoModel.setProperty("/totalAno", 0);
+                        }
+                    }.bind(this),
 
-                error: function (oError) {
-                    var sError = JSON.parse(oError.responseText).error.message.value;
-                    sap.m.MessageBox.alert(sError, { icon: "ERROR" });
-                }.bind(this)
-            });
+                    error: function (oError) {
+                        var sError = JSON.parse(oError.responseText).error.message.value;
+                        sap.m.MessageBox.alert(sError, { icon: "ERROR" });
+                    }.bind(this)
+                });
+
+            } catch (error) {
+                this.showErrorMessage({
+                    oText: error.message,
+                    oTitle: this.getResourceBundle().getText("errorTitle")
+                });
+            }
         },
 
         // Get sum of expenses month
         getSumMonth: function () {
-            var oModel = this.getView().getModel(),
-                oGraficoModel = this.getView().getModel("graficoModel"),
-                iAnoAtual = new Date().getFullYear(),
-                iMesAtual = new Date().getMonth() + 1;
+            try {
+                var oModel = this.getView().getModel(),
+                    oGraficoModel = this.getView().getModel("graficoModel"),
+                    iAnoAtual = new Date().getFullYear(),
+                    iMesAtual = new Date().getMonth() + 1;
 
-            oModel.read("/ZFI_EXPENSES_BCP", {
-                success: function (oData) {
-                    var aAllResults = oData.results;
+                oModel.read("/ZFI_EXPENSES_BCP", {
+                    success: function (oData) {
+                        var aAllResults = oData.results;
 
-                    var aDadosAnoAtual = aAllResults.filter(function (oEntry) {
-                        return parseInt(oEntry.VYear) === iAnoAtual;
-                    });
-
-                    aDadosAnoAtual.sort(function (a, b) {
-                        return parseInt(a.YearMonth) - parseInt(b.YearMonth);
-                    });
-
-                    aDadosAnoAtual.forEach(function (oEntry) {
-                        oEntry.Amount = parseFloat(oEntry.Amount);
-                    });
-
-                    oGraficoModel.setProperty("/gastosPorMes", aDadosAnoAtual);
-
-                    var sMesAtualKey = iAnoAtual.toString() + (iMesAtual < 10 ? "0" + iMesAtual : iMesAtual);
-                    var oMesAtual = aDadosAnoAtual.find(function (oEntry) {
-                        return oEntry.YearMonth === sMesAtualKey;
-                    });
-
-                    if (oMesAtual) {
-                        oGraficoModel.setProperty("/gastoMesAtual", oMesAtual.Amount);
-                        oGraficoModel.setProperty("/moeda", oMesAtual.Currency);
-
-                        var aSemMesAtual = aDadosAnoAtual.filter(function (oEntry) {
-                            return oEntry.YearMonth !== sMesAtualKey;
+                        var aDadosAnoAtual = aAllResults.filter(function (oEntry) {
+                            return parseInt(oEntry.VYear) === iAnoAtual;
                         });
-                        oGraficoModel.setProperty("/gastosPorMes", aSemMesAtual);
-                    } else {
-                        oGraficoModel.setProperty("/gastoMesAtual", 0);
-                    }
 
-                }.bind(this),
+                        aDadosAnoAtual.sort(function (a, b) {
+                            return parseInt(a.YearMonth) - parseInt(b.YearMonth);
+                        });
 
-                error: function (oError) {
-                    var sError = JSON.parse(oError.responseText).error.message.value;
-                    sap.m.MessageBox.alert(sError, { icon: "ERROR" });
-                }.bind(this)
-            });
+                        aDadosAnoAtual.forEach(function (oEntry) {
+                            oEntry.Amount = parseFloat(oEntry.Amount);
+                        });
+
+                        oGraficoModel.setProperty("/gastosPorMes", aDadosAnoAtual);
+
+                        var sMesAtualKey = iAnoAtual.toString() + (iMesAtual < 10 ? "0" + iMesAtual : iMesAtual);
+                        var oMesAtual = aDadosAnoAtual.find(function (oEntry) {
+                            return oEntry.YearMonth === sMesAtualKey;
+                        });
+
+                        if (oMesAtual) {
+                            oGraficoModel.setProperty("/gastoMesAtual", oMesAtual.Amount);
+                            oGraficoModel.setProperty("/moeda", oMesAtual.Currency);
+
+                            var aSemMesAtual = aDadosAnoAtual.filter(function (oEntry) {
+                                return oEntry.YearMonth !== sMesAtualKey;
+                            });
+                            oGraficoModel.setProperty("/gastosPorMes", aSemMesAtual);
+                        } else {
+                            oGraficoModel.setProperty("/gastoMesAtual", 0);
+                        }
+
+                    }.bind(this),
+
+                    error: function (oError) {
+                        var sError = JSON.parse(oError.responseText).error.message.value;
+                        sap.m.MessageBox.alert(sError, { icon: "ERROR" });
+                    }.bind(this)
+                });
+            } catch (error) {
+                this.showErrorMessage({
+                    oText: error.message,
+                    oTitle: this.getResourceBundle().getText("errorTitle")
+                });
+            }
         }
     });
 });

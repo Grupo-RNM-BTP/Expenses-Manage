@@ -76,7 +76,7 @@ sap.ui.define([], function () {
         formatDateTime: function (sValue) {
             if (!sValue) {
                 return "";
-            }
+            } 
 
             let oDate;
 
