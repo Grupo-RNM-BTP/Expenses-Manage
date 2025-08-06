@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+
+specVersion: "3.1"
+metadata:
+  name: zfiexpensesmanage
+type: application
+builder:
+  resources:
+    excludes:
+      - /test/**
+      - /localService/**
+  customTasks:
+    - name: deploy-to-abap
+      afterTask: generateCachebusterInfo
+      configuration:
+        target:
+          url: https://sapdev.grupornm.pt:44300/
+          client: "300"
+        app:
+          name: ZFI_EXP_MNG
+          description: ""
+          package: ZFI_EXPENSES
+          transport: DD2K905065
+        exclude:
+          - /test/
