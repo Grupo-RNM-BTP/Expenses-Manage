@@ -29,7 +29,7 @@
         }
       },
       "ZFI_EXPENSES_ANNO_MDL": {
-        "uri": "/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Annotations(TechnicalName='ZFI_EXPENSES_ANNO_MDL',Version='0001')/$value/",
+        "uri": "/zsrv_iwfnd/Annotations(TechnicalName='ZFI_EXPENSES_ANNO_MDL',Version='0001')/$value/",
         "type": "ODataAnnotation",
         "settings": {
           "localUri": "localService/ZFI_EXPENSES_ANNO_MDL.xml"

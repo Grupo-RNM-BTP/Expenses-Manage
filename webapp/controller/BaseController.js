@@ -4,7 +4,99 @@ sap.ui.define([
 ], function (Controller, MessageBox) {
     "use strict";
 
+    var CAModel;
+
     return Controller.extend("zfiexpensesmanage.controller.BaseController", {
+
+        getModelCA: function () {
+            return CAModel;
+        },
+
+
+        setModelCA: function (token) {
+            var userLanguage = sessionStorage.getItem("oLangu");
+            if (!userLanguage) {
+                userLanguage = "EN";
+            }
+            var serviceUrlWithLanguage = this.getModel().sServiceUrl + (this.getModel().sServiceUrl.includes("?") ? "&" : "?") + "sap-language=" + userLanguage;
+
+            CAModel = new sap.ui.model.odata.v2.ODataModel({
+                serviceUrl: serviceUrlWithLanguage,
+                annotationURI: "/zsrv_iwfnd/Annotations(TechnicalName='ZFI_EXPENSES_ANNO_MDL',Version='0001')/$value/",
+                headers: {
+                    "authorization": token,
+                    "applicationName": "ZFI_EXP_MNG"
+                }
+            });
+
+            this.setModel(CAModel);
+        },
+
+        getUserAuthentication: function (type) {
+            var that = this,
+                urlParams = new URLSearchParams(window.location.search),
+                token = urlParams.get('token');
+
+            if (token != null) {
+                var headers = new Headers();
+                headers.append("X-authorization", token);
+
+                var requestOptions = {
+                    method: 'GET',
+                    headers: headers,
+                    redirect: 'follow'
+                };
+
+                fetch("/sap/opu/odata/sap/ZODCA_AUTHENTICATOR_SRV/USER_AUTHENTICATION", requestOptions)
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error("Ocorreu um erro ao ler a entidade.");
+                        }
+                        return response.text();
+                    })
+                    .then(function (xml) {
+                        var parser = new DOMParser(),
+                            xmlDoc = parser.parseFromString(xml, "text/xml"),
+                            successResponseElement = xmlDoc.getElementsByTagName("d:SuccessResponse")[0],
+                            response = successResponseElement.textContent;
+
+                        if (response != 'X') {
+                            that.getRouter().navTo("NotFound");
+                        }
+                        else {
+                            that.getModel("appView").setProperty("/token", token);
+                        }
+                    })
+                    .catch(function (error) {
+                        console.error(error);
+                    });
+            } else {
+                that.getRouter().navTo("NotFound");
+                return;
+            }
+        },
+
+        getRouter: function () {
+            return this.getOwnerComponent().getRouter();
+        },
+
+        onNavigation: function (sPath, oRoute, oEntityName) {
+            if (sPath) {
+                this.getRouter().navTo(oRoute, {
+                    objectId: sPath.replace(oEntityName, "")
+                }, false, true);
+            } else {
+                this.getRouter().navTo(oRoute, {}, false, true);
+            }
+        },
+
+        getModel: function (sName) {
+            return this.getView().getModel(sName);
+        },
+
+        setModel: function (oModel, sName) {
+            return this.getView().setModel(oModel, sName);
+        },
 
         getResourceBundle: function () {
             return this.getOwnerComponent().getModel("i18n").getResourceBundle();
@@ -207,6 +299,6 @@ sap.ui.define([
                     oTitle: this.getResourceBundle().getText("errorTitle")
                 });
             }
-        }
+        },
     });
 });

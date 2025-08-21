@@ -16,18 +16,35 @@ sap.ui.define([
                 this.getView().setModel(oModel, "Main");
 
                 var oGraficoModel = new sap.ui.model.json.JSONModel({});
-
                 this.getView().setModel(oGraficoModel, "graficoModel");
-                sap.ui.core.UIComponent.getRouterFor(this).getRoute("RouteMain").attachPatternMatched(this.onObjectMain, this);
+
+                var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
+                oRouter.getRoute("RouteMain").attachPatternMatched(this.onObjectMain, this);
+            },
+
+            onAfterRendering: function () {
+                sessionStorage.setItem("goToLaunchpad", "X");
+                if (sessionStorage.getItem("selectedTheme").indexOf("dark") !== -1) {
+                    jQuery(".sapUiBlockLayer, .sapUiLocalBusyIndicator").css("background-color", "rgba(28,34,40,0.99)");
+                }
+                else {
+                    jQuery(".sapUiBlockLayer, .sapUiLocalBusyIndicator").css("background-color", "rgba(255, 255, 255, 0.99)");
+                }
+
             },
 
             // On object main
             onObjectMain: function (oEvent) {
+                debugger;
+
                 this.bindData("/" + oEvent.getParameter("config").pattern.replace("/{objectId}", "") + oEvent.getParameter("arguments").objectId, true);
+                this.getUserAuthentication();
+
             },
 
             // Bind data
             bindData: function (sObjectPath) {
+                debugger;
                 this.getView().bindElement({ path: sObjectPath });
 
                 this.getSumOfApprovedExpenses();
@@ -92,7 +109,8 @@ sap.ui.define([
                     if (!this._oUploadDialog) {
                         this._oUploadDialog = new sap.m.Dialog({
                             title: this.getResourceBundle().getText("uploadImage"),
-                            stretchOnPhone: true,
+                            contentWidth: "300px",
+                            contentHeight: "auto",
                             content: [
                                 new sap.m.VBox({
                                     fitContainer: true,
@@ -381,5 +399,23 @@ sap.ui.define([
                 }
             },
 
+            onItemSelect: function (oEvent) {
+                var sKey = oEvent.getParameter("item").getKey();
+                var oNavContainer = this.byId("NavContainer");
+
+                switch (sKey) {
+                    case "Menu":
+                        var oToolPage = this.byId("toolPage");
+                        oToolPage.setSideExpanded(!oToolPage.getSideExpanded());
+                        break;
+                    case "Manage":
+                        oNavContainer.to(this.byId("pageManage"));
+                        break;
+
+                    case "CardMovements":
+                        oNavContainer.to(this.byId("pageCardMovements"));
+                        break;
+                }
+            }
         });
     });

@@ -53,7 +53,7 @@ sap.ui.define([], function () {
                 case 4: return "Error";
                 case 5: return "Warning";
                 case 6: return "Warning";
-                case 3: return "None";
+                case 3: return "Warning";
                 default: return "None";
             }
         },
@@ -66,8 +66,8 @@ sap.ui.define([], function () {
                 case 1: return "sap-icon://status-negative";
                 case 2: return "sap-icon://status-negative";
                 case 4: return "sap-icon://status-negative";
-                case 5: return "sap-icon://status-inactive";
-                case 6: return "sap-icon://status-inactive";
+                case 5: return "sap-icon://warning";
+                case 6: return "sap-icon://warning";
                 case 3: return "sap-icon://question-mark";
                 default: return "";
             }
