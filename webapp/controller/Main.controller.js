@@ -35,8 +35,6 @@ sap.ui.define([
 
             // On object main
             onObjectMain: function (oEvent) {
-                debugger;
-
                 this.bindData("/" + oEvent.getParameter("config").pattern.replace("/{objectId}", "") + oEvent.getParameter("arguments").objectId, true);
                 this.getUserAuthentication();
 
@@ -44,7 +42,6 @@ sap.ui.define([
 
             // Bind data
             bindData: function (sObjectPath) {
-                debugger;
                 this.getView().bindElement({ path: sObjectPath });
 
                 this.getSumOfApprovedExpenses();

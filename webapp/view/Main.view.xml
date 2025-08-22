@@ -5,6 +5,7 @@
     xmlns:l="sap.ui.layout"
     xmlns:core="sap.ui.core"
     xmlns:card="sap.f.cards"
+    xmlns:smartFilterBar="sap.ui.comp.smartfilterbar"
     xmlns:smartTable="sap.ui.comp.smarttable"
     xmlns:viz="sap.viz.ui5.controls"
     xmlns:viz.data="sap.viz.ui5.data"
@@ -74,9 +75,10 @@
                             <FlexBox justifyContent="SpaceBetween" class="sapUiLargeMarginTop" wrap="Wrap" alignItems="Center">
                                 <Title text="{i18n>AllExpenses}" titleStyle="H4" />
                             </FlexBox>
-                            <Toolbar style="Standard" design="Transparent" height="0.1rem" />
 
-                            <smartTable:SmartTable demandPopin="true" entitySet="ZFI_EXPENSES_MNG" id="operationsTable" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="false" useTablePersonalisation="false" useVariantManagement="false" requestAtLeastFields="Doc,Reason,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="false" class="sapUiResponsiveContentPadding">
+                            <smartFilterBar:SmartFilterBar id="idSmartFilterBar" entitySet="ZFI_EXPENSES_MNG" persistencyKey="SmartFilterBar" />
+
+                            <smartTable:SmartTable demandPopin="true" entitySet="ZFI_EXPENSES_MNG" id="operationsTable" smartFilterId="idSmartFilterBar" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="false" useTablePersonalisation="false" useVariantManagement="false" requestAtLeastFields="Doc,Reason,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="false" class="sapUiResponsiveContentPadding">
                                 <smartTable:customData>
                                     <core:CustomData key="p13nDialogSettings" value='\{"columns":\{"visible": true \},"sort":\{"visible": true\},"filter":\{"visible": false\},"group":\{"visible": true\}\}'/>
                                 </smartTable:customData>
