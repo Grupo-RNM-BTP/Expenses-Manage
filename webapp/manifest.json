@@ -92,39 +92,57 @@
         "settings": {}
       }
     },
-    "resources": {
-      "css": [
-        {
-          "uri": "css/style.css"
-        }
-      ]
-    },
+    "resources": {},
     "routing": {
       "config": {
         "routerClass": "sap.m.routing.Router",
         "viewType": "XML",
         "async": true,
         "viewPath": "zfiexpensesmanage.view",
-        "controlAggregation": "pages",
-        "controlId": "app",
-        "clearControlAggregation": false
+        "controlAggregation": "beginColumnPages",
+        "controlId": "layout"
       },
       "routes": [
         {
           "name": "RouteMain",
-          "pattern": ":?query:",
+          "pattern": "",
+          "target": "TargetMain"
+        },
+        {
+          "pattern": "ZFI_EXPENSES_MNG/{objectId}",
+          "name": "Detail",
           "target": [
-            "TargetMain"
+            "TargetMain",
+            "Detail"
           ]
+        },
+        {
+          "name": "NotFound",
+          "pattern": "NotFound",
+          "target": "NotFound"
         }
       ],
       "targets": {
         "TargetMain": {
           "viewType": "XML",
           "transition": "slide",
-          "clearControlAggregation": false,
+          "viewLevel": 1,
           "viewId": "Main",
           "viewName": "Main"
+        },
+        "Detail": {
+          "viewName": "Detail",
+          "transition": "slide",
+          "viewLevel": 1,
+          "controlAggregation": "midColumnPages",
+          "viewId": "Detail"
+        },
+        "NotFound": {
+          "viewName": "NotFound",
+          "viewType": "XML",
+          "transition": "show",
+          "clearControlAggregation": false,
+          "viewId": "NotFound"
         }
       }
     },

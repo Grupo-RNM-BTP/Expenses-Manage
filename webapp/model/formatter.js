@@ -19,9 +19,9 @@ sap.ui.define([], function () {
             if (!sBase64Encoded) {
                 return "";
             }
+
             try {
-                var decoded = atob(sBase64Encoded);
-                return decoded;
+                return sBase64Encoded;
             } catch (e) {
                 console.error("Erro a decodificar base64:", e);
                 return "";
@@ -39,6 +39,7 @@ sap.ui.define([], function () {
                 case 4: return this.getResourceBundle().getText("statusError");
                 case 5: return this.getResourceBundle().getText("statusWithoutAttachment");
                 case 6: return this.getResourceBundle().getText("statusPending");
+                case 7: return this.getResourceBundle().getText("statusMarkedDeletion");
                 default: return this.getResourceBundle().getText("statusUnknown");
             }
         },
@@ -54,6 +55,7 @@ sap.ui.define([], function () {
                 case 5: return "Warning";
                 case 6: return "Warning";
                 case 3: return "Warning";
+                case 7: return "Error";
                 default: return "None";
             }
         },
@@ -69,6 +71,7 @@ sap.ui.define([], function () {
                 case 5: return "sap-icon://warning";
                 case 6: return "sap-icon://warning";
                 case 3: return "sap-icon://question-mark";
+                case 7: return "sap-icon://status-negative";
                 default: return "";
             }
         },
@@ -76,7 +79,7 @@ sap.ui.define([], function () {
         formatDateTime: function (sValue) {
             if (!sValue) {
                 return "";
-            } 
+            }
 
             let oDate;
 
@@ -118,15 +121,15 @@ sap.ui.define([], function () {
             return months[monthIndex];
         },
 
-        formatAmountEuro: function(fAmount) {
+        formatAmountEuro: function (fAmount) {
             if (typeof fAmount !== "number") {
-              return fAmount;
+                return fAmount;
             }
             return new Intl.NumberFormat("pt-PT", {
-              style: "currency",
-              currency: "EUR",
-              minimumFractionDigits: 2
+                style: "currency",
+                currency: "EUR",
+                minimumFractionDigits: 2
             }).format(fAmount);
-          }
+        }
     };
 });

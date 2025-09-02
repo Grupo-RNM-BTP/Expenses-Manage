@@ -1,0 +1,136 @@
+<mvc:View controllerName="zfiexpensesmanage.controller.Detail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:uxap="sap.uxap"
+    xmlns:form="sap.ui.layout.form" height="100%">
+    <Page id="pageExpenseDetail" title="{i18n>JournalEntryDetail}" showNavButton="true" navButtonPress="onDetailBack">
+        <content>
+            <uxap:ObjectPageLayout id="opl" enableLazyLoading="true" showTitleInHeaderContent="false">
+                <uxap:headerTitle>
+                    <uxap:ObjectPageDynamicHeaderTitle>
+                        <uxap:expandedHeading>
+                            <ObjectIdentifier title="{ExpNo}" />
+                        </uxap:expandedHeading>
+
+                        <uxap:navigationActions>
+                            <uxap:ObjectPageHeaderActionButton icon="sap-icon://full-screen" tooltip="Full Screen" press=".onFullScreen"/>
+                            <uxap:ObjectPageHeaderActionButton icon="sap-icon://decline" tooltip="Close" press=".onClose"/>
+                        </uxap:navigationActions>
+
+                        <uxap:snappedHeading>
+                            <ObjectIdentifier title="{Doc}" />
+                        </uxap:snappedHeading>
+
+                        <uxap:actions>
+                            <uxap:ObjectPageHeaderActionButton text="{i18n>Edit}" type="Emphasized" importance="High" hideText="false"/>
+                            <uxap:ObjectPageHeaderActionButton text="Create Correspondence" type="Transparent" importance="High" hideText="false"/>
+                            <uxap:ObjectPageHeaderActionButton text="Document Flow" type="Transparent" importance="High" hideText="false"/>
+                            <uxap:ObjectPageHeaderActionButton text="Display Change Log" type="Transparent" importance="High" hideText="false"/>
+                        </uxap:actions>
+                    </uxap:ObjectPageDynamicHeaderTitle>
+                </uxap:headerTitle>
+
+                <uxap:sections>
+
+                    <!-- SECTION: General Information -->
+                    <uxap:ObjectPageSection title="{i18n>GeneralInformation}">
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:ObjectPageSection>
+
+                    <!-- SECTION: Line Items -->
+                    <uxap:ObjectPageSection title="{i18n>LineItems}">
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <Table id="tblLines" inset="false" growing="true" growingThreshold="10" items="{path: 'to_Items'}">
+                                    <columns>
+                                        <Column>
+                                            <Text text="{i18n>GLAccount}" />
+                                        </Column>
+                                        <Column>
+                                            <Text text="{i18n>Text}" />
+                                        </Column>
+                                        <Column>
+                                            <Text text="{i18n>Amount}" />
+                                        </Column>
+                                        <Column>
+                                            <Text text="{i18n>CostCenter}" />
+                                        </Column>
+                                    </columns>
+                                    <items>
+                                        <ColumnListItem>
+                                            <cells>
+                                                <Text text="{Hkont}" />
+                                                <Text text="{Sgtxt}" />
+                                                <ObjectNumber number="{Dmbtr}" unit="{Waers}" />
+                                                <Text text="{Kostl}" />
+                                            </cells>
+                                        </ColumnListItem>
+                                    </items>
+                                </Table>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:ObjectPageSection>
+
+                    <!-- SECTION: Taxes -->
+                    <uxap:ObjectPageSection title="{i18n>Taxes}">
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <form:SimpleForm editable="false" layout="ResponsiveGridLayout" columnsL="2" columnsM="2" labelSpanL="5" labelSpanM="6" class="sapUiResponsiveMargin">
+                                    <Label text="{i18n>AbsTaxExchangeRate}" />
+                                    <Text text="{AbsTaxRate}" />
+                                    <Label text="{i18n>TaxCalculation}" />
+                                    <Text text="{TaxCalcMode}" />
+                                    <Label text="{i18n>TaxBasedOn}" />
+                                    <Text text="{TaxBasedOn}" />
+                                </form:SimpleForm>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:ObjectPageSection>
+
+                    <!-- SECTION: Related Documents -->
+                    <uxap:ObjectPageSection title="{i18n>RelatedDocuments}">
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <Table id="tblRelatedDocs" growing="true" items="{path: 'to_Related'}">
+                                    <columns>
+                                        <Column>
+                                            <Text text="{i18n>Type}" />
+                                        </Column>
+                                        <Column>
+                                            <Text text="{i18n>Reference}" />
+                                        </Column>
+                                    </columns>
+                                    <items>
+                                        <ColumnListItem>
+                                            <cells>
+                                                <Text text="{RelType}" />
+                                                <Link text="{RelDoc}" press="onOpenRelated" />
+                                            </cells>
+                                        </ColumnListItem>
+                                    </items>
+                                </Table>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:ObjectPageSection>
+
+
+
+                    <!-- <uxap:ObjectPageSection title="{i18n>Attachments}">
+                        <uxap:ObjectPageSubSection>
+                            <uxap:blocks>
+                                <UploadCollection id="uc" items="{path: 'to_Attachments'}" fileDeleted="onFileDeleted" uploadComplete="onUploadComplete">
+                                    <UploadCollectionItem fileName="{FileName}" url="{FileUrl}" visibleEdit="false" visibleDelete="false" />
+                                </UploadCollection>
+                            </uxap:blocks>
+                        </uxap:ObjectPageSubSection>
+                    </uxap:ObjectPageSection> -->
+
+                </uxap:sections>
+            </uxap:ObjectPageLayout>
+        </content>
+    </Page>
+</mvc:View>

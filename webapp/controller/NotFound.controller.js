@@ -4,7 +4,7 @@ sap.ui.define([
 ], function (BaseController, JSONModel) {
     "use strict";
 
-    return BaseController.extend("outbounddeliverycheck.controller.NotFound", {
+    return BaseController.extend("zfiexpensesmanage.controller.NotFound", {
         onInit: function () {
             var oModel = new JSONModel();
             this.getView().setModel(oModel, "NotFound");

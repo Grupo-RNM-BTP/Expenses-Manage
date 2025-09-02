@@ -1,25 +1,26 @@
 sap.ui.define([
     "./BaseController",
-    "sap/m/MessageBox",
     "../model/formatter",
     "sap/ui/model/json/JSONModel"
 ],
-    function (BaseController, MessageBox, formatter, JSONModel) {
+    function (BaseController, formatter, JSONModel) {
         "use strict";
 
         return BaseController.extend("zfiexpensesmanage.controller.Main", {
+
             formatter: formatter,
+
             onInit: function () {
                 var oModel = new JSONModel({
                     ExpNo: ""
                 });
                 this.getView().setModel(oModel, "Main");
+                this.getView().setModel(new JSONModel({}), "graficoModel");
 
-                var oGraficoModel = new sap.ui.model.json.JSONModel({});
-                this.getView().setModel(oGraficoModel, "graficoModel");
+                sessionStorage.setItem("goToLaunchpad", "X");
 
-                var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
-                oRouter.getRoute("RouteMain").attachPatternMatched(this.onObjectMain, this);
+                // this.getRouter().getRoute("RouteMain").attachPatternMatched(this.getUserAuthentication, this);
+                this.getRouter().getRoute("RouteMain").attachPatternMatched(this.onObjectMain, this);
             },
 
             onAfterRendering: function () {
@@ -33,11 +34,23 @@ sap.ui.define([
 
             },
 
+            onRouteMatched: function () {
+                sessionStorage.setItem("goToLaunchpad", "X");
+                this.getUserAuthentication();
+            },
+
+            // On before rebind table
+            onBeforeRebindTable: function (oEvent) {
+                var oBindingParams = oEvent.getParameter("bindingParams");
+
+                if (!this._bInitialSorterApplied) {
+                    oBindingParams.sorter = [new sap.ui.model.Sorter("Erdat", true)];
+                }
+            },
+
             // On object main
             onObjectMain: function (oEvent) {
                 this.bindData("/" + oEvent.getParameter("config").pattern.replace("/{objectId}", "") + oEvent.getParameter("arguments").objectId, true);
-                this.getUserAuthentication();
-
             },
 
             // Bind data
@@ -93,6 +106,7 @@ sap.ui.define([
             // Open upload dialog
             onUploadPressed: function (oEvent) {
                 try {
+                    debugger;
                     this.getView().getModel("Main").setData({});
                     var that = this,
                         sPath = oEvent.getSource().getBindingContext().getPath();
@@ -203,6 +217,7 @@ sap.ui.define([
             // Send Data to backend with IMAGE
             handleUpload: async function () {
                 try {
+                    debugger;
                     var oModel = this.getView().getModel(),
                         sPath = "/UploadImage",
                         sDocument = await this.onGetDocument(sap.ui.getCore().byId("fileUploader")),
@@ -238,156 +253,137 @@ sap.ui.define([
             },
 
             // Open Edit Dialog change Value
-            handleEdit: function () {
-                try {
-                    if (this._editDialog) {
-                        this._editDialog = null;
-                    }
-                    var oLabel = new sap.m.Label({
-                        text: this.getResourceBundle().getText("labelValue")
-                    });
+            // handleEditExpense: function () {
+            //     try {
+            //         if (this._editDialog) {
+            //             this._editDialog = null;
+            //         }
+            //         var oLabel = new sap.m.Label({
+            //             text: this.getResourceBundle().getText("labelValue")
+            //         });
 
-                    var oInput = new sap.m.Input({
-                        id: "idInputValue",
-                        placeholder: this.getResourceBundle().getText("placeholderValue"),
-                        width: "100%"
-                    });
+            //         var oInput = new sap.m.Input({
+            //             id: "idInputValue",
+            //             placeholder: this.getResourceBundle().getText("placeholderValue"),
+            //             width: "100%"
+            //         });
 
-                    oLabel.setLabelFor(oInput);
+            //         oLabel.setLabelFor(oInput);
 
-                    var oForm = new sap.ui.layout.form.SimpleForm({
-                        layout: "ResponsiveGridLayout",
-                        content: [
-                            oLabel,
-                            oInput
-                        ]
-                    });
+            //         var oForm = new sap.ui.layout.form.SimpleForm({
+            //             layout: "ResponsiveGridLayout",
+            //             content: [
+            //                 oLabel,
+            //                 oInput
+            //             ]
+            //         });
 
-                    this._editDialog = new sap.m.Dialog({
-                        title: this.getResourceBundle().getText("editValue"),
-                        contentWidth: "300px",
-                        contentHeight: "auto",
-                        content: [oForm],
-                        beginButton: new sap.m.Button({
-                            text: this.getResourceBundle().getText("btnOk"),
-                            type: "Emphasized",
-                            press: this.handleEditValue.bind(this)
-                        }),
-                        endButton: new sap.m.Button({
-                            text: this.getResourceBundle().getText("btnCancel"),
-                            press: function () {
-                                this._editDialog.close();
-                                this._editDialog.destroy();
-                                this._editDialog = null;
+            //         this._editDialog = new sap.m.Dialog({
+            //             title: this.getResourceBundle().getText("editValue"),
+            //             contentWidth: "300px",
+            //             contentHeight: "auto",
+            //             content: [oForm],
+            //             beginButton: new sap.m.Button({
+            //                 text: this.getResourceBundle().getText("btnOk"),
+            //                 type: "Emphasized",
+            //                 press: this.handleEditValue.bind(this)
+            //             }),
+            //             endButton: new sap.m.Button({
+            //                 text: this.getResourceBundle().getText("btnCancel"),
+            //                 press: function () {
+            //                     this._editDialog.close();
+            //                     this._editDialog.destroy();
+            //                     this._editDialog = null;
 
-                            }.bind(this)
-                        }),
-                        afterClose: function () {
-                            this._editDialog.close();
-                            this._editDialog.destroy();
-                            this._editDialog = null;
+            //                 }.bind(this)
+            //             }),
+            //             afterClose: function () {
+            //                 this._editDialog.close();
+            //                 this._editDialog.destroy();
+            //                 this._editDialog = null;
 
-                        }.bind(this)
-                    });
+            //             }.bind(this)
+            //         });
 
 
-                    this._editDialog.open();
-                } catch (error) {
-                    this.showErrorMessage({
-                        oText: error.message,
-                        oTitle: this.getResourceBundle().getText("errorTitle")
-                    });
-                }
-            },
+            //         this._editDialog.open();
+            //     } catch (error) {
+            //         this.showErrorMessage({
+            //             oText: error.message,
+            //             oTitle: this.getResourceBundle().getText("errorTitle")
+            //         });
+            //     }
+            // },
 
             // Handle Edit Value
-            handleEditValue: function () {
-                try {
-                    var oModel = this.getView().getModel(),
-                        oTable = this.byId("idTableExpenses"),
-                        sTablePath = oTable.getSelectedItem().getBindingContext().getPath(),
-                        expNoMatch = sTablePath.match(/ExpNo='(.*?)'/),
-                        sExpNo = expNoMatch ? expNoMatch[1] : null,
-                        sPath = "/EditExpense('" + sExpNo + "')",
-                        inputValue = sap.ui.getCore().byId("idInputValue"),
-                        oEntry = {};
+            // handleEditValue: function () {
+            //     try {
+            //         var oModel = this.getView().getModel(),
+            //             oTable = this.byId("idTableExpenses"),
+            //             sTablePath = oTable.getSelectedItem().getBindingContext().getPath(),
+            //             expNoMatch = sTablePath.match(/ExpNo='(.*?)'/),
+            //             sExpNo = expNoMatch ? expNoMatch[1] : null,
+            //             sPath = "/EditExpense('" + sExpNo + "')",
+            //             inputValue = sap.ui.getCore().byId("idInputValue"),
+            //             oEntry = {};
 
-                    if (inputValue.getValue() == "") {
-                        inputValue.setValueState("Error");
-                        return;
-                    }
+            //         if (inputValue.getValue() == "") {
+            //             inputValue.setValueState("Error");
+            //             return;
+            //         }
 
-                    oEntry.Amount = inputValue.getValue();
+            //         oEntry.Amount = inputValue.getValue();
 
-                    oModel.update(sPath, oEntry, {
-                        success: function () {
-                            oTable.removeSelections();
-                            oModel.refresh();
-                            this._editDialog.close();
-                            this._editDialog.destroy();
-                        }.bind(this),
-                        error: function (oError) {
-                            var sError = JSON.parse(oError.responseText).error.message.value;
+            //         oModel.update(sPath, oEntry, {
+            //             success: function () {
+            //                 oTable.removeSelections();
+            //                 oModel.refresh();
+            //                 this._editDialog.close();
+            //                 this._editDialog.destroy();
+            //             }.bind(this),
+            //             error: function (oError) {
+            //                 var sError = JSON.parse(oError.responseText).error.message.value;
 
-                            sap.m.MessageBox.alert(sError, {
-                                icon: "ERROR",
-                                onClose: null,
-                                styleClass: '',
-                                initialFocus: null,
-                                textDirection: sap.ui.core.TextDirection.Inherit
-                            });
-                        }.bind(this)
-                    })
-                } catch (error) {
-                    this.showErrorMessage({
-                        oText: error.message,
-                        oTitle: this.getResourceBundle().getText("errorTitle")
-                    });
-                }
-            },
-
-            // Handle Selection Change
-            handleSelectionChange: function () {
-                this.byId("btnDelete").setEnabled(true);
-                this.byId("btnEdit").setEnabled(true);
-            },
+            //                 sap.m.MessageBox.alert(sError, {
+            //                     icon: "ERROR",
+            //                     onClose: null,
+            //                     styleClass: '',
+            //                     initialFocus: null,
+            //                     textDirection: sap.ui.core.TextDirection.Inherit
+            //                 });
+            //             }.bind(this)
+            //         })
+            //     } catch (error) {
+            //         this.showErrorMessage({
+            //             oText: error.message,
+            //             oTitle: this.getResourceBundle().getText("errorTitle")
+            //         });
+            //     }
+            // },
 
             // Handle Delete
-            handleDelete: function () {
+            handleDeleteExpense: function () {
                 try {
-                    var oModel = this.getView().getModel(),
-                        oTable = this.byId("idTableExpenses"),
+                    var oTable = this.byId("idTableExpenses"),
                         sTablePath = oTable.getSelectedItem().getBindingContext().getPath(),
                         expNoMatch = sTablePath.match(/ExpNo='(.*?)'/),
                         sExpNo = expNoMatch ? expNoMatch[1] : null,
                         sPath = "/EditExpense('" + sExpNo + "')";
 
-                    sap.m.MessageBox.confirm(
-                        this.getResourceBundle().getText("confirmDeleteExpense"),
-                        {
-                            title: this.getResourceBundle().getText("deleteTitle"),
-                            icon: sap.m.MessageBox.Icon.WARNING,
-                            actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO],
-                            emphasizedAction: sap.m.MessageBox.Action.YES,
-                            onClose: function (oAction) {
-                                if (oAction === sap.m.MessageBox.Action.YES) {
-                                    oModel.remove(sPath, {
-                                        success: function () {
-                                            oTable.removeSelections();
-                                            oModel.refresh();
-                                            sap.m.MessageToast.show(this.getResourceBundle().getText("deleteSuccess"));
-                                        }.bind(this),
-                                        error: function (oError) {
-                                            var sError = JSON.parse(oError.responseText).error.message.value;
-                                            sap.m.MessageBox.alert(sError, {
-                                                icon: sap.m.MessageBox.Icon.ERROR
-                                            });
-                                        }.bind(this)
-                                    });
-                                }
-                            }.bind(this)
-                        }
-                    );
+                    sap.m.MessageBox.confirm(this.getResourceBundle().getText("confirmDeleteExpense"), {
+                        title: this.getResourceBundle().getText("deleteTitle"),
+                        icon: sap.m.MessageBox.Icon.WARNING,
+                        actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO],
+                        emphasizedAction: sap.m.MessageBox.Action.YES,
+                        onClose: function (oAction) {
+                            if (oAction === sap.m.MessageBox.Action.YES) {
+                                this.onDeleteExpense(sPath);
+                            }
+
+                            this.handleButtons(false, ['btnEdit', 'btnDelete']);
+                            this.handleRemoveSelections(oTable);
+                        }.bind(this)
+                    });
                 } catch (error) {
                     this.showErrorMessage({
                         oText: error.message,
@@ -412,6 +408,46 @@ sap.ui.define([
                     case "CardMovements":
                         oNavContainer.to(this.byId("pageCardMovements"));
                         break;
+                }
+            },
+
+
+            /**
+             * Delete Expense
+             * @param {string} sPath - Path to the expense to delete
+             */
+            onDeleteExpense: function (sPath) {
+                var oModel = this.getView().getModel();
+
+                oModel.remove(sPath, {
+                    success: function () {
+                        oModel.refresh();
+                        sap.m.MessageToast.show(this.getResourceBundle().getText("deleteSuccess"));
+                    }.bind(this),
+                    error: function (oError) {
+                        var sError = JSON.parse(oError.responseText).error.message.value;
+                        sap.m.MessageBox.alert(sError, {
+                            icon: sap.m.MessageBox.Icon.ERROR
+                        });
+                    }.bind(this)
+                });
+
+                this.handleRequestBusy(oModel);
+            },
+
+            /**
+             * Navigate to Expense Detail
+             * @param {sap.ui.base.Event} oEvent - Event object
+             */
+            handleExpensePress: function (oEvent) {
+                this.getModel("global").setProperty("/layout", "TwoColumnsMidExpanded");
+
+                var oItem = oEvent.getParameter("listItem");
+
+                if (oItem) {
+                    var sPath = oItem.getBindingContextPath();
+
+                    this.onNavigation(sPath, "Detail", "/ZFI_EXPENSES_MNG");
                 }
             }
         });

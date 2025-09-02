@@ -12,7 +12,7 @@
     xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
     xmlns:tnt="sap.tnt"
     xmlns:layout="sap.ui.layout" height="100%">
-    <tnt:ToolPage id="toolPage">
+    <tnt:ToolPage id="toolPage" sideExpanded="false">
         <tnt:sideContent>
             <tnt:SideNavigation expanded="false" itemSelect=".onItemSelect">
                 <tnt:NavigationList selectedKey="Manage">
@@ -28,7 +28,6 @@
                 <pages>
                     <ScrollContainer id="pageManage" visible="true" horizontal="false" vertical="true" height="100%">
                         <VBox class="sapUiMediumMarginBeginEnd">
-
 
                             <FlexBox justifyContent="SpaceBetween" class="sapUiMediumMarginTop" wrap="Wrap" alignItems="Center">
                                 <Title text="{i18n>OverviewExpenses}" titleStyle="H4" />
@@ -78,18 +77,18 @@
 
                             <smartFilterBar:SmartFilterBar id="idSmartFilterBar" entitySet="ZFI_EXPENSES_MNG" persistencyKey="SmartFilterBar" />
 
-                            <smartTable:SmartTable demandPopin="true" entitySet="ZFI_EXPENSES_MNG" id="operationsTable" smartFilterId="idSmartFilterBar" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="false" useTablePersonalisation="false" useVariantManagement="false" requestAtLeastFields="Doc,Reason,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="false" class="sapUiResponsiveContentPadding">
+                            <smartTable:SmartTable beforeRebindTable="onBeforeRebindTable" demandPopin="true" entitySet="ZFI_EXPENSES_MNG" id="operationsTable" smartFilterId="idSmartFilterBar" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="false" useTablePersonalisation="false" useVariantManagement="false" requestAtLeastFields="Doc,Reason,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="false">
                                 <smartTable:customData>
                                     <core:CustomData key="p13nDialogSettings" value='\{"columns":\{"visible": true \},"sort":\{"visible": true\},"filter":\{"visible": false\},"group":\{"visible": true\}\}'/>
                                 </smartTable:customData>
                                 <smartTable:customToolbar>
                                     <OverflowToolbar design="Transparent">
                                         <ToolbarSpacer/>
-                                        <Button id="btnEdit" enabled="false" text="{i18n>Edit}" press="handleEdit" />
-                                        <Button id="btnDelete" enabled="false" text="{i18n>Delete}" press="handleDelete" />
+                                        <!-- <Button id="btnEdit" enabled="false" text="{i18n>Edit}" press="handleEditExpense" /> -->
+                                        <Button id="btnDelete" enabled="false" text="{i18n>Delete}" press="handleDeleteExpense" />
                                     </OverflowToolbar>
                                 </smartTable:customToolbar>
-                                <Table id="idTableExpenses" fixedLayout="false" growing="true" growingThreshold="5" mode="SingleSelectLeft" selectionChange="handleSelectionChange">
+                                <Table id="idTableExpenses" fixedLayout="false" growing="true" growingThreshold="5" mode="SingleSelectLeft" selectionChange="handleButtons(true, ['btnEdit', 'btnDelete'])" itemPress="handleExpensePress">
                                     <columns>
                                         <Column>
                                             <Text text="{i18n>Document}" />
@@ -114,10 +113,10 @@
                                         </Column>
                                     </columns>
                                     <items>
-                                        <ColumnListItem id="idColumnListItem">
+                                        <ColumnListItem id="idColumnListItem" type="Navigation">
                                             <cells>
                                                 <VBox>
-                                                    <Avatar src="{path: 'Doc', formatter: '.formatter.base64ToSrc'}" visible="{path: 'Doc', formatter: '.formatter.hasExpDoc'}" displayShape="Square" densityAware="false" class="imgClass">
+                                                    <Avatar src="{path: 'Doc', formatter: '.formatter.base64ToSrc'}" visible="{path: 'Doc', formatter: '.formatter.hasExpDoc'}" displayShape="Square" class="imgClass">
                                                         <detailBox>
                                                             <LightBox>
                                                                 <LightBoxItem imageSrc="{path: 'Doc', formatter: '.formatter.base64ToSrc'}" />

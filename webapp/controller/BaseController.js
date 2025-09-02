@@ -7,12 +7,6 @@ sap.ui.define([
     var CAModel;
 
     return Controller.extend("zfiexpensesmanage.controller.BaseController", {
-
-        getModelCA: function () {
-            return CAModel;
-        },
-
-
         setModelCA: function (token) {
             var userLanguage = sessionStorage.getItem("oLangu");
             if (!userLanguage) {
@@ -33,6 +27,7 @@ sap.ui.define([
         },
 
         getUserAuthentication: function (type) {
+            debugger;
             var that = this,
                 urlParams = new URLSearchParams(window.location.search),
                 token = urlParams.get('token');
@@ -64,7 +59,7 @@ sap.ui.define([
                             that.getRouter().navTo("NotFound");
                         }
                         else {
-                            that.getModel("appView").setProperty("/token", token);
+                            that.getModel("global").setProperty("/token", token);
                         }
                     })
                     .catch(function (error) {
@@ -299,6 +294,30 @@ sap.ui.define([
                     oTitle: this.getResourceBundle().getText("errorTitle")
                 });
             }
+        },
+
+        handleButtons: function (bEnabled, aButtonIds) {
+            aButtonIds.forEach(function (sId) {
+                this.byId(sId).setEnabled(bEnabled);
+            }.bind(this));
+        },
+
+        handleRemoveSelections: function (oTable) {
+            oTable.removeSelections();
+        },
+
+        handleRequestBusy: function (oModel) {
+            var oAppViewModel = this.getModel("global");
+
+            oModel.attachRequestSent(() => {
+                oAppViewModel.setProperty("/busy", true);
+            });
+            oModel.attachRequestCompleted(() => {
+                oAppViewModel.setProperty("/busy", false);
+            });
+            oModel.attachRequestFailed(() => {
+                oAppViewModel.setProperty("/busy", false);
+            });
         },
     });
 });

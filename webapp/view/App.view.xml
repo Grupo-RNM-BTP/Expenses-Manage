@@ -1,7 +1,10 @@
 <mvc:View controllerName="zfiexpensesmanage.controller.App"
     xmlns:html="http://www.w3.org/1999/xhtml"
     xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns:f="sap.f"
     xmlns="sap.m">
-    <App id="app">
+    <App id="app" busy="{global>/busy}" busyIndicatorDelay="{global>/delay}">
+        <f:FlexibleColumnLayout id="layout" layout="{global>/layout}" backgroundDesign="Translucent">
+        </f:FlexibleColumnLayout>
     </App>
 </mvc:View>
