@@ -12,11 +12,16 @@
     xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
     xmlns:tnt="sap.tnt"
     xmlns:layout="sap.ui.layout" height="100%">
-    <tnt:ToolPage id="toolPage" sideExpanded="false">
+    <tnt:ToolPage id="toolPage" sideExpanded="true">
+        <tnt:header>
+            <tnt:ToolHeader>
+                <Button icon="sap-icon://menu2" press="onSideNavToggle"/>
+                <Title text="{i18n>ManageMyExpenses}" />
+            </tnt:ToolHeader>
+        </tnt:header>
         <tnt:sideContent>
-            <tnt:SideNavigation expanded="false" itemSelect=".onItemSelect">
+            <tnt:SideNavigation expanded="true" itemSelect=".onItemSelect">
                 <tnt:NavigationList selectedKey="Manage">
-                    <tnt:NavigationListItem text="{i18n>Menu}" key="Menu" icon="sap-icon://menu2" />
                     <tnt:NavigationListItem text="{i18n>ManageExpenses}" key="Manage" icon="sap-icon://credit-card"/>
                     <tnt:NavigationListItem text="{i18n>OverviewExpenses}" key="CardMovements" icon="sap-icon://collections-insight"/>
                 </tnt:NavigationList>
@@ -31,7 +36,6 @@
 
                             <FlexBox justifyContent="SpaceBetween" class="sapUiMediumMarginTop" wrap="Wrap" alignItems="Center">
                                 <Title text="{i18n>OverviewExpenses}" titleStyle="H4" />
-                                <Button text="{i18n>btnAdd}" type="Default" press="handleAdd" />
                             </FlexBox>
 
                             <Toolbar style="Standard" design="Transparent" height="0.1rem" />
@@ -77,24 +81,26 @@
 
                             <smartFilterBar:SmartFilterBar id="idSmartFilterBar" entitySet="ZFI_EXPENSES_MNG" persistencyKey="SmartFilterBar" />
 
-                            <smartTable:SmartTable beforeRebindTable="onBeforeRebindTable" demandPopin="true" entitySet="ZFI_EXPENSES_MNG" id="operationsTable" smartFilterId="idSmartFilterBar" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="false" useTablePersonalisation="false" useVariantManagement="false" requestAtLeastFields="Doc,Reason,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="false">
+                            <smartTable:SmartTable beforeRebindTable="onBeforeRebindTable" demandPopin="true" entitySet="ZFI_EXPENSES_MNG" id="operationsTable" smartFilterId="idSmartFilterBar" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="false" useTablePersonalisation="false" useVariantManagement="false" requestAtLeastFields="Doc,Reason,ExpNo,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="false">
                                 <smartTable:customData>
                                     <core:CustomData key="p13nDialogSettings" value='\{"columns":\{"visible": true \},"sort":\{"visible": true\},"filter":\{"visible": false\},"group":\{"visible": true\}\}'/>
                                 </smartTable:customData>
                                 <smartTable:customToolbar>
                                     <OverflowToolbar design="Transparent">
                                         <ToolbarSpacer/>
-                                        <!-- <Button id="btnEdit" enabled="false" text="{i18n>Edit}" press="handleEditExpense" /> -->
-                                        <Button id="btnDelete" enabled="false" text="{i18n>Delete}" press="handleDeleteExpense" />
+                                        <Button icon="sap-icon://customer-financial-fact-sheet" text="{i18n>New}" type="Default" press="handleAdd" />
                                     </OverflowToolbar>
                                 </smartTable:customToolbar>
-                                <Table id="idTableExpenses" fixedLayout="false" growing="true" growingThreshold="5" mode="SingleSelectLeft" selectionChange="handleButtons(true, ['btnEdit', 'btnDelete'])" itemPress="handleExpensePress">
+                                <Table id="idTableExpenses" fixedLayout="false" growing="true" growingThreshold="20" itemPress="handleExpensePress">
                                     <columns>
                                         <Column>
                                             <Text text="{i18n>Document}" />
                                         </Column>
                                         <Column>
                                             <Text text="{i18n>Reason}" />
+                                        </Column>
+                                        <Column>
+                                            <Text text="{i18n>ExpensesNo}" />
                                         </Column>
                                         <Column>
                                             <Text text="{i18n>PaymentMethod}" />
@@ -113,7 +119,7 @@
                                         </Column>
                                     </columns>
                                     <items>
-                                        <ColumnListItem id="idColumnListItem" type="Navigation">
+                                        <ColumnListItem id="idColumnListItem">
                                             <cells>
                                                 <VBox>
                                                     <Avatar src="{path: 'Doc', formatter: '.formatter.base64ToSrc'}" visible="{path: 'Doc', formatter: '.formatter.hasExpDoc'}" displayShape="Square" class="imgClass">
@@ -125,9 +131,11 @@
                                                     </Avatar>
                                                     <core:Icon visible="{path: 'Doc', formatter: '.formatter.noExpDoc'}" src="sap-icon://upload-to-cloud" size="3rem" press="onUploadPressed"/>
                                                 </VBox>
+
                                                 <VBox>
                                                     <core:Icon visible="{path: 'Reason', formatter: '.formatter.hasReason'}" src="sap-icon://comment" size="2rem" press="onPressReason" tooltip="{Reason}" />
                                                 </VBox>
+                                                <Link id="LinkDetail" text="{ExpNo}" press="handleExpensePress" />
                                                 <Text id="Pymtmeth" text="{PayMethodDsc}" />
                                                 <Text id="Exptype" text="{ExpTypeDsc}" />
                                                 <Text text="{path: 'Erdat', formatter: '.formatter.formatDateTime'}" />

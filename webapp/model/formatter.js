@@ -16,8 +16,8 @@ sap.ui.define([], function () {
         },
 
         base64ToSrc: function (sBase64Encoded) {
-            if (!sBase64Encoded) {
-                return "";
+            if (sBase64Encoded === "") {
+                return;
             }
 
             try {
@@ -40,6 +40,7 @@ sap.ui.define([], function () {
                 case 5: return this.getResourceBundle().getText("statusWithoutAttachment");
                 case 6: return this.getResourceBundle().getText("statusPending");
                 case 7: return this.getResourceBundle().getText("statusMarkedDeletion");
+                case 8: return this.getResourceBundle().getText("statusPartiallyApprove");
                 default: return this.getResourceBundle().getText("statusUnknown");
             }
         },
@@ -56,6 +57,7 @@ sap.ui.define([], function () {
                 case 6: return "Warning";
                 case 3: return "Warning";
                 case 7: return "Error";
+                case 8: return "Warning";
                 default: return "None";
             }
         },
@@ -72,6 +74,7 @@ sap.ui.define([], function () {
                 case 6: return "sap-icon://warning";
                 case 3: return "sap-icon://question-mark";
                 case 7: return "sap-icon://status-negative";
+                case 8: return "sap-icon://warning";
                 default: return "";
             }
         },
@@ -130,6 +133,22 @@ sap.ui.define([], function () {
                 currency: "EUR",
                 minimumFractionDigits: 2
             }).format(fAmount);
+        },
+
+        formatDateToDDMMYYYY: function (sDate) {
+            if (!sDate) {
+                return "";
+            }
+
+            // Converter string para objeto Date
+            var oDate = new Date(sDate);
+
+            // Formatar usando API do UI5
+            var oDateFormat = sap.ui.core.format.DateFormat.getDateInstance({
+                pattern: "dd/MM/yyyy"
+            });
+
+            return oDateFormat.format(oDate);
         }
     };
 });

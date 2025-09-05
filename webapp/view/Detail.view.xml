@@ -1,136 +1,194 @@
-<mvc:View controllerName="zfiexpensesmanage.controller.Detail"
-    xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m"
-    xmlns:uxap="sap.uxap"
-    xmlns:form="sap.ui.layout.form" height="100%">
-    <Page id="pageExpenseDetail" title="{i18n>JournalEntryDetail}" showNavButton="true" navButtonPress="onDetailBack">
-        <content>
-            <uxap:ObjectPageLayout id="opl" enableLazyLoading="true" showTitleInHeaderContent="false">
-                <uxap:headerTitle>
-                    <uxap:ObjectPageDynamicHeaderTitle>
-                        <uxap:expandedHeading>
-                            <ObjectIdentifier title="{ExpNo}" />
-                        </uxap:expandedHeading>
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.uxap"
+    xmlns:m="sap.m"
+    xmlns:u="sap.ui.unified"
+    xmlns:f="sap.ui.layout.form" controllerName="zfiexpensesmanage.controller.Detail" height="100%">
+    <ObjectPageLayout id="ObjectPageLayout" enableLazyLoading="true" upperCaseAnchorBar="false">
+        <headerTitle>
+            <ObjectPageDynamicHeaderTitle>
+                <heading>
+                    <m:Title text="{ExpNo}" />
+                </heading>
 
-                        <uxap:navigationActions>
-                            <uxap:ObjectPageHeaderActionButton icon="sap-icon://full-screen" tooltip="Full Screen" press=".onFullScreen"/>
-                            <uxap:ObjectPageHeaderActionButton icon="sap-icon://decline" tooltip="Close" press=".onClose"/>
-                        </uxap:navigationActions>
+                <snappedTitleOnMobile>
+                    <m:Title text="{ExpNo}"/>
+                </snappedTitleOnMobile>
 
-                        <uxap:snappedHeading>
-                            <ObjectIdentifier title="{Doc}" />
-                        </uxap:snappedHeading>
+                <actions>
+                    <m:Button icon="sap-icon://edit" type="Transparent" visible="false" press="onPressEditDetail"/>
+                    <m:Button icon="sap-icon://nav-back" type="Emphasized" press="onPressCloseDetail"/>
+                </actions>
+            </ObjectPageDynamicHeaderTitle>
+        </headerTitle>
 
-                        <uxap:actions>
-                            <uxap:ObjectPageHeaderActionButton text="{i18n>Edit}" type="Emphasized" importance="High" hideText="false"/>
-                            <uxap:ObjectPageHeaderActionButton text="Create Correspondence" type="Transparent" importance="High" hideText="false"/>
-                            <uxap:ObjectPageHeaderActionButton text="Document Flow" type="Transparent" importance="High" hideText="false"/>
-                            <uxap:ObjectPageHeaderActionButton text="Display Change Log" type="Transparent" importance="High" hideText="false"/>
-                        </uxap:actions>
-                    </uxap:ObjectPageDynamicHeaderTitle>
-                </uxap:headerTitle>
+        <headerContent>
+            <f:SimpleForm maxContainerCols="2" editable="false" layout="ColumnLayout" width="auto">
+                <f:content>
+                    <m:Label text="{i18n>DocumentName}"/>
+                    <m:Text id="DocNumber" text="{Belnr}"/>
 
-                <uxap:sections>
+                    <m:Label text="{i18n>CompanyCode}"/>
+                    <m:Text id="CompanyCode" text="{CompanyCode} ({CompanyDsc})"/>
 
-                    <!-- SECTION: General Information -->
-                    <uxap:ObjectPageSection title="{i18n>GeneralInformation}">
-                        <uxap:ObjectPageSubSection>
-                            <uxap:blocks>
+                    <m:Label text="{i18n>Reference}"/>
+                    <m:Text text="{ExpNo}"/>
 
-                            </uxap:blocks>
-                        </uxap:ObjectPageSubSection>
-                    </uxap:ObjectPageSection>
+                    <m:Label text="{i18n>Amount}"/>
+                    <m:Text text="{Value} EUR"/>
+                    <!-- <m:Input value="{Value}" enabled="false" width="100px"/> -->
 
-                    <!-- SECTION: Line Items -->
-                    <uxap:ObjectPageSection title="{i18n>LineItems}">
-                        <uxap:ObjectPageSubSection>
-                            <uxap:blocks>
-                                <Table id="tblLines" inset="false" growing="true" growingThreshold="10" items="{path: 'to_Items'}">
-                                    <columns>
-                                        <Column>
-                                            <Text text="{i18n>GLAccount}" />
-                                        </Column>
-                                        <Column>
-                                            <Text text="{i18n>Text}" />
-                                        </Column>
-                                        <Column>
-                                            <Text text="{i18n>Amount}" />
-                                        </Column>
-                                        <Column>
-                                            <Text text="{i18n>CostCenter}" />
-                                        </Column>
-                                    </columns>
-                                    <items>
-                                        <ColumnListItem>
-                                            <cells>
-                                                <Text text="{Hkont}" />
-                                                <Text text="{Sgtxt}" />
-                                                <ObjectNumber number="{Dmbtr}" unit="{Waers}" />
-                                                <Text text="{Kostl}" />
-                                            </cells>
-                                        </ColumnListItem>
-                                    </items>
-                                </Table>
-                            </uxap:blocks>
-                        </uxap:ObjectPageSubSection>
-                    </uxap:ObjectPageSection>
+                    <m:Label text="{i18n>Nif}"/>
+                    <m:Text text="{Nif}"/>
 
-                    <!-- SECTION: Taxes -->
-                    <uxap:ObjectPageSection title="{i18n>Taxes}">
-                        <uxap:ObjectPageSubSection>
-                            <uxap:blocks>
-                                <form:SimpleForm editable="false" layout="ResponsiveGridLayout" columnsL="2" columnsM="2" labelSpanL="5" labelSpanM="6" class="sapUiResponsiveMargin">
-                                    <Label text="{i18n>AbsTaxExchangeRate}" />
-                                    <Text text="{AbsTaxRate}" />
-                                    <Label text="{i18n>TaxCalculation}" />
-                                    <Text text="{TaxCalcMode}" />
-                                    <Label text="{i18n>TaxBasedOn}" />
-                                    <Text text="{TaxBasedOn}" />
-                                </form:SimpleForm>
-                            </uxap:blocks>
-                        </uxap:ObjectPageSubSection>
-                    </uxap:ObjectPageSection>
+                    <m:Label text="{i18n>Country}"/>
+                    <m:Text text="{Land1}"/>
 
-                    <!-- SECTION: Related Documents -->
-                    <uxap:ObjectPageSection title="{i18n>RelatedDocuments}">
-                        <uxap:ObjectPageSubSection>
-                            <uxap:blocks>
-                                <Table id="tblRelatedDocs" growing="true" items="{path: 'to_Related'}">
-                                    <columns>
-                                        <Column>
-                                            <Text text="{i18n>Type}" />
-                                        </Column>
-                                        <Column>
-                                            <Text text="{i18n>Reference}" />
-                                        </Column>
-                                    </columns>
-                                    <items>
-                                        <ColumnListItem>
-                                            <cells>
-                                                <Text text="{RelType}" />
-                                                <Link text="{RelDoc}" press="onOpenRelated" />
-                                            </cells>
-                                        </ColumnListItem>
-                                    </items>
-                                </Table>
-                            </uxap:blocks>
-                        </uxap:ObjectPageSubSection>
-                    </uxap:ObjectPageSection>
+                    <m:Label text="{i18n>ExpType}"/>
+                    <m:Text text="{ExpTypeDsc}"/>
 
+                    <m:Label text="{i18n>ExpPyMethod}"/>
+                    <m:Text text="{PayMethodDsc}"/>
 
+                    <m:Label text="{i18n>FiscalYear}"/>
+                    <m:Text id="FiscalYear" text="{FiscalYear}"/>
 
-                    <!-- <uxap:ObjectPageSection title="{i18n>Attachments}">
-                        <uxap:ObjectPageSubSection>
-                            <uxap:blocks>
-                                <UploadCollection id="uc" items="{path: 'to_Attachments'}" fileDeleted="onFileDeleted" uploadComplete="onUploadComplete">
-                                    <UploadCollectionItem fileName="{FileName}" url="{FileUrl}" visibleEdit="false" visibleDelete="false" />
-                                </UploadCollection>
-                            </uxap:blocks>
-                        </uxap:ObjectPageSubSection>
-                    </uxap:ObjectPageSection> -->
+                    <m:Label text="{i18n>Status}"/>
+                    <m:ObjectStatus text="{path: 'FiStatus', formatter: '.formatter.statusText'}" state="{path: 'FiStatus', formatter: '.formatter.statusState'}" icon="{path: 'FiStatus', formatter: '.formatter.statusIcon'}" iconDensityAware="false" active="false"/>
+                    <m:Text text="{FiStatus}" visible="false" id="StatusNo"/>
 
-                </uxap:sections>
-            </uxap:ObjectPageLayout>
-        </content>
-    </Page>
+                    <m:Label text="{i18n>CreationDate}"/>
+                    <m:Text text="{ path: 'Sdate', formatter: '.formatter.formatDateToDDMMYYYY' }" />
+
+                    <m:Label text="{i18n>CreatedBy}"/>
+                    <m:Text text="{Ernam}"/>
+
+                </f:content>
+            </f:SimpleForm>
+        </headerContent>
+
+        <sections>
+            <ObjectPageSection id="Section1" visible="true" titleUppercase="false" title="{i18n>TaxItem}">
+                <subSections>
+                    <ObjectPageSubSection title="{i18n>TaxItem}" mode="Expanded" titleUppercase="false">
+                        <blocks>
+                            <m:Table id="TaxTable" items="{path: 'to_TaxItem'}" growing="true">
+                                <m:columns>
+                                    <m:Column demandPopin="true" minScreenWidth="Tablet">
+                                        <m:Text text="{i18n>TaxCode}"/>
+                                    </m:Column>
+
+                                    <m:Column demandPopin="true" minScreenWidth="Tablet">
+                                        <m:Text text="{i18n>GLAccount}"/>
+                                    </m:Column>
+
+                                    <m:Column demandPopin="true" minScreenWidth="Tablet">
+                                        <m:Text text="{i18n>TaxRate}"/>
+                                    </m:Column>
+
+                                    <m:Column demandPopin="true" minScreenWidth="Tablet">
+                                        <m:Text text="{i18n>TaxBaseAmount}"/>
+                                    </m:Column>
+
+                                    <m:Column demandPopin="true" minScreenWidth="Tablet">
+                                        <m:Text text="{i18n>Debit}"/>
+                                    </m:Column>
+
+                                    <m:Column demandPopin="true" minScreenWidth="Tablet">
+                                        <m:Text text="{i18n>Credit}"/>
+                                    </m:Column>
+                                </m:columns>
+                                <m:items>
+                                    <m:ColumnListItem vAlign="Middle">
+                                        <m:cells>
+                                            <m:Text text="{TaxCode} {TaxCodeName}"/>
+                                            <m:Text text="{GLAccount}"/>
+                                            <m:Text text="{TaxRate} {TaxRegisterPercentageUnit}"/>
+                                            <m:Text text="{TaxBaseAmountInCoCodeCrcy} {TransactionCurrency}"/>
+                                            <m:Text text="{DebitAmountInCoCodeCrcy} {TransactionCurrency}"/>
+                                            <m:Text text="{CredituntInCoCodeCrcy} {TransactionCurrency}"/>
+                                        </m:cells>
+                                    </m:ColumnListItem>
+                                </m:items>
+                            </m:Table>
+                        </blocks>
+                    </ObjectPageSubSection>
+                </subSections>
+            </ObjectPageSection>
+            <ObjectPageSection id="Section2" visible="true" titleUppercase="false" title="{i18n>TaxItem}">
+                <subSections>
+                    <ObjectPageSubSection title="{i18n>TaxItem}" mode="Expanded" titleUppercase="false">
+                        <blocks>
+                            <m:Table id="TaxTable1" items="{path: 'to_ParkedTaxItem'}" growing="true">
+                                <m:columns>
+                                    <m:Column demandPopin="true" minScreenWidth="Tablet">
+                                        <m:Text text="{i18n>TaxCode}"/>
+                                    </m:Column>
+
+                                    <m:Column demandPopin="true" minScreenWidth="Tablet">
+                                        <m:Text text="{i18n>Procedure}"/>
+                                    </m:Column>
+
+                                    <m:Column demandPopin="true" minScreenWidth="Tablet">
+                                        <m:Text text="{i18n>Transaction}"/>
+                                    </m:Column>
+
+                                    <m:Column demandPopin="true" minScreenWidth="Tablet">
+                                        <m:Text text="{i18n>Debit}"/>
+                                    </m:Column>
+
+                                    <m:Column demandPopin="true" minScreenWidth="Tablet">
+                                        <m:Text text="{i18n>Credit}"/>
+                                    </m:Column>
+                                </m:columns>
+                                <m:items>
+                                    <m:ColumnListItem vAlign="Middle">
+                                        <m:cells>
+                                            <m:Text text="{TaxCode} {TaxCodeName}"/>
+                                            <m:Text text="{TaxCalculationProcedure}"/>
+                                            <m:Text text="{TransactionTypeDetermination}"/>
+                                            <m:Text text="{DebitAmountInCoCodeCrcy} {TransactionCurrency}"/>
+                                            <m:Text text="{CredituntInCoCodeCrcy} {TransactionCurrency}"/>
+                                        </m:cells>
+                                    </m:ColumnListItem>
+                                </m:items>
+                            </m:Table>
+                        </blocks>
+                    </ObjectPageSubSection>
+                </subSections>
+            </ObjectPageSection>
+
+            <ObjectPageSection id="Section3" visible="true" titleUppercase="false" title="{i18n>Attachments}">
+                <subSections>
+                    <ObjectPageSubSection title="{i18n>Attachments}" mode="Expanded" titleUppercase="false">
+                        <blocks>
+                            <m:VBox id="attachmentIllustration" visible="false" height="100%" justifyContent="SpaceBetween">
+                                <m:IllustratedMessage id="im" title="{i18n>NoAttachments}" description="{i18n>NoAttachmentsDescription}" illustrationType="sapIllus-NoData" class="sapUiSmallMarginTop"/>
+                                <m:HBox justifyContent="Center" width="100%">
+                                    <u:FileUploader id="fileUploader" buttonOnly="true" buttonText="{i18n>btnUpload}" change="onFileChange" class="sapUiSmallMarginBottom"/>
+                                </m:HBox>
+                            </m:VBox>
+
+                            <m:List visible="true" id="attachmentList" items="{attachmentModel>/attachments}" width="100%">
+                                <m:CustomListItem>
+                                    <m:HBox class="sapUiSmallMargin" justifyContent="SpaceBetween" alignItems="Center" width="100%">
+                                        <m:HBox alignItems="Center" wrap="Wrap">
+                                            <m:Image src="{attachmentModel>src}" decorative="false" width="170px" densityAware="false">
+                                                <m:detailBox>
+                                                    <m:LightBox>
+                                                        <m:LightBoxItem imageSrc="{attachmentModel>src}" />
+                                                    </m:LightBox>
+                                                </m:detailBox>
+                                            </m:Image>
+                                        </m:HBox>
+                                        <m:Button icon="sap-icon://delete" type="Reject" class="sapUiMediumMarginEnd" press="handleDeleteExpense"/>
+                                    </m:HBox>
+                                </m:CustomListItem>
+                            </m:List>
+
+                        </blocks>
+                    </ObjectPageSubSection>
+                </subSections>
+            </ObjectPageSection>
+        </sections>
+    </ObjectPageLayout>
 </mvc:View>

@@ -27,7 +27,6 @@ sap.ui.define([
         },
 
         getUserAuthentication: function (type) {
-            debugger;
             var that = this,
                 urlParams = new URLSearchParams(window.location.search),
                 token = urlParams.get('token');
@@ -105,81 +104,16 @@ sap.ui.define([
             });
         },
 
-        // Format currency
-        formatCurrencyEUR: function (vValue) {
-            var oCurrencyFormat = sap.ui.core.format.NumberFormat.getCurrencyInstance({
-                currencyCode: false
-            });
-
-            return oCurrencyFormat.format(vValue, "EUR");
-        },
-
-        // Get sum of approved expenses
-        getSumOfApprovedExpenses: function () {
+        // Get card values
+        getCardValues: function () {
             try {
                 var oModel = this.getView().getModel();
 
-                oModel.read("/ZFI_EXPENSES_APPRVD", {
+                oModel.read("/GetCardValues", {
                     success: function (oData) {
-                        this.getView().byId("idSumOfApprovedExpenses").setText(this.formatCurrencyEUR(oData.results[0].Totalvalue));
-                    }.bind(this),
-                    error: function (oError) {
-                        var sError = JSON.parse(oError.responseText).error.message.value;
-
-                        sap.m.MessageBox.alert(sError, {
-                            icon: "ERROR",
-                            onClose: null,
-                            styleClass: '',
-                            initialFocus: null,
-                            textDirection: sap.ui.core.TextDirection.Inherit
-                        });
-                    }.bind(this)
-                });
-            } catch (error) {
-                this.showErrorMessage({
-                    oText: error.message,
-                    oTitle: this.getResourceBundle().getText("errorTitle")
-                });
-            }
-        },
-
-        // Get sum of expenses without attach
-        getSumOfExpensesNoAttach: function () {
-            try {
-                var oModel = this.getView().getModel();
-
-                oModel.read("/ZFI_EXPENSES_SUM_NDOC", {
-                    success: function (oData) {
-                        this.getView().byId("idSumOfExpensesNoAttach").setText(this.formatCurrencyEUR(oData.results[0].Totalvalue));
-                    }.bind(this),
-                    error: function (oError) {
-                        var sError = JSON.parse(oError.responseText).error.message.value;
-
-                        sap.m.MessageBox.alert(sError, {
-                            icon: "ERROR",
-                            onClose: null,
-                            styleClass: '',
-                            initialFocus: null,
-                            textDirection: sap.ui.core.TextDirection.Inherit
-                        });
-                    }.bind(this)
-                });
-            } catch (error) {
-                this.showErrorMessage({
-                    oText: error.message,
-                    oTitle: this.getResourceBundle().getText("errorTitle")
-                });
-            }
-        },
-
-        // Get sum of expenses last 30 days
-        getSumOfExpensesLast30Days: function () {
-            try {
-                var oModel = this.getView().getModel();
-
-                oModel.read("/ZFI_EXPENSES_LAST30", {
-                    success: function (oData) {
-                        this.getView().byId("idSumOfExpensesLast30Days").setText(this.formatCurrencyEUR(oData.results[0].Totalvalue));
+                        this.getView().byId("idSumOfExpensesNoAttach").setText(oData.results[0].NdocV + " EUR");
+                        this.getView().byId("idSumOfApprovedExpenses").setText(oData.results[0].ApprvdV + " EUR");
+                        this.getView().byId("idSumOfExpensesLast30Days").setText(oData.results[0].Last30V + " EUR");
                     }.bind(this),
                     error: function (oError) {
                         var sError = JSON.parse(oError.responseText).error.message.value;
@@ -248,6 +182,7 @@ sap.ui.define([
 
                 oModel.read("/ZFI_EXPENSES_BCP", {
                     success: function (oData) {
+                        debugger;
                         var aAllResults = oData.results;
 
                         var aDadosAnoAtual = aAllResults.filter(function (oEntry) {
@@ -296,14 +231,12 @@ sap.ui.define([
             }
         },
 
-        handleButtons: function (bEnabled, aButtonIds) {
-            aButtonIds.forEach(function (sId) {
-                this.byId(sId).setEnabled(bEnabled);
-            }.bind(this));
-        },
-
-        handleRemoveSelections: function (oTable) {
-            oTable.removeSelections();
+        // Reload data
+        onRealodData: function () {
+            this.byId("operationsTable").getTable().getBinding("items").refresh();
+            this.onGetDocument("", sExpNo);
+            this.byId("attachmentList").getBinding("items").refresh();
+            this.getView().getModel().refresh();
         },
 
         handleRequestBusy: function (oModel) {

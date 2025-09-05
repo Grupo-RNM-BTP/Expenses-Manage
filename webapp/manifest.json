@@ -125,17 +125,19 @@
       "targets": {
         "TargetMain": {
           "viewType": "XML",
-          "transition": "slide",
           "viewLevel": 1,
           "viewId": "Main",
-          "viewName": "Main"
+          "viewName": "Main",
+          "controlAggregation": "beginColumnPages",
+          "controlId": "layout",
+          "targetControl": "layout"
         },
         "Detail": {
           "viewName": "Detail",
-          "transition": "slide",
           "viewLevel": 1,
           "controlAggregation": "midColumnPages",
-          "viewId": "Detail"
+          "viewId": "Detail",
+          "viewType": "XML"
         },
         "NotFound": {
           "viewName": "NotFound",
