@@ -6,10 +6,20 @@ sap.ui.define([
     function (BaseController, formatter, JSONModel) {
         "use strict";
 
+        /**
+        * DetailController: Handles detail view, attachments, file upload, and deletion.
+        *
+        * @namespace zfiexpensesmanage.controller
+        * @extends zfiexpensesmanage.controller.BaseController
+        */
+
         return BaseController.extend("zfiexpensesmanage.controller.Detail", {
 
             formatter: formatter,
 
+            /**
+             * Initialize the controller, set attachment model and attach route pattern.
+             */
             onInit: function () {
                 var oAttachmentModel = new sap.ui.model.json.JSONModel({
                     attachments: []
@@ -18,11 +28,20 @@ sap.ui.define([
                 this.getOwnerComponent().getRouter().getRoute("Detail").attachPatternMatched(this.onObjectDetail, this);
             },
 
+            /**
+             * Handle object detail navigation.
+             * @param {sap.ui.core.mvc.NavigationEvent} oEvent Navigation event
+             */
             onObjectDetail: function (oEvent) {
                 var sObjectId = "/ZFI_EXPENSES_MNG" + oEvent.getParameter("arguments").objectId;
                 this._bindView(sObjectId, true);
             },
 
+            /**
+             * Bind view to object path.
+             * @param {string} sObjectPath Object path
+             * @param {boolean} sForceRefresh Force refresh
+             */
             _bindView: function (sObjectPath, sForceRefresh) {
                 this.getView().bindElement({
                     path: sObjectPath,
@@ -43,7 +62,10 @@ sap.ui.define([
                 this.onGetDocument(sObjectPath);
             },
 
-            // Set visible section of detail
+            /**
+             * Show/hide detail sections based on FiStatus.
+             * @param {string} sObjectPath
+             */
             setVisibleSection: function (sObjectPath) {
                 var oModel = this.getModel();
 
@@ -70,7 +92,11 @@ sap.ui.define([
                 });
             },
 
-            // Get document of expenses
+            /**
+            * Load attachments for a given object or expense number.
+            * @param {string} sObjectPath
+            * @param {string} sExpNo
+            */
             onGetDocument: function (sObjectPath, sExpNo) {
                 var oModel = this.getModel();
 
@@ -119,7 +145,9 @@ sap.ui.define([
                 });
             },
 
-            // Handle close detail
+            /**
+             * Handle close detail.
+             */
             onPressCloseDetail: function () {
                 var oFCL = this.getView().getParent().getParent();
                 oFCL.setLayout(sap.f.LayoutType.OneColumn);
@@ -127,7 +155,10 @@ sap.ui.define([
                 this.getRouter().navTo("RouteMain");
             },
 
-            // Upload of file to Backend
+            /**
+             * Handle file upload to backend.
+             * @param {sap.ui.base.Event} oEvent File change event
+             */
             onFileChange: function (oEvent) {
                 var aFiles = oEvent.getParameter("files");
                 if (!aFiles || aFiles.length === 0) {
@@ -177,7 +208,9 @@ sap.ui.define([
                 reader.readAsDataURL(oFile);
             },
 
-            // Handle Delete
+            /**
+             * Handle delete expense.
+             */
             handleDeleteExpense: function () {
                 try {
                     sap.m.MessageBox.confirm(this.getResourceBundle().getText("confirmDeleteExpense"), {
@@ -200,7 +233,9 @@ sap.ui.define([
                 }
             },
 
-            // Handle Delete bakcend
+            /**
+             * Handle delete expense backend.
+             */
             onDeleteSelected: function () {
                 var oModel = this.getModel(),
                     sFullPath = this.getView().getBindingContext().sPath,

@@ -6,10 +6,20 @@ sap.ui.define([
     function (BaseController, formatter, JSONModel) {
         "use strict";
 
+        /**
+         * MainController: Handles main view, navigation, uploads, and card data.
+         *
+         * @namespace zfiexpensesmanage.controller
+         * @extends zfiexpensesmanage.controller.BaseController
+         */
+
         return BaseController.extend("zfiexpensesmanage.controller.Main", {
 
             formatter: formatter,
 
+            /**
+             * Initialize the controller, set model, and attach route matched.
+             */
             onInit: function () {
                 var oModel = new JSONModel({
                     ExpNo: ""
@@ -21,6 +31,9 @@ sap.ui.define([
                 this.getRouter().attachRouteMatched(this.getUserAuthentication, this);
             },
 
+            /**
+             * Handle after rendering, get card values, and set theme.
+             */
             onAfterRendering: function () {
                 this.getCardValues();
                 sessionStorage.setItem("goToLaunchpad", "X");
@@ -32,12 +45,18 @@ sap.ui.define([
                 }
             },
 
+            /**
+             * Handle route matched, set goToLaunchpad and get user authentication.
+             */
             onRouteMatched: function () {
                 sessionStorage.setItem("goToLaunchpad", "X");
                 this.getUserAuthentication();
             },
 
-            // On before rebind table
+            /**
+             * Apply initial sorter before table binding.
+             * @param {sap.ui.base.Event} oEvent
+             */
             onBeforeRebindTable: function (oEvent) {
                 var oBindingParams = oEvent.getParameter("bindingParams");
 
@@ -46,7 +65,10 @@ sap.ui.define([
                 }
             },
 
-            // Open reason dialog
+            /**
+             * Open reason dialog.
+             * @param {sap.ui.base.Event} oEvent
+             */
             onPressReason: function (oEvent) {
                 try {
                     var oIcon = oEvent.getSource(),
@@ -83,7 +105,10 @@ sap.ui.define([
                 }
             },
 
-            // Open upload dialog
+            /**
+             * Open upload dialog.
+             * @param {sap.ui.base.Event} oEvent
+             */
             onUploadPressed: function (oEvent) {
                 try {
                     this.getView().getModel("Main").setData({});
@@ -149,7 +174,9 @@ sap.ui.define([
                 }
             },
 
-            // Get document and convert to Base64
+            /**
+             * Get document and convert to Base64.
+             */
             onGetDocument: function () {
                 try {
                     var oDocumentInput = sap.ui.getCore().byId("fileUploader");
@@ -191,7 +218,9 @@ sap.ui.define([
                 }
             },
 
-            // Send Data to backend with IMAGE
+            /**
+             * Send Data to backend with IMAGE.
+             */
             handleUpload: async function () {
                 try {
                     var oModel = this.getView().getModel(),
@@ -228,7 +257,10 @@ sap.ui.define([
                 }
             },
 
-            // Handle select item
+            /**
+             * Handle navigation between pages based on side menu selection.
+             * @param {sap.ui.base.Event} oEvent
+             */
             onItemSelect: function (oEvent) {
                 var sKey = oEvent.getParameter("item").getKey(),
                     oNavContainer = this.byId("NavContainer"),
@@ -250,7 +282,10 @@ sap.ui.define([
                 }
             },
 
-            // Handle expense press
+            /**
+             * Handle expense item press and navigate to detail view.
+             * @param {sap.ui.base.Event} oEvent
+             */
             handleExpensePress: function (oEvent) {
                 this.getModel("global").setProperty("/layout", "TwoColumnsMidExpanded");
 
@@ -266,6 +301,10 @@ sap.ui.define([
             onSideNavToggle: function () {
                 var oToolPage = this.byId("toolPage");
                 oToolPage.setSideExpanded(!oToolPage.getSideExpanded());
+            },
+
+            handleAdd: function () {
+                this.onTeste()
             }
         });
     });

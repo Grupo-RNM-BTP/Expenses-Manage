@@ -91,7 +91,7 @@
                                         <Button icon="sap-icon://customer-financial-fact-sheet" text="{i18n>New}" type="Default" press="handleAdd" />
                                     </OverflowToolbar>
                                 </smartTable:customToolbar>
-                                <Table id="idTableExpenses" fixedLayout="false" growing="true" growingThreshold="20" itemPress="handleExpensePress">
+                                <Table id="idTableExpenses" fixedLayout="false" growing="true" growingThreshold="20"   itemPress="handleExpensePress">
                                     <columns>
                                         <Column>
                                             <Text text="{i18n>Document}" />
@@ -163,7 +163,7 @@
                                     <f:Card class="sapUiSmallMargin" width="100%">
                                         <f:content>
                                             <VBox class="sapUiSmallMargin" width="100%">
-                                                <viz:VizFrame id="barChart" width="100%" height="400px" uiConfig="{applicationSet:'fiori'}" vizType="bar" vizProperties='{ "legend": { "visible": true },"title": { "visible": false }, "plotArea": { "dataLabel": { "visible": true } } }'>
+                                                <viz:VizFrame id="barChart" width="100%" height="400px" uiConfig="{applicationSet:'fiori'}" vizType="bar" vizProperties='{ "legend": { "visible": false },"title": { "visible": false }, "plotArea": { "dataLabel": { "visible": true } } }'>
                                                     <viz:dataset>
                                                         <viz.data:FlattenedDataset data="{graficoModel>/gastosPorMes}">
                                                             <viz.data:dimensions>

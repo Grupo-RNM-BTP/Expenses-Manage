@@ -6,7 +6,19 @@ sap.ui.define([
 
     var CAModel;
 
+    /**
+ * BaseController: Utility controller for navigation, models, messages, and OData calls.
+ *
+ * @namespace zfiexpensesmanage.controller
+ * @extends sap.ui.core.mvc.Controller
+ */
+
     return Controller.extend("zfiexpensesmanage.controller.BaseController", {
+
+        /**
+         * Set OData model with token and user language.
+         * @param {string} token Authentication token
+         */
         setModelCA: function (token) {
             var userLanguage = sessionStorage.getItem("oLangu");
             if (!userLanguage) {
@@ -26,6 +38,10 @@ sap.ui.define([
             this.setModel(CAModel);
         },
 
+        /**
+         * Validate user authentication using backend service.
+         * @param {string} type Auth type
+         */
         getUserAuthentication: function (type) {
             var that = this,
                 urlParams = new URLSearchParams(window.location.search),
@@ -70,10 +86,20 @@ sap.ui.define([
             }
         },
 
+        /**
+         * Get router instance.
+         * @returns {sap.ui.core.routing.Router}
+         */
         getRouter: function () {
             return this.getOwnerComponent().getRouter();
         },
 
+        /**
+        * Navigate to given route with optional object ID.
+        * @param {string} sPath Object path
+        * @param {string} oRoute Route name
+        * @param {string} oEntityName Entity name
+        */
         onNavigation: function (sPath, oRoute, oEntityName) {
             if (sPath) {
                 this.getRouter().navTo(oRoute, {
@@ -84,18 +110,37 @@ sap.ui.define([
             }
         },
 
+        /**
+         * Get view model.
+         * @param {string} [sName] Model name
+         * @returns {sap.ui.model.Model}
+         */
         getModel: function (sName) {
             return this.getView().getModel(sName);
         },
 
+        /**
+         * Set view model.
+         * @param {sap.ui.model.Model} oModel Model
+         * @param {string} [sName] Model name
+         * @returns {sap.ui.model.Model}
+         */
         setModel: function (oModel, sName) {
             return this.getView().setModel(oModel, sName);
         },
 
+        /**
+         * Get i18n resource bundle.
+         * @returns {sap.ui.model.resource.ResourceBundle}
+         */
         getResourceBundle: function () {
             return this.getOwnerComponent().getModel("i18n").getResourceBundle();
         },
 
+        /**
+         * Show error message.
+         * @param {object} oMessage Error message object
+         */
         showErrorMessage: function (oMessage) {
             MessageBox.error(oMessage.oText, {
                 title: oMessage.oTitle,
@@ -104,7 +149,9 @@ sap.ui.define([
             });
         },
 
-        // Get card values
+        /**
+        * Fetch card values from backend and update view.
+        */
         getCardValues: function () {
             try {
                 var oModel = this.getView().getModel();
@@ -135,7 +182,9 @@ sap.ui.define([
             }
         },
 
-        // Get sum of expenses year
+        /**
+         * Fetch sum of expenses year from backend and update view.
+         */
         getSumYear: function () {
             try {
                 var oModel = this.getView().getModel(),
@@ -172,7 +221,9 @@ sap.ui.define([
             }
         },
 
-        // Get sum of expenses month
+        /**
+         * Fetch sum of expenses month from backend and update view.
+         */
         getSumMonth: function () {
             try {
                 var oModel = this.getView().getModel(),
@@ -231,7 +282,9 @@ sap.ui.define([
             }
         },
 
-        // Reload data
+        /**
+        * Fetch card values from backend and update view.
+        */
         onRealodData: function () {
             this.byId("operationsTable").getTable().getBinding("items").refresh();
             this.onGetDocument("", sExpNo);
@@ -239,6 +292,10 @@ sap.ui.define([
             this.getView().getModel().refresh();
         },
 
+        /**
+         * Attach busy indicator handlers to model requests.
+         * @param {sap.ui.model.Model} oModel OData model
+         */
         handleRequestBusy: function (oModel) {
             var oAppViewModel = this.getModel("global");
 
