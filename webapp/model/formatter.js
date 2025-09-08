@@ -11,6 +11,10 @@ sap.ui.define([], function () {
             return !sExpDoc;
         },
 
+        noExpDocApprvd: function (sExpDoc) {
+            return !sExpDoc;
+        },
+
         hasReason: function (sReason) {
             return !!sReason;
         },

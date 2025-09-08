@@ -146,16 +146,6 @@ sap.ui.define([
             },
 
             /**
-             * Handle close detail.
-             */
-            onPressCloseDetail: function () {
-                var oFCL = this.getView().getParent().getParent();
-                oFCL.setLayout(sap.f.LayoutType.OneColumn);
-
-                this.getRouter().navTo("RouteMain");
-            },
-
-            /**
              * Handle file upload to backend.
              * @param {sap.ui.base.Event} oEvent File change event
              */

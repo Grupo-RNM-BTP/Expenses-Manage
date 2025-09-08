@@ -6,6 +6,7 @@ sap.ui.define([
     function (BaseController, formatter, JSONModel) {
         "use strict";
 
+
         /**
          * MainController: Handles main view, navigation, uploads, and card data.
          *
@@ -27,6 +28,8 @@ sap.ui.define([
                 this.getView().setModel(oModel, "Main");
                 this.getView().setModel(new JSONModel({}), "graficoModel");
 
+                // ExternalBaseController.onTeste();
+
                 sessionStorage.setItem("goToLaunchpad", "X");
                 this.getRouter().attachRouteMatched(this.getUserAuthentication, this);
             },
@@ -36,13 +39,13 @@ sap.ui.define([
              */
             onAfterRendering: function () {
                 this.getCardValues();
-                sessionStorage.setItem("goToLaunchpad", "X");
-                if (sessionStorage.getItem("selectedTheme").indexOf("dark") !== -1) {
-                    jQuery(".sapUiBlockLayer, .sapUiLocalBusyIndicator").css("background-color", "rgba(28,34,40,0.99)");
-                }
-                else {
-                    jQuery(".sapUiBlockLayer, .sapUiLocalBusyIndicator").css("background-color", "rgba(255, 255, 255, 0.99)");
-                }
+                // sessionStorage.setItem("goToLaunchpad", "X");
+                // if (sessionStorage.getItem("selectedTheme").indexOf("dark") !== -1) {
+                //     jQuery(".sapUiBlockLayer, .sapUiLocalBusyIndicator").css("background-color", "rgba(28,34,40,0.99)");
+                // }
+                // else {
+                //     jQuery(".sapUiBlockLayer, .sapUiLocalBusyIndicator").css("background-color", "rgba(255, 255, 255, 0.99)");
+                // }
             },
 
             /**
@@ -271,12 +274,18 @@ sap.ui.define([
                         this.getCardValues();
                         oNavContainer.to(this.byId("pageManage"));
                         oToolPage.setSideExpanded(false);
+                        this.onPressCloseDetail();
                         break;
 
                     case "CardMovements":
                         this.getSumMonth();
                         this.getSumYear();
                         oNavContainer.to(this.byId("pageCardMovements"));
+                        oToolPage.setSideExpanded(false);
+                        break;
+
+                    case "ApproveExpenses":
+                        oNavContainer.to(this.byId("pageApprovals"));
                         oToolPage.setSideExpanded(false);
                         break;
                 }
@@ -304,7 +313,12 @@ sap.ui.define([
             },
 
             handleAdd: function () {
-                this.onTeste()
+            },
+
+            handleApprove: function () {
+            },
+
+            handleReject: function () {
             }
         });
     });

@@ -7,11 +7,11 @@ sap.ui.define([
     var CAModel;
 
     /**
- * BaseController: Utility controller for navigation, models, messages, and OData calls.
- *
- * @namespace zfiexpensesmanage.controller
- * @extends sap.ui.core.mvc.Controller
- */
+     * BaseController: Utility controller for navigation, models, messages, and OData calls.
+     *
+     * @namespace zfiexpensesmanage.controller
+     * @extends sap.ui.core.mvc.Controller
+     */
 
     return Controller.extend("zfiexpensesmanage.controller.BaseController", {
 
@@ -233,7 +233,6 @@ sap.ui.define([
 
                 oModel.read("/ZFI_EXPENSES_BCP", {
                     success: function (oData) {
-                        debugger;
                         var aAllResults = oData.results;
 
                         var aDadosAnoAtual = aAllResults.filter(function (oEntry) {
@@ -290,6 +289,19 @@ sap.ui.define([
             this.onGetDocument("", sExpNo);
             this.byId("attachmentList").getBinding("items").refresh();
             this.getView().getModel().refresh();
+        },
+
+        /**
+       * Handle close detail.
+       */
+        onPressCloseDetail: function () {
+            // var oFCL = this.getView().getParent().getParent();
+            // oFCL.setLayout(sap.f.LayoutType.OneColumn);
+            debugger;
+            this.getModel("global").setProperty("/layout", "OneColumn");
+            // this.getView().getParent().getParent().destroyMidColumnPages();
+
+            this.getRouter().navTo("RouteMain");
         },
 
         /**
