@@ -54,9 +54,6 @@ sap.ui.define([
                         }.bind(this)
                     }
                 });
-                // if (sForceRefresh) {
-                //     this.getView().getModel().refresh();
-                // }
                 this.getView().getModel("attachmentModel").setProperty("/attachments", []);
                 this.setVisibleSection(sObjectPath);
                 this.onGetDocument(sObjectPath);
@@ -67,29 +64,15 @@ sap.ui.define([
              * @param {string} sObjectPath
              */
             setVisibleSection: function (sObjectPath) {
-                var oModel = this.getModel();
+                var sFiStatus = sObjectPath.match(/FiStatus='(\d+)'/)[1];
 
-                oModel.read(sObjectPath, {
-                    success: function (oData) {
-                        if (oData.FiStatus === "0") {
-                            this.byId("Section1").setVisible(true);
-                            this.byId("Section2").setVisible(false);
-                        } else {
-                            this.byId("Section1").setVisible(false);
-                            this.byId("Section2").setVisible(true);
-                        }
-                    }.bind(this),
-                    error: function (oError) {
-                        var sError = JSON.parse(oError.responseText).error.message.value;
-                        sap.m.MessageBox.alert(sError, {
-                            icon: "ERROR",
-                            onClose: null,
-                            styleClass: '',
-                            initialFocus: null,
-                            textDirection: sap.ui.core.TextDirection.Inherit
-                        });
-                    }.bind(this)
-                });
+                if (sFiStatus === "0") {
+                    this.byId("Section1").setVisible(true);
+                    this.byId("Section2").setVisible(false);
+                } else {
+                    this.byId("Section1").setVisible(false);
+                    this.byId("Section2").setVisible(true);
+                }
             },
 
             /**
@@ -98,16 +81,17 @@ sap.ui.define([
             * @param {string} sExpNo
             */
             onGetDocument: function (sObjectPath, sExpNo) {
-                var oModel = this.getModel();
+                var oModel = this.getModel(),
+                    sPath;
 
                 if (sObjectPath) {
-                    var sPath = sObjectPath.replace("ZFI_EXPENSES_MNG", "AttachmentsEvents");
-                    sPath = sPath.replace("ExpNo", "Expenseno");
-                    sPath = sPath.replace(/\(.*?Expenseno=/, "(Expenseno=");
+                    var sExpNo2 = sObjectPath.match(/ExpNo='(\d+)'/)[1];
+                    sPath = "/AttachmentsEvents(Expenseno='" + sExpNo2 + "')";
                 } else {
-                    var sPath = "/AttachmentsEvents(Expenseno='" + sExpNo + "')";
+                    sPath = "/AttachmentsEvents(Expenseno='" + sExpNo + "')";
                 }
 
+                this.getModel("global").setProperty("/busy", true);
                 oModel.read(sPath, {
                     success: function (oData) {
                         var oModel = this.getView().getModel("attachmentModel"),
@@ -131,8 +115,10 @@ sap.ui.define([
                             this.byId("attachmentIllustration").setVisible(true);
                             this.byId("attachmentList").setVisible(false);
                         }
+                        this.getModel("global").setProperty("/busy", false);
                     }.bind(this),
                     error: function (oError) {
+                        this.getModel("global").setProperty("/busy", false);
                         var sError = JSON.parse(oError.responseText).error.message.value;
                         sap.m.MessageBox.alert(sError, {
                             icon: "ERROR",
@@ -178,17 +164,25 @@ sap.ui.define([
                             FileString: sBase64
                         };
 
+                    this.getModel("global").setProperty("/busy", true);
+
                     oModel.create(sPath, oEntry, {
                         success: function () {
+                            this.getModel("global").setProperty("/busy", false);
                             this.byId("fileUploader").setValue("");
-                            this.onRealodData();
-                            sap.m.MessageBox.show(this.getResourceBundle().getText("uploadSuccess"));
+                            this.onRealodData(sExpNo);
+                            sap.m.MessageBox.success(this.getResourceBundle().getText("uploadSuccess"));
                         }.bind(this),
                         error: function (oError) {
+                            this.getModel("global").setProperty("/busy", false);
                             this.byId("fileUploader").setValue("");
                             var sError = JSON.parse(oError.responseText).error.message.value;
                             sap.m.MessageBox.alert(sError, {
-                                icon: "ERROR"
+                                icon: "ERROR",
+                                onClose: null,
+                                styleClass: '',
+                                initialFocus: null,
+                                textDirection: sap.ui.core.TextDirection.Inherit
                             });
                         }.bind(this)
                     });
@@ -212,7 +206,6 @@ sap.ui.define([
                             if (oAction === sap.m.MessageBox.Action.YES) {
                                 this.onDeleteSelected();
                             }
-                            this.byId("attachmentList").removeSelections();
                         }.bind(this)
                     });
                 } catch (error) {
@@ -233,15 +226,23 @@ sap.ui.define([
                     sExpNo = match ? match[1] : null,
                     sPath = "/AttachmentsEvents(Expenseno='" + sExpNo + "')";
 
+                this.getModel("global").setProperty("/busy", true);
+
                 oModel.remove(sPath, {
                     success: function () {
-                        this.onRealodData();
-                        sap.m.MessageBox.show(this.getResourceBundle().getText("deleteSuccess"));
+                        this.getModel("global").setProperty("/busy", false);
+                        this.onRealodData(sExpNo);
+                        sap.m.MessageBox.success(this.getResourceBundle().getText("deleteAttachSuccess"));
                     }.bind(this),
                     error: function (oError) {
+                        this.getModel("global").setProperty("/busy", false);
                         var sError = JSON.parse(oError.responseText).error.message.value;
                         sap.m.MessageBox.alert(sError, {
-                            icon: "ERROR"
+                            icon: "ERROR",
+                            onClose: null,
+                            styleClass: '',
+                            initialFocus: null,
+                            textDirection: sap.ui.core.TextDirection.Inherit
                         });
                     }.bind(this)
                 })

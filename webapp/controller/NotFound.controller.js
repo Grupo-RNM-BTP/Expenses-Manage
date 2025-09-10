@@ -13,6 +13,9 @@ sap.ui.define([
             oRouter.attachRouteMatched(this.onRouteMatched, this);
         },
 
+        /**
+         * Handle route matched.
+         */
         onRouteMatched: function () {
             var that = this,
                 urlParams = new URLSearchParams(window.location.search),

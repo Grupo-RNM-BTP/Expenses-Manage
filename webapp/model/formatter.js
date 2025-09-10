@@ -2,23 +2,48 @@ sap.ui.define([], function () {
     "use strict";
     return {
 
+        /**
+         * Check if there is an expense document.
+         * @param {string} sExpDoc Expense document
+         * @returns {boolean} True if there is an expense document
+         */
         hasExpDoc: function (sExpDoc) {
 
             return !!sExpDoc;
         },
 
+        /**
+         * Check if there is no expense document.
+         * @param {string} sExpDoc Expense document
+         * @returns {boolean} True if there is no expense document
+         */
         noExpDoc: function (sExpDoc) {
             return !sExpDoc;
         },
 
+        /**
+         * Check if there is no expense document approved.
+         * @param {string} sExpDoc Expense document
+         * @returns {boolean} True if there is no expense document approved
+         */
         noExpDocApprvd: function (sExpDoc) {
             return !sExpDoc;
         },
 
+        /**
+         * Check if there is a reason.
+         * @param {string} sReason Reason
+         * @returns {boolean} True if there is a reason
+         */
         hasReason: function (sReason) {
             return !!sReason;
         },
 
+        /**
+         * Convert base64 to source.
+         * @param {string} sBase64Encoded Base64 encoded string
+         * @returns {string} Source string
+         */
         base64ToSrc: function (sBase64Encoded) {
             if (sBase64Encoded === "") {
                 return;
@@ -27,11 +52,15 @@ sap.ui.define([], function () {
             try {
                 return sBase64Encoded;
             } catch (e) {
-                console.error("Erro a decodificar base64:", e);
                 return "";
             }
         },
 
+        /**
+         * Get status text.
+         * @param {number} iStatus Status
+         * @returns {string} Status text
+         */
         statusText: function (iStatus) {
             iStatus = parseInt(iStatus);
 
@@ -49,6 +78,11 @@ sap.ui.define([], function () {
             }
         },
 
+        /**
+         * Get status state.
+         * @param {number} iStatus Status
+         * @returns {string} Status state
+         */
         statusState: function (iStatus) {
             iStatus = parseInt(iStatus);
 
@@ -66,6 +100,11 @@ sap.ui.define([], function () {
             }
         },
 
+        /**
+         * Get status icon.
+         * @param {number} iStatus Status
+         * @returns {string} Status icon
+         */
         statusIcon: function (iStatus) {
             iStatus = parseInt(iStatus);
 
@@ -83,6 +122,11 @@ sap.ui.define([], function () {
             }
         },
 
+        /**
+         * Format date time.
+         * @param {string} sValue Date time
+         * @returns {string} Formatted date time
+         */
         formatDateTime: function (sValue) {
             if (!sValue) {
                 return "";
@@ -114,6 +158,11 @@ sap.ui.define([], function () {
             return oDateFormat.format(oDate);
         },
 
+        /**
+         * Format year month.
+         * @param {string} sYearMonth Year month
+         * @returns {string} Formatted year month
+         */
         formatYearMonth: function (sYearMonth) {
             if (!sYearMonth || sYearMonth.length !== 6) {
                 return sYearMonth;
@@ -128,26 +177,18 @@ sap.ui.define([], function () {
             return months[monthIndex];
         },
 
-        formatAmountEuro: function (fAmount) {
-            if (typeof fAmount !== "number") {
-                return fAmount;
-            }
-            return new Intl.NumberFormat("pt-PT", {
-                style: "currency",
-                currency: "EUR",
-                minimumFractionDigits: 2
-            }).format(fAmount);
-        },
-
+        /**
+         * Format date to dd/mm/yyyy.
+         * @param {string} sDate Date
+         * @returns {string} Formatted date
+         */
         formatDateToDDMMYYYY: function (sDate) {
             if (!sDate) {
                 return "";
             }
 
-            // Converter string para objeto Date
             var oDate = new Date(sDate);
 
-            // Formatar usando API do UI5
             var oDateFormat = sap.ui.core.format.DateFormat.getDateInstance({
                 pattern: "dd/MM/yyyy"
             });

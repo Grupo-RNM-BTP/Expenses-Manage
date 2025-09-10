@@ -5,12 +5,6 @@ sap.ui.define([
     function (UIComponent, models) {
         "use strict";
 
-        // sap.ui.loader.config({
-        //     paths: {
-        //         "zfiexpenses": "/sap/bc/ui5_ui5/sap/zfi_exp_ovw"
-        //     }
-        // });
-
         return UIComponent.extend("zfiexpensesmanage.Component", {
             metadata: {
                 manifest: "json"

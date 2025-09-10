@@ -45,7 +45,13 @@ sap.ui.define([
         getUserAuthentication: function (type) {
             var that = this,
                 urlParams = new URLSearchParams(window.location.search),
-                token = urlParams.get('token');
+                token = urlParams.get('token'),
+                sViewName = this.getView().getParent().getParent().getLayout();
+
+            if (sViewName.includes("OneColumn")) {
+                this.getCardValues();
+                this.getModel().refresh();
+            }
 
             if (token != null) {
                 var headers = new Headers();
@@ -209,7 +215,13 @@ sap.ui.define([
 
                     error: function (oError) {
                         var sError = JSON.parse(oError.responseText).error.message.value;
-                        sap.m.MessageBox.alert(sError, { icon: "ERROR" });
+                        sap.m.MessageBox.alert(sError, {
+                            icon: "ERROR",
+                            onClose: null,
+                            styleClass: '',
+                            initialFocus: null,
+                            textDirection: sap.ui.core.TextDirection.Inherit
+                        });
                     }.bind(this)
                 });
 
@@ -270,7 +282,13 @@ sap.ui.define([
 
                     error: function (oError) {
                         var sError = JSON.parse(oError.responseText).error.message.value;
-                        sap.m.MessageBox.alert(sError, { icon: "ERROR" });
+                        sap.m.MessageBox.alert(sError, {
+                            icon: "ERROR",
+                            onClose: null,
+                            styleClass: '',
+                            initialFocus: null,
+                            textDirection: sap.ui.core.TextDirection.Inherit
+                        });
                     }.bind(this)
                 });
             } catch (error) {
@@ -284,8 +302,7 @@ sap.ui.define([
         /**
         * Fetch card values from backend and update view.
         */
-        onRealodData: function () {
-            this.byId("operationsTable").getTable().getBinding("items").refresh();
+        onRealodData: function (sExpNo) {
             this.onGetDocument("", sExpNo);
             this.byId("attachmentList").getBinding("items").refresh();
             this.getView().getModel().refresh();
@@ -296,11 +313,7 @@ sap.ui.define([
        */
         onPressCloseDetail: function () {
             // var oFCL = this.getView().getParent().getParent();
-            // oFCL.setLayout(sap.f.LayoutType.OneColumn);
-            debugger;
             this.getModel("global").setProperty("/layout", "OneColumn");
-            // this.getView().getParent().getParent().destroyMidColumnPages();
-
             this.getRouter().navTo("RouteMain");
         },
 

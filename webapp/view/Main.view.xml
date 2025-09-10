@@ -13,18 +13,20 @@
     xmlns:tnt="sap.tnt"
     xmlns:layout="sap.ui.layout" height="100%">
     <tnt:ToolPage id="toolPage" sideExpanded="true">
+
         <tnt:header>
             <tnt:ToolHeader>
                 <Button icon="sap-icon://menu2" press="onSideNavToggle"/>
                 <Title text="{i18n>ManageMyExpenses}" />
             </tnt:ToolHeader>
         </tnt:header>
+
         <tnt:sideContent>
             <tnt:SideNavigation expanded="true" itemSelect=".onItemSelect">
                 <tnt:NavigationList selectedKey="Manage">
                     <tnt:NavigationListItem text="{i18n>ManageExpenses}" key="Manage" icon="sap-icon://credit-card"/>
                     <tnt:NavigationListItem text="{i18n>OverviewExpenses}" key="CardMovements" icon="sap-icon://collections-insight"/>
-                    <tnt:NavigationListItem text="{i18n>ApproveExpenses}" key="ApproveExpenses" icon="sap-icon://accept"/>
+                    <tnt:NavigationListItem id="idApproveExpenses" text="{i18n>ApproveExpenses}" visible="false" key="ApproveExpenses" icon="sap-icon://accept"/>
                 </tnt:NavigationList>
             </tnt:SideNavigation>
         </tnt:sideContent>
@@ -32,6 +34,7 @@
         <tnt:mainContents >
             <NavContainer id="NavContainer" visible="true" initialPage="pageManage">
                 <pages>
+
                     <ScrollContainer id="pageManage" visible="true" horizontal="false" vertical="true" height="100%">
                         <VBox class="sapUiMediumMarginBeginEnd">
 
@@ -82,17 +85,18 @@
 
                             <smartFilterBar:SmartFilterBar id="idSmartFilterBar" entitySet="ZFI_EXPENSES_MNG" persistencyKey="SmartFilterBar" />
 
-                            <smartTable:SmartTable beforeRebindTable="onBeforeRebindTable" demandPopin="true" entitySet="ZFI_EXPENSES_MNG" id="operationsTable" smartFilterId="idSmartFilterBar" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="false" useTablePersonalisation="false" useVariantManagement="false" requestAtLeastFields="Doc,Reason,ExpNo,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="false">
+                            <smartTable:SmartTable beforeRebindTable="onBeforeRebindTable" demandPopin="true" entitySet="ZFI_EXPENSES_MNG" id="MyExpensesTable" smartFilterId="idSmartFilterBar" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="false" useTablePersonalisation="false" useVariantManagement="false" requestAtLeastFields="Doc,Reason,ExpNo,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="false">
                                 <smartTable:customData>
                                     <core:CustomData key="p13nDialogSettings" value='\{"columns":\{"visible": true \},"sort":\{"visible": true\},"filter":\{"visible": false\},"group":\{"visible": true\}\}'/>
                                 </smartTable:customData>
                                 <smartTable:customToolbar>
                                     <OverflowToolbar design="Transparent">
                                         <ToolbarSpacer/>
-                                        <Button icon="sap-icon://customer-financial-fact-sheet" text="{i18n>New}" type="Default" press="handleAdd" />
+                                        <Button id="deleteButton" text="{i18n>Delete}" enabled="false" type="Default" press="handleDelete" />
+                                        <Button text="{i18n>New}" type="Emphasized" press="handleAdd" />
                                     </OverflowToolbar>
                                 </smartTable:customToolbar>
-                                <Table id="idTableExpenses" fixedLayout="false" growing="true" growingThreshold="20" itemPress="handleExpensePress">
+                                <Table id="idTableExpenses" fixedLayout="false" growing="true" mode="SingleSelectLeft" selectionChange="handleSelectionChange" growingThreshold="20">
                                     <columns>
                                         <Column>
                                             <Text text="{i18n>Document}" />
@@ -153,12 +157,12 @@
                     <ScrollContainer id="pageCardMovements" horizontal="false" vertical="true" height="100%">
                         <VBox class="sapUiMediumMarginBeginEnd">
 
-
                             <FlexBox justifyContent="SpaceBetween" class="sapUiMediumMarginTop" wrap="Wrap" alignItems="Center">
                                 <Title text="{i18n>OverView}" titleStyle="H4" />
                             </FlexBox>
 
                             <Toolbar style="Standard" design="Transparent" height="0.1rem" />
+
                             <layout:Grid defaultSpan="XL12 L12 M12 S12" hSpacing="4" vSpacing="4" class="sapUiResponsiveMargin sapUiSmallMarginTopBottom">
                                 <layout:content>
                                     <f:Card class="sapUiSmallMargin" width="100%">
@@ -218,9 +222,8 @@
                             <smartTable:customToolbar>
                                 <OverflowToolbar design="Transparent">
                                     <ToolbarSpacer/>
-                                    <Button icon="sap-icon://accept" text="{i18n>Approve}" type="Emphasized" press="handleApprove" />
-                                    <Button icon="sap-icon://decline" text="{i18n>Reject}" type="Default" press="handleReject" />
-
+                                    <Button icon="sap-icon://accept" text="{i18n>Approve}" type="Emphasized" press="onGetItemsTable('A')" />
+                                    <Button icon="sap-icon://decline" text="{i18n>Reject}" type="Default" press="onGetItemsTable('R')" />
                                 </OverflowToolbar>
                             </smartTable:customToolbar>
                             <Table id="idTableApprovals" fixedLayout="false" class="sapUiResponsiveContentPadding" mode="MultiSelect" selectionChange="onSelectionChangeApprovals" growing="true" growingThreshold="20">
@@ -235,7 +238,7 @@
                                         <Text text="{i18n>Company}" />
                                     </Column>
                                     <Column>
-                                        <Text text="{i18n>ExpensesNo}" />
+                                        <Text text="{i18n>ExpNoAndDocNo}" />
                                     </Column>
                                     <Column>
                                         <Text text="{i18n>PaymentMethod}" />
