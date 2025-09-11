@@ -117,14 +117,6 @@
           ]
         },
         {
-          "pattern": "ZFI_EXPENSES_LAPPRVD/{objectId}",
-          "name": "DetailApprvd",
-          "target": [
-            "TargetMain",
-            "DetailApprvd"
-          ]
-        },
-        {
           "name": "NotFound",
           "pattern": "NotFound",
           "target": "NotFound"
@@ -145,13 +137,6 @@
           "viewLevel": 1,
           "controlAggregation": "midColumnPages",
           "viewId": "Detail",
-          "viewType": "XML"
-        },
-        "DetailApprvd": {
-          "viewName": "DetailApprvd",
-          "viewLevel": 2,
-          "controlAggregation": "midColumnPages",
-          "viewId": "DetailApprvd",
           "viewType": "XML"
         },
         "NotFound": {
