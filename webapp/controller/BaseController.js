@@ -279,6 +279,13 @@ sap.ui.define([
                             oGraficoModel.setProperty("/gastoMesAtual", 0);
                             oGraficoModel.setProperty("/moeda", "");
                         }
+
+                        this.getView().byId("barChart").setVizProperties({
+                            title: {
+                                text: this.getResourceBundle().getText("Resumo") + " " + iAnoAtual
+                            }
+                        });
+
                     }.bind(this),
 
                     error: function (oError) {

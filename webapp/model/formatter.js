@@ -168,7 +168,11 @@ sap.ui.define([], function () {
                 return sYearMonth;
             }
             var month = sYearMonth.substring(4, 6),
-                months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                months = [this.getResourceBundle().getText("month01"), this.getResourceBundle().getText("month02"), this.getResourceBundle().getText("month03"),
+                this.getResourceBundle().getText("month04"), this.getResourceBundle().getText("month05"), this.getResourceBundle().getText("month06"),
+                this.getResourceBundle().getText("month07"), this.getResourceBundle().getText("month08"), this.getResourceBundle().getText("month09"),
+                this.getResourceBundle().getText("month10"), this.getResourceBundle().getText("month11"), this.getResourceBundle().getText("month12")],
+                
                 monthIndex = parseInt(month, 10) - 1;
 
             if (monthIndex < 0 || monthIndex > 11) {
