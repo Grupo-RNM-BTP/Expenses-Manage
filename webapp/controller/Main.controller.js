@@ -67,6 +67,14 @@ sap.ui.define([
                 }
             },
 
+            onBeforeRebindTableCards: function (oEvent) {
+                var oBindingParams = oEvent.getParameter("bindingParams");
+
+                if (!this._bInitialSorterApplied) {
+                    oBindingParams.sorter = [new sap.ui.model.Sorter("VYearMonthDay", true)];
+                }
+            },
+
             /**
              * Open reason dialog.
              * @param {sap.ui.base.Event} oEvent

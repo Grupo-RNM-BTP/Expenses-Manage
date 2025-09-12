@@ -96,7 +96,7 @@
                                         <Button text="{i18n>New}" type="Emphasized" press="handleAdd" />
                                     </OverflowToolbar>
                                 </smartTable:customToolbar>
-                                <Table id="idTableExpenses" fixedLayout="false" growing="true" mode="SingleSelectLeft" selectionChange="handleSelectionChange" growingThreshold="20">
+                                <Table id="idTableExpenses" fixedLayout="false" growing="true" mode="SingleSelectLeft" selectionChange="handleSelectionChange" growingThreshold="10">
                                     <columns>
                                         <Column>
                                             <Text text="{i18n>Document}" />
@@ -203,7 +203,7 @@
 
                             <Toolbar style="Standard" design="Transparent" height="0.1rem" />
 
-                            <smartTable:SmartTable id="smartTable" entitySet="ZFI_BCP_MOVCC" tableType="ResponsiveTable" useExportToExcel="false" demandPopin="true" useVariantManagement="false" useTablePersonalisation="true" header="{i18n>AllMovements}" showRowCount="true" persistencyKey="SmartTable" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
+                            <smartTable:SmartTable id="smartTable" beforeRebindTable="onBeforeRebindTableCards" entitySet="ZFI_BCP_MOVCC" tableType="ResponsiveTable" useExportToExcel="false" demandPopin="true" useVariantManagement="false" useTablePersonalisation="true" header="{i18n>AllMovements}" showRowCount="true" persistencyKey="SmartTable" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
                                 <Table mode="None" growing="true" growingThreshold="5">
                                     <ColumnListItem vAlign="Middle">
                                     </ColumnListItem>
