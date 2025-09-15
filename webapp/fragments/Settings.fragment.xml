@@ -1,0 +1,29 @@
+<core:FragmentDefinition xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <Popover id="settingsPopover" title="Definições" placement="Bottom" class="sapUiResponsivePadding--header sapUiResponsivePadding--footer">
+        <content>
+            <List>
+                <CustomListItem>
+                    <HBox fitContainer="true" alignItems="Center" justifyContent="SpaceBetween">
+                        <Text text="Extrair dados c/ AI"/>
+                        <Switch id="settingsPopover:switchAiScan" state="true" change=".handleAiExtractToggle"/>
+                    </HBox>
+                </CustomListItem>
+
+                <CustomListItem>
+                    <HBox fitContainer="true" alignItems="Center" justifyContent="SpaceBetween">
+                        <Text text="Trocar câmara"/>
+                        <Switch state="false" change=".handleSwitchCamera"/>
+                    </HBox>
+                </CustomListItem>
+            </List>
+        </content>
+
+        <footer>
+            <OverflowToolbar>
+                <ToolbarSpacer/>
+                <Button text="Fechar" press=".onCloseSettings"/>
+            </OverflowToolbar>
+        </footer>
+    </Popover>
+</core:FragmentDefinition>

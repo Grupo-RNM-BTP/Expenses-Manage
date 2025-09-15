@@ -1,0 +1,152 @@
+<core:FragmentDefinition xmlns="sap.m"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:u="sap.ui.unified"
+    xmlns:l="sap.ui.layout"
+    xmlns:core="sap.ui.core"
+    xmlns:tnt="sap.tnt">
+    <Dialog id="expenseDialog" title="{i18n>xexp.expNewExpTitle}" afterClose="onCancelProcess(true)" contentWidth="40rem" contentHeight="42rem" horizontalScrolling="false" verticalScrolling="false" resizable="false" draggable="false" closeOnNavigation="true" busyIndicatorDelay="1000" busyIndicatorSize="Medium">
+
+        <Page id="detail" backgroundDesign="List" titleLevel="Auto" showNavButton="false" showHeader="false" showSubHeader="true" enableScrolling="true" showFooter="true" contentOnlyBusy="false" floatingFooter="false" titleAlignment="Auto">
+
+            <ObjectHeader title="{i18n>xexp.expDraft}" iconDensityAware="true" imageShape="Square" titleTextDirection="Inherit" introTextDirection="Inherit" numberTextDirection="Inherit" titleLevel="H3"/>
+
+            <VBox direction="Column" fitContainer="false" renderType="Div" justifyContent="Start" alignItems="Stretch" wrap="NoWrap" alignContent="Stretch" backgroundDesign="Transparent">
+                <f:SimpleForm id="sfGeneral" editable="true" layout="ResponsiveLayout" labelMinWidth="192" labelSpanXL="-1" labelSpanL="4" labelSpanM="2" labelSpanS="5" adjustLabelSpan="true" emptySpanXL="-1" emptySpanL="0" emptySpanM="0" emptySpanS="0" columnsXl="-1" columnsL="2" columnsM="7" singleContainerFullSize="true" breakpointXL="1440" breakpointL="1024" breakpointM="600" backgroundDesign="Translucent">
+                    <f:content>
+                        <Label text="" visible="false"/>
+                        <Title text="{i18n>xexp.expGenTitle}"/>
+
+                        <Label text="{i18n>xexp.expLocal}"/>
+                        <Input id="expenseDialog:inputLocal" required="true"/>
+
+                        <Label text="{i18n>xexp.expDate}"/>
+                        <DatePicker id="expenseDialog:datePicker" valueFormat="yyyy-MM-dd" displayFormat="dd/MM/yyyy" required="true"/>
+
+                        <Label text="{i18n>xexp.expNif}"/>
+                        <Input id="expenseDialog:inputNif" required="true"/>
+
+                        <Label text="{i18n>xexp.expCountry}"/>
+                        <Select id="expenseDialog:selectCountry" items="{ path: '/ZFI_EXPENSES_COUNTRIES', length:500 }" required="true" change=".onCountryChange">
+                            <items>
+                                <core:Item key="{Country}" text="{Description}" />
+                            </items>
+                        </Select>
+                    </f:content>
+                </f:SimpleForm>
+
+                <core:InvisibleText text=""/>
+
+                <f:SimpleForm id="sfTech" editable="true" layout="ResponsiveLayout" labelMinWidth="192" labelSpanXL="-1" labelSpanL="4" labelSpanM="2" labelSpanS="5" adjustLabelSpan="true" emptySpanXL="-1" emptySpanL="0" emptySpanM="0" emptySpanS="0" columnsXl="-1" columnsL="2" columnsM="7" singleContainerFullSize="true" breakpointXL="1440" breakpointL="1024" breakpointM="600" backgroundDesign="Translucent">
+                    <f:content>
+                        <Label text="" visible="false"/>
+                        <Title text="{i18n>xexp.expTechTitle}"/>
+
+                        <Label text="{i18n>xexp.expType}"/>
+                        <Select id="expenseDialog:selectExpType" items="{ path: '/ZFI_EXPENSES_TYPES' }" required="true" change=".onExpTypeChange">
+                            <items>
+                                <core:Item key="{Exptype}" text="{Description}" />
+                            </items>
+                        </Select>
+
+                        <Label text="{i18n>xexp.expFuelQuantity}"/>
+                        <Input id="expenseDialog:inputFuelQuantity" type="Number" visible="{= (${Expenses>/exptype} || '').indexOf('COMBST') > -1 }" required="true"/>
+
+                        <Label text="{i18n>xexp.expPymtMeth}"/>
+                        <Select id="expenseDialog:selectPymtMeth" items="{ path: '/ZFI_EXPENSES_PYMTMETH' }" required="true">
+                            <items>
+                                <core:Item key="{Zlsch}" text="{Text1}" />
+                            </items>
+                        </Select>
+
+                        <Label text="{i18n>xexp.expValue}"/>
+                        <Input id="expenseDialog:inputAmt" type="Number" required="true"/>
+
+                        <Label text="{i18n>xexp.expUnit}" visible="{Expenses>/unitVisible}"/>
+                        <StepInput id="expenseDialog:inputUnit" min="1" max="100" step="1" value="1" visible="{Expenses>/unitVisible}" textAlign="Center" width="120px"/>
+
+                        <Label text="" visible="false"/>
+                        <Title text="{i18n>xexp.expVatTable}" level="H6" class="sapUiSmallMarginTop"/>
+
+                        <Label text="" visible="false"/>
+                        <Table id="expenseDialog:vatTable" items="{path: 'Expenses>/vatLines'}" width="auto">
+                            <headerToolbar>
+                                <Toolbar>
+                                    <Button icon="sap-icon://add" type="Transparent" visible="{Expenses>/vatEditMode}" press=".onAddVatLine"/>
+                                    <ToolbarSpacer/>
+                                    <Button text="Editar" visible="{= !${Expenses>/vatEditMode} }" press=".onToggleVatEdit"/>
+                                    <Button text="Guardar" type="Emphasized" visible="{Expenses>/vatEditMode}" press=".onToggleVatEdit"/>
+                                </Toolbar>
+                            </headerToolbar>
+
+                            <columns>
+                                <Column hAlign="Begin">
+                                    <Text text="{i18n>xexp.expVatType}" />
+                                </Column>
+                                <Column hAlign="Middle">
+                                    <Text text="{i18n>xexp.expBaseValue}" />
+                                </Column>
+                                <Column hAlign="Middle">
+                                    <Text text="{i18n>xexp.expVatValue}" />
+                                </Column>
+                                <Column hAlign="Center" width="3rem">
+                                    <Text text="" />
+                                </Column>
+                            </columns>
+
+                            <items>
+                                <ColumnListItem>
+                                    <cells>
+                                        <HBox renderType="Bare">
+                                            <Text text="{Expenses>d}" visible="{= !${Expenses>/vatEditMode} }"/>
+                                            <Select visible="{Expenses>/vatEditMode}" required="true" selectedKey="{Expenses>t}" items="{ path: '/ZFI_TAX_TYPES' }" change=".onVatTypeChange">
+                                                <items>
+                                                    <core:Item key="{DomvalueL}" text="{Ddtext}" />
+                                                </items>
+                                            </Select>
+                                        </HBox>
+
+                                        <HBox renderType="Bare">
+                                            <Text text="{Expenses>b}" visible="{= !${Expenses>/vatEditMode} }"/>
+                                            <Input type="Number" value="{Expenses>b}" visible="{Expenses>/vatEditMode}" placeholder="{i18n>xexp.expBaseValue}" required="true"/>
+                                        </HBox>
+
+                                        <HBox renderType="Bare">
+                                            <Text text="{Expenses>v}" visible="{= !${Expenses>/vatEditMode} }"/>
+                                            <Input type="Number" value="{Expenses>v}" visible="{Expenses>/vatEditMode}" placeholder="{i18n>xexp.expVatValue}" required="true"/>
+                                        </HBox>
+
+                                        <Button icon="sap-icon://delete" type="Transparent" visible="{Expenses>/vatEditMode}" press=".onDeleteVatLine"/>
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+
+                        <Label text="" visible="false"/>
+                        <tnt:InfoLabel id="expenseDialog:messageStrip" text="{i18n>xexp.expFillFields}" renderMode="Narrow" colorScheme="2" visible="false"/>
+
+                        <core:InvisibleText text=""/>
+                        <Label text=""/>
+                        <Text text="{i18n>xexp.expAttn}" class="sapMText sapUiSelectable sapUshellFlpSettingsHint"/>
+
+                        <Label text="{i18n>xexp.expAttachment}" />
+                        <HBox alignItems="Center" justifyContent="Start">
+                            <u:FileUploader id="fileUploader" width="200px" visible="{= !${Expenses>/capturedImage} }" uploadOnChange="false" placeholder="{i18n>xexp.expSelectFile}" buttonText="{i18n>xexp.expBrowse}" change=".onFileSelected"/>
+                            <Image src="{Expenses>/capturedImage}" width="230px" height="200px" visible="{= !!${Expenses>/capturedImage} }" class="sapUiTinyMarginBegin">
+                                <detailBox>
+                                    <LightBox>
+                                        <LightBoxItem imageSrc="{Expenses>/capturedImage}"/>
+                                    </LightBox>
+                                </detailBox>
+                            </Image>
+                        </HBox>
+                    </f:content>
+                </f:SimpleForm>
+            </VBox>
+
+        </Page>
+        <buttons>
+            <Button text="{i18n>xexp.expSave}" type="Emphasized" press=".onFinishProcess" />
+            <Button text="{i18n>xexp.expCancel}" press=".onCancelProcess(true)" />
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>

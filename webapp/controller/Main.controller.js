@@ -1,9 +1,10 @@
 sap.ui.define([
     "./BaseController",
     "../model/formatter",
-    "sap/ui/model/json/JSONModel"
+    "sap/ui/model/json/JSONModel",
+    "sap/ui/unified/FileUploader"   
 ],
-    function (BaseController, formatter, JSONModel) {
+    function (BaseController, formatter, JSONModel, FileUploader) {
         "use strict";
 
 
@@ -27,6 +28,23 @@ sap.ui.define([
                 });
                 this.getView().setModel(oModel, "Main");
                 this.getView().setModel(new JSONModel({}), "graficoModel");
+
+                this._handlers = {};
+                this._bError = false;
+                this._bSubmit = false;
+
+                this.getView().setModel(new JSONModel(), "Camera");
+                this.getView().setModel(new JSONModel({ vatLines: [], vatEditMode: true, unitVisible: false }), "Expenses");
+
+                this.getView().setModel(new JSONModel({ aiScan: true }), "Scan");
+
+                this.getView().setModel(new JSONModel({ title: "A analisar documento", description: "" }), "Scanning");
+
+                this.oScanModel = this.getView().getModel("Scan");
+                this.oCameraModel = this.getView().getModel("Camera");
+                this.oExpensesModel = this.getView().getModel("Expenses");
+                this.oScanningModel = this.getView().getModel("Scanning");
+
 
                 sessionStorage.setItem("goToLaunchpad", "X");
                 this.getRouter().attachRouteMatched(this.getUserAuthentication, this);
@@ -143,14 +161,21 @@ sap.ui.define([
                                             text: this.getResourceBundle().getText("selectImage"),
                                             wrapping: true,
                                             width: "100%",
-                                            design: "Bold"
                                         }),
+                                        // new sap.m.Input({
+                                        //     id: "input123",
+                                        //     name: "input123",
+                                        //     width: "100%",
+                                        //     text: "123",
+                                            
+                                        // })
                                         new sap.ui.unified.FileUploader({
-                                            id: "fileUploader",
-                                            name: "fileUploader",
+                                            id: "fileUploaderMain",
+                                            name: "fileUploaderMain",
+                                            change: this.onFileChange.bind(this),
                                             width: "100%",
                                             buttonText: this.getResourceBundle().getText("btnChooseFile"),
-                                            fileType: ["jpg", "jpeg", "png", "gif"]
+                                            fileType: ["jpg", "jpeg", "png"]
                                         })
                                     ]
                                 }).addStyleClass("sapUiSmallMargin")
@@ -164,10 +189,13 @@ sap.ui.define([
                                 text: this.getResourceBundle().getText("btnCancel"),
                                 press: function () {
                                     that._oUploadDialog.close();
+                                    that._oUploadDialog.destroy();
+                                    that._oUploadDialog = null;
+                                    this._sFileType = "";
                                 }
                             }),
                             afterClose: function () {
-                                var oFileUploader = sap.ui.getCore().byId("fileUploader");
+                                var oFileUploader = sap.ui.getCore().byId("fileUploaderMain");
                                 if (oFileUploader) {
                                     oFileUploader.clear();
                                 }
@@ -209,6 +237,29 @@ sap.ui.define([
                 });
             },
 
+            onFileChange: function (oEvent) {
+                var aFiles = oEvent.getParameter("files");
+                if (!aFiles || aFiles.length === 0) {
+                    return;
+                }
+
+                var oFile = aFiles[0];
+
+                if (!(oFile.type === "image/png" || oFile.type === "image/jpeg")) {
+                    sap.m.MessageBox.error(this.getResourceBundle().getText("invalidFormat"));
+                    return;
+                }
+
+                var sType = oFile.type.split("/")[1].toUpperCase();
+
+                if (oFile.type.toLowerCase().includes("jpeg")) {
+                    sType = "jpg";
+                }
+
+                this._sFileType = sType;
+
+            },
+
             /**
              * Send Data to backend with IMAGE.
              */
@@ -218,20 +269,22 @@ sap.ui.define([
                         sPath = "/AttachmentsEvents",
                         oEntry = {};
 
-                    if (sap.ui.getCore().byId("fileUploader").getValue() == "") {
-                        return sap.ui.getCore().byId("fileUploader").setValueState("Error")
+                    if (sap.ui.getCore().byId("fileUploaderMain").getValue() == "") {
+                        return sap.ui.getCore().byId("fileUploaderMain").setValueState("Error")
                     }
 
-                    var sDocument = await this.onGetDocumentToBase64(sap.ui.getCore().byId("fileUploader"));
+                    var sDocument = await this.onGetDocumentToBase64(sap.ui.getCore().byId("fileUploaderMain"));
 
                     oEntry.Expenseno = this.getView().getModel("Main").getProperty("/ExpNo");
                     oEntry.FileString = sDocument;
+                    oEntry.FileType = this._sFileType;
 
                     oModel.create(sPath, oEntry, {
                         success: function () {
                             this._oUploadDialog.close();
                             this._oUploadDialog.destroy();
                             oModel.refresh();
+                            this._sFileType = "";
                             sap.m.MessageBox.success(this.getResourceBundle().getText("uploadSuccess"));
                         }.bind(this),
                         error: function (oError) {

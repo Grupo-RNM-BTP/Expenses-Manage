@@ -2,6 +2,7 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:f="sap.f"
+    xmlns:u="sap.ui.unified"
     xmlns:l="sap.ui.layout"
     xmlns:core="sap.ui.core"
     xmlns:card="sap.f.cards"
@@ -93,7 +94,7 @@
                                     <OverflowToolbar design="Transparent">
                                         <ToolbarSpacer/>
                                         <Button id="deleteButton" text="{i18n>Delete}" enabled="false" type="Default" press="handleDelete" />
-                                        <Button text="{i18n>New}" type="Emphasized" press="handleAdd" />
+                                        <Button text="{i18n>New}" type="Emphasized" press="handleStartProcess" />
                                     </OverflowToolbar>
                                 </smartTable:customToolbar>
                                 <Table id="idTableExpenses" fixedLayout="false" growing="true" mode="SingleSelectLeft" selectionChange="handleSelectionChange" growingThreshold="10">
@@ -168,7 +169,7 @@
                                     <f:Card class="sapUiSmallMargin" width="100%">
                                         <f:content>
                                             <VBox class="sapUiSmallMargin" width="100%">
-                                                <viz:VizFrame id="barChart" width="100%" height="400px" uiConfig="{applicationSet:'fiori'}"  vizType="bar" vizProperties='{ "legend": { "visible": false },"title": { "visible": true }, "plotArea": { "dataLabel": { "visible": true } } }'>
+                                                <viz:VizFrame id="barChart" width="100%" height="400px" uiConfig="{applicationSet:'fiori'}" vizType="bar" vizProperties='{ "legend": { "visible": false },"title": { "visible": true }, "plotArea": { "dataLabel": { "visible": true } } }'>
                                                     <viz:dataset>
                                                         <viz.data:FlattenedDataset data="{graficoModel>/gastosPorMes}">
                                                             <viz.data:dimensions>

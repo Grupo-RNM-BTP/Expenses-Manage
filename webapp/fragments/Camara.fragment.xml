@@ -1,0 +1,35 @@
+<core:FragmentDefinition xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <Dialog id="cameraDialog" stretch="true" showHeader="false" horizontalScrolling="false" verticalScrolling="false" afterClose="_teardownCameraDialog" closeOnNavigation="true">
+        <content>
+            <core:HTML id="cameraHTML" sanitizeContent="false" content='
+                &lt;div class="cameraContainer"&gt;
+                    &lt;video id="cameraVideo" autoplay playsinline&gt;&lt;/video&gt;
+                    &lt;button id="captureBtn"&gt;&lt;/button&gt;
+
+                    &lt;label id="uploadBtn" for="fileUploader" title="Upload photo" tabindex="0" role="button" aria-label="Upload photo"&gt;
+                        &lt;svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"&gt;
+                            &lt;rect x="3" y="3" width="18" height="18" rx="2" ry="2"/&gt;
+                            &lt;circle cx="8.5" cy="8.5" r="1.5"/&gt;
+                            &lt;path d="M21 15l-5-5L5 21"/&gt;
+                        &lt;/svg&gt;
+                    &lt;/label&gt;
+                    &lt;input type="file" id="fileUploader" accept="image/*" style="display:none" /&gt;
+
+                    &lt;button id="settingsBtn" aria-label="Settings" title="Settings" style="position:absolute;top:20px;right:80px;width:50px;height:50px;border-radius:50%;border:none;background:transparent;color:white;cursor:pointer;user-select:none;"&gt;
+                        &lt;svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"&gt;
+                            &lt;circle cx="12" cy="12" r="3"/&gt;
+                            &lt;path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/&gt;
+                        &lt;/svg&gt;
+                    &lt;/button&gt;
+
+                    &lt;button id="closeBtn" aria-label="Close"&gt;
+                        &lt;svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"&gt;
+                            &lt;line x1="18" y1="6" x2="6" y2="18"/&gt;
+                            &lt;line x1="6" y1="6" x2="18" y2="18"/&gt;
+                        &lt;/svg&gt;
+                    &lt;/button&gt;
+                &lt;/div&gt;' />
+        </content>
+    </Dialog>
+</core:FragmentDefinition>

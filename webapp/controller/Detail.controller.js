@@ -97,7 +97,7 @@ sap.ui.define([
                         var oModel = this.getView().getModel("attachmentModel"),
                             aAttachments = oModel.getProperty("/attachments");
 
-                        oModel.setProperty("/attachments", []);
+                        this.getView().getModel("attachmentModel").setProperty("/attachments", []);
 
                         if (oData.FileString.length > 0) {
                             aAttachments.push({
@@ -152,7 +152,6 @@ sap.ui.define([
 
                 reader.onload = function (e) {
                     var sBase64 = e.target.result;
-                    this._sUploadedBase64 = sBase64;
 
                     var oModel = this.getModel(),
                         sFullPath = this.getView().getBindingContext().sPath,
@@ -161,8 +160,16 @@ sap.ui.define([
                         sPath = "/AttachmentsEvents",
                         oEntry = {
                             Expenseno: sExpNo,
-                            FileString: sBase64
+                            FileString: sBase64,
                         };
+
+                    var sType = oFile.type.split("/")[1].toUpperCase();
+
+                    if (oFile.type.toLowerCase().includes("jpeg")) {
+                        sType = "jpg";
+                    }
+
+                    oEntry.FileType = sType;
 
                     this.getModel("global").setProperty("/busy", true);
 

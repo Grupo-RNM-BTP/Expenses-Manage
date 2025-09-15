@@ -1,0 +1,12 @@
+<core:FragmentDefinition xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <Dialog id="processingDialog" type="Message" showHeader="false" stretchOnPhone="false">
+        <content>
+            <IllustratedMessage id="im" illustrationSize="Dialog" illustrationType="{Scanning>/illustrationType}" title="{Scanning>/title}" description="{Scanning>/description}" busy="true" busyIndicatorDelay="1000" busyIndicatorSize="Small">
+                <additionalContent>
+                    <Button id="processingDialog:cancelBtn" text="{i18n>xexp.expCancel}" press=".onStopScanning"/>
+                </additionalContent>
+            </IllustratedMessage>
+        </content>
+    </Dialog>
+</core:FragmentDefinition>
