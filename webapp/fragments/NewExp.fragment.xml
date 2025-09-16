@@ -54,7 +54,7 @@
                         <Label text="{i18n>xexp.expPymtMeth}"/>
                         <Select id="expenseDialog:selectPymtMeth" items="{ path: '/ZFI_EXPENSES_PYMTMETH' }" required="true">
                             <items>
-                                <core:Item key="{Zlsch}" text="{Text1}" />
+                                <core:Item key="{Zlsch}" text="{Text2}" />
                             </items>
                         </Select>
 

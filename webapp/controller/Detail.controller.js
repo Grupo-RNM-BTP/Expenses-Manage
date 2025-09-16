@@ -165,8 +165,11 @@ sap.ui.define([
 
                     var sType = oFile.type.split("/")[1].toUpperCase();
 
-                    if (oFile.type.toLowerCase().includes("jpeg")) {
-                        sType = "jpg";
+                    if (sType.toUpperCase() === "JPEG") {
+                        sType = "JPG";
+                    }
+                    else {
+                        sType = sType.toUpperCase();
                     }
 
                     oEntry.FileType = sType;

@@ -205,7 +205,7 @@
                             <Toolbar style="Standard" design="Transparent" height="0.1rem" />
 
                             <smartTable:SmartTable id="smartTable" beforeRebindTable="onBeforeRebindTableCards" entitySet="ZFI_BCP_MOVCC" tableType="ResponsiveTable" useExportToExcel="false" demandPopin="true" useVariantManagement="false" useTablePersonalisation="true" header="{i18n>AllMovements}" showRowCount="true" persistencyKey="SmartTable" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
-                                <Table mode="None" growing="true" growingThreshold="5">
+                                <Table mode="None" growing="true" growingThreshold="50">
                                     <ColumnListItem vAlign="Middle">
                                     </ColumnListItem>
                                 </Table>
