@@ -323,23 +323,5 @@ sap.ui.define([
             this.getModel("global").setProperty("/layout", "OneColumn");
             this.getRouter().navTo("RouteMain");
         },
-
-        /**
-         * Attach busy indicator handlers to model requests.
-         * @param {sap.ui.model.Model} oModel OData model
-         */
-        handleRequestBusy: function (oModel) {
-            var oAppViewModel = this.getModel("global");
-
-            oModel.attachRequestSent(() => {
-                oAppViewModel.setProperty("/busy", true);
-            });
-            oModel.attachRequestCompleted(() => {
-                oAppViewModel.setProperty("/busy", false);
-            });
-            oModel.attachRequestFailed(() => {
-                oAppViewModel.setProperty("/busy", false);
-            });
-        },
     });
 });

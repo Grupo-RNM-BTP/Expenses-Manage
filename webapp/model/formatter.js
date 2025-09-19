@@ -37,24 +37,7 @@ sap.ui.define([], function () {
          */
         hasReason: function (sReason) {
             return !!sReason;
-        },
-
-        /**
-         * Convert base64 to source.
-         * @param {string} sBase64Encoded Base64 encoded string
-         * @returns {string} Source string
-         */
-        base64ToSrc: function (sBase64Encoded) {
-            if (sBase64Encoded === "") {
-                return;
-            }
-
-            try {
-                return sBase64Encoded;
-            } catch (e) {
-                return "";
-            }
-        },
+        }, 
 
         /**
          * Get status text.
@@ -172,7 +155,7 @@ sap.ui.define([], function () {
                 this.getResourceBundle().getText("month04"), this.getResourceBundle().getText("month05"), this.getResourceBundle().getText("month06"),
                 this.getResourceBundle().getText("month07"), this.getResourceBundle().getText("month08"), this.getResourceBundle().getText("month09"),
                 this.getResourceBundle().getText("month10"), this.getResourceBundle().getText("month11"), this.getResourceBundle().getText("month12")],
-                
+
                 monthIndex = parseInt(month, 10) - 1;
 
             if (monthIndex < 0 || monthIndex > 11) {

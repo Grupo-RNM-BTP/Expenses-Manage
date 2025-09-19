@@ -86,6 +86,7 @@ sap.ui.define([
 
                 switch (sKey) {
                     case "Manage":
+                        this.byId("MyExpensesTable").getTable().removeSelections();
                         this.getCardValues();
                         this.onPressCloseDetail();
                         oNavContainer.to(this.byId("pageManage"));
@@ -101,6 +102,7 @@ sap.ui.define([
                         break;
 
                     case "ApproveExpenses":
+                        this.byId("smartTableApprovals").getTable().removeSelections();
                         this.onPressCloseDetail();
                         oNavContainer.to(this.byId("pageApprovals"));
                         oToolPage.setSideExpanded(false);
@@ -362,6 +364,54 @@ sap.ui.define([
                 }
             },
 
+
+            onPressAvatar: function (oEvent) {
+                try {
+                    var oModel = this.getModel(),
+                        sExpNo = oEvent.getSource().getBindingContext().getObject().ExpNo,
+                        sPath = "/AttachmentsEvents(Expenseno='" + sExpNo + "')";
+
+                    this.getModel("global").setProperty("/busy", true);
+                    oModel.read(sPath, {
+                        success: function (oData) {
+                            var sSrc = oData.FileString;
+
+                            var oLightBox = new sap.m.LightBox({
+                                imageContent: new sap.m.LightBoxItem({
+                                    imageSrc: sSrc
+                                })
+                            });
+
+                            oLightBox.addEventDelegate({
+                                onAfterRendering: function () {
+                                    this.getModel("global").setProperty("/busy", false);
+                                }.bind(this)
+                            });
+
+                            oLightBox.open();
+
+                        }.bind(this),
+                        error: function (oError) {
+                            this.getModel("global").setProperty("/busy", false);
+                            var sError = JSON.parse(oError.responseText).error.message.value;
+                            sap.m.MessageBox.alert(sError, {
+                                icon: "ERROR",
+                                onClose: null,
+                                styleClass: '',
+                                initialFocus: null,
+                                textDirection: sap.ui.core.TextDirection.Inherit
+                            });
+                        }.bind(this)
+                    });
+
+                } catch (error) {
+                    this.showErrorMessage({
+                        oText: error.message,
+                        oTitle: this.getResourceBundle().getText("errorTitle")
+                    });
+                }
+            },
+
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
             //---------------------------------------------------------------------- Approve Expenses -----------------------------------------------------------------
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -381,6 +431,18 @@ sap.ui.define([
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
             //---------------------------------------------------------------------- Leader Management -----------------------------------------------------------------
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+            /**
+             * Apply initial sorter before table binding.
+             * @param {sap.ui.base.Event} oEvent
+             */
+            onBeforeRebindTableApprovals: function (oEvent) {
+                var oBindingParams = oEvent.getParameter("bindingParams");
+
+                if (!this._bInitialSorterApplied) {
+                    oBindingParams.sorter = [new sap.ui.model.Sorter("Erdat", true)];
+                }
+            },
 
             /**
              * Check if the user is a leader.
