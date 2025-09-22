@@ -27,6 +27,7 @@
                 <tnt:NavigationList selectedKey="Manage">
                     <tnt:NavigationListItem text="{i18n>ManageExpenses}" key="Manage" icon="sap-icon://credit-card"/>
                     <tnt:NavigationListItem text="{i18n>OverviewExpenses}" key="CardMovements" icon="sap-icon://collections-insight"/>
+                    <tnt:NavigationListItem text="{i18n>UnaccountedMovements}" key="UnaccountedMovs" icon="sap-icon://unpaid-leave"/>
                     <tnt:NavigationListItem id="idApproveExpenses" text="{i18n>ApproveExpenses}" visible="false" key="ApproveExpenses" icon="sap-icon://accept"/>
                 </tnt:NavigationList>
             </tnt:SideNavigation>
@@ -210,6 +211,15 @@
                                 </Table>
                             </smartTable:SmartTable>
                         </VBox>
+                    </ScrollContainer>
+
+                    <ScrollContainer id="pageUnaccountedMovs" visible="true" horizontal="false" vertical="true" height="100%"> 
+                        <smartTable:SmartTable id="smartTableUnaccountedMovs" entitySet="ZFI_EXPENSES_RECON" beforeRebindTable="onBeforeRebindTableUnaccountedMovs" tableType="ResponsiveTable" demandPopin="true" useExportToExcel="false"  useTablePersonalisation="true" useVariantManagement="false" header="{i18n>UnaccountedMovements}" showRowCount="true" showTablePersonalisation="true" showVariantManagement="false" persistencyKey="SmartTable" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
+                            <Table class="sapUiResponsiveContentPadding" growing="true" growingThreshold="20">
+                                <ColumnListItem>
+                                </ColumnListItem>
+                            </Table>
+                        </smartTable:SmartTable>
                     </ScrollContainer>
 
                     <ScrollContainer id="pageApprovals" horizontal="false" vertical="true" height="100%">

@@ -101,6 +101,12 @@ sap.ui.define([
                         oToolPage.setSideExpanded(false);
                         break;
 
+                    case "UnaccountedMovs":
+                        this.onPressCloseDetail();
+                        oNavContainer.to(this.byId("pageUnaccountedMovs"));
+                        oToolPage.setSideExpanded(false);
+                        break;
+
                     case "ApproveExpenses":
                         this.byId("smartTableApprovals").getTable().removeSelections();
                         this.onPressCloseDetail();
@@ -425,6 +431,18 @@ sap.ui.define([
 
                 if (!this._bInitialSorterApplied) {
                     oBindingParams.sorter = [new sap.ui.model.Sorter("VYearMonthDay", true)];
+                }
+            },
+
+            //---------------------------------------------------------------------------------------------------------------------------------------------------------
+            //---------------------------------------------------------------------- Unaccounted movements ------------------------------------------------------------
+            //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+            onBeforeRebindTableUnaccountedMovs: function (oEvent) {
+                var oBindingParams = oEvent.getParameter("bindingParams");
+
+                if (!this._bInitialSorterApplied) {
+                    oBindingParams.sorter = [new sap.ui.model.Sorter("Posteddt", true)];
                 }
             },
 
