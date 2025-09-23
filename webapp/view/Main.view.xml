@@ -85,7 +85,7 @@
                                 <Title text="{i18n>AllExpenses}" titleStyle="H4" />
                             </FlexBox>
 
-                            <smartFilterBar:SmartFilterBar id="idSmartFilterBar" entitySet="ZFI_EXPENSES_MNG" persistencyKey="SmartFilterBar" />
+                            <smartFilterBar:SmartFilterBar id="idSmartFilterBar" entitySet="ZFI_EXPENSES_MNG" persistencyKey="pKeyOperationsTable" />
 
                             <smartTable:SmartTable id="MyExpensesTable" entitySet="ZFI_EXPENSES_MNG" smartFilterId="idSmartFilterBar" beforeRebindTable="onBeforeRebindTable" demandPopin="true" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="false" useTablePersonalisation="false" useVariantManagement="false" requestAtLeastFields="Doc,Reason,ExpNo,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showVariantManagement="false" showTablePersonalisation="false">
                                 <smartTable:customData>
