@@ -31,6 +31,7 @@ sap.ui.define([
                 this._handlers = {};
                 this._bError = false;
                 this._bSubmit = false;
+                this._cancel = false;
 
                 this.getView().setModel(new JSONModel(), "Camera");
                 this.getView().setModel(new JSONModel({ vatLines: [], vatEditMode: true, unitVisible: false }), "Expenses");
@@ -813,6 +814,7 @@ sap.ui.define([
 
                 this._bError = false;
                 this._bSubmit = false;
+                this._cancel = false;
 
                 if (!this.oCameraDialog) {
                     this.oCameraDialog = sap.ui.xmlfragment("zfiexpensesmanage.fragments.Camara", this);
@@ -888,6 +890,10 @@ sap.ui.define([
             handleSetValues: function (oData) {
                 var oView = this.getView();
 
+                this.oExpensesModel.setProperty("/expNo", oData.ExpNo);
+                this.oExpensesModel.setProperty("/valid", oData.Valid);
+
+                Fragment.byId(oView.getId(), "expenseDialog:inputExpNo").setValue(oData.ExpNo);
                 Fragment.byId(oView.getId(), "expenseDialog:inputLocal").setValue(oData.Local);
                 Fragment.byId(oView.getId(), "expenseDialog:inputNif").setValue(oData.Nif);
                 Fragment.byId(oView.getId(), "expenseDialog:selectCountry").setSelectedKey(oData.Country);
@@ -933,6 +939,7 @@ sap.ui.define([
                 this._bSubmit = true;
 
                 const sIds = [
+                    "expenseDialog:inputExpNo",
                     "expenseDialog:inputLocal",
                     "expenseDialog:selectCountry",
                     "expenseDialog:inputNif",
@@ -955,12 +962,16 @@ sap.ui.define([
                     that = this,
                     oEntry = {};
 
+                oEntry.OExpNo = this.oExpensesModel.getProperty("/expNo");
+                oEntry.Valid = this.oExpensesModel.getProperty("/valid");
+
+                oEntry.ExpNo = Fragment.byId(oView.getId(), "expenseDialog:inputExpNo").getValue();
                 oEntry.Bktxt = Fragment.byId(oView.getId(), "expenseDialog:inputLocal").getValue();
                 oEntry.Nif = Fragment.byId(oView.getId(), "expenseDialog:inputNif").getValue();
                 oEntry.Exptype = Fragment.byId(oView.getId(), "expenseDialog:selectExpType").getSelectedKey();
                 oEntry.Pymtmeth = Fragment.byId(oView.getId(), "expenseDialog:selectPymtMeth").getSelectedKey();
                 oEntry.Land1 = Fragment.byId(oView.getId(), "expenseDialog:selectCountry").getSelectedKey();
-                oEntry.Sdate = Fragment.byId(oView.getId(), "expenseDialog:datePicker").getDateValue();
+                oEntry.Sdate = Fragment.byId(oView.getId(), "expenseDialog:datePicker").getValue();
                 oEntry.Value = Fragment.byId(oView.getId(), "expenseDialog:inputAmt").getValue();
                 oEntry.TableIva = JSON.stringify(oView.getModel("Expenses").getProperty("/vatLines"));
 
@@ -1212,16 +1223,22 @@ sap.ui.define([
 
                 if (!vBase64) return;
 
+                if (this._cancel) return;
+
                 oEntry.Base64 = vBase64;
 
                 oModel.create("/ReadImage", oEntry, {
                     success: (oData) => {
-                        this.handleFinishProcess(oData);
-                        this.onStopScanning();
+                        if (!this._cancel) {
+                            this.handleFinishProcess(oData);
+                            this.onStopScanning();
+                        }
                     },
                     error: (oError) => {
-                        this._bError = true;
-                        this.handleScanError();
+                        if (!this._cancel) {
+                            this._bError = true;
+                            this.handleScanError();
+                        }
                     }
                 });
             },
@@ -1294,6 +1311,8 @@ sap.ui.define([
                 if (this._pProcessingDialog) {
                     this._pProcessingDialog.then(oDialog => oDialog.close());
                 }
+
+                this._cancel = true;
             },
 
             /**

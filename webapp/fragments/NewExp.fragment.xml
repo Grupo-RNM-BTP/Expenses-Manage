@@ -16,11 +16,14 @@
                         <Label text="" visible="false"/>
                         <Title text="{i18n>xexp.expGenTitle}"/>
 
+                        <Label text="{i18n>xexp.expNo}"/>
+                        <Input id="expenseDialog:inputExpNo" required="true"/>
+
                         <Label text="{i18n>xexp.expLocal}"/>
                         <Input id="expenseDialog:inputLocal" required="true"/>
 
                         <Label text="{i18n>xexp.expDate}"/>
-                        <DatePicker id="expenseDialog:datePicker" valueFormat="yyyy-MM-dd" displayFormat="dd/MM/yyyy" required="true"/>
+                        <DatePicker id="expenseDialog:datePicker" valueFormat="yyyyMMdd" displayFormat="dd/MM/yyyy" required="true"/>
 
                         <Label text="{i18n>xexp.expNif}"/>
                         <Input id="expenseDialog:inputNif" required="true"/>
