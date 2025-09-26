@@ -102,12 +102,6 @@ sap.ui.define([
                         oToolPage.setSideExpanded(false);
                         break;
 
-                    case "UnaccountedMovs":
-                        this.onPressCloseDetail();
-                        oNavContainer.to(this.byId("pageUnaccountedMovs"));
-                        oToolPage.setSideExpanded(false);
-                        break;
-
                     case "ApproveExpenses":
                         this.byId("smartTableApprovals").getTable().removeSelections();
                         this.onPressCloseDetail();

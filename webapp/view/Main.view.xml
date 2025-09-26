@@ -27,7 +27,6 @@
                 <tnt:NavigationList selectedKey="Manage">
                     <tnt:NavigationListItem text="{i18n>ManageExpenses}" key="Manage" icon="sap-icon://credit-card"/>
                     <tnt:NavigationListItem text="{i18n>OverviewExpenses}" key="CardMovements" icon="sap-icon://collections-insight"/>
-                    <tnt:NavigationListItem text="{i18n>UnaccountedMovements}" key="UnaccountedMovs" icon="sap-icon://unpaid-leave"/>
                     <tnt:NavigationListItem id="idApproveExpenses" text="{i18n>ApproveExpenses}" visible="false" key="ApproveExpenses" icon="sap-icon://accept"/>
                 </tnt:NavigationList>
             </tnt:SideNavigation>
@@ -204,22 +203,17 @@
 
                             <Toolbar style="Standard" design="Transparent" height="0.1rem" />
 
-                            <smartTable:SmartTable id="smartTable" beforeRebindTable="onBeforeRebindTableCards" entitySet="ZFI_BCP_MOVCC" tableType="ResponsiveTable" useExportToExcel="false" demandPopin="true" useVariantManagement="false" useTablePersonalisation="true" header="{i18n>AllMovements}" showRowCount="true" persistencyKey="SmartTable" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
+                            <!-- <smartFilterBar:SmartFilterBar id="sfbMovCC" entitySet="ZFI_BCP_MOVCC" /> -->
+
+                            <smartFilterBar:SmartFilterBar id="sfbMovCC" entitySet="ZFI_BCP_MOVCC" useToolbar="true" showAdaptFiltersButton="true" showClearOnFB="true" showRestoreOnFB="true" enableBasicSearch="true" basicSearchFieldName="Name" />
+
+                            <smartTable:SmartTable id="smartTable" beforeRebindTable="onBeforeRebindTableCards" smartFilterId="sfbMovCC" entitySet="ZFI_BCP_MOVCC" tableType="ResponsiveTable" useExportToExcel="false" demandPopin="true" useVariantManagement="false" useTablePersonalisation="true" header="{i18n>AllMovements}" showRowCount="true" enableAutoBinding="true" class="sapUiResponsiveContentPadding" initiallyVisibleFields="Name,Chknum,Amt,Currency,VYearMonthDay,Reconciliation">
                                 <Table mode="None" growing="true" growingThreshold="50">
                                     <ColumnListItem vAlign="Middle">
                                     </ColumnListItem>
                                 </Table>
                             </smartTable:SmartTable>
                         </VBox>
-                    </ScrollContainer>
-
-                    <ScrollContainer id="pageUnaccountedMovs" visible="true" horizontal="false" vertical="true" height="100%"> 
-                        <smartTable:SmartTable id="smartTableUnaccountedMovs" entitySet="ZFI_EXPENSES_RECON" beforeRebindTable="onBeforeRebindTableUnaccountedMovs" tableType="ResponsiveTable" demandPopin="true" useExportToExcel="false"  useTablePersonalisation="true" useVariantManagement="false" header="{i18n>UnaccountedMovements}" showRowCount="true" showTablePersonalisation="true" showVariantManagement="false" persistencyKey="SmartTable" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
-                            <Table class="sapUiResponsiveContentPadding" growing="true" growingThreshold="20">
-                                <ColumnListItem>
-                                </ColumnListItem>
-                            </Table>
-                        </smartTable:SmartTable>
                     </ScrollContainer>
 
                     <ScrollContainer id="pageApprovals" horizontal="false" vertical="true" height="100%">
