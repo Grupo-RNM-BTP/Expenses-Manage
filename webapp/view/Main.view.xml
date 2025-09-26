@@ -203,11 +203,15 @@
 
                             <Toolbar style="Standard" design="Transparent" height="0.1rem" />
 
-                            <!-- <smartFilterBar:SmartFilterBar id="sfbMovCC" entitySet="ZFI_BCP_MOVCC" /> -->
+                            <smartFilterBar:SmartFilterBar id="sfbMovCC" entitySet="ZFI_BCP_MOVCC" />
 
-                            <smartFilterBar:SmartFilterBar id="sfbMovCC" entitySet="ZFI_BCP_MOVCC" useToolbar="true" showAdaptFiltersButton="true" showClearOnFB="true" showRestoreOnFB="true" enableBasicSearch="true" basicSearchFieldName="Name" />
-
-                            <smartTable:SmartTable id="smartTable" beforeRebindTable="onBeforeRebindTableCards" smartFilterId="sfbMovCC" entitySet="ZFI_BCP_MOVCC" tableType="ResponsiveTable" useExportToExcel="false" demandPopin="true" useVariantManagement="false" useTablePersonalisation="true" header="{i18n>AllMovements}" showRowCount="true" enableAutoBinding="true" class="sapUiResponsiveContentPadding" initiallyVisibleFields="Name,Chknum,Amt,Currency,VYearMonthDay,Reconciliation">
+                            <smartTable:SmartTable id="smartTable" beforeRebindTable="onBeforeRebindTableCards" smartFilterId="sfbMovCC" entitySet="ZFI_BCP_MOVCC" tableType="ResponsiveTable" useExportToExcel="false" demandPopin="true" useVariantManagement="false" useTablePersonalisation="true" header="{i18n>AllMovements}" showRowCount="true" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
+                                <smartTable:customToolbar>
+                                    <OverflowToolbar design="Transparent">
+                                        <ToolbarSpacer/>
+                                        <Button text="{i18n>Synchronize}" icon="sap-icon://synchronize" enabled="true" type="Emphasized" press="handleSynchronize" />
+                                    </OverflowToolbar>
+                                </smartTable:customToolbar>
                                 <Table mode="None" growing="true" growingThreshold="50">
                                     <ColumnListItem vAlign="Middle">
                                     </ColumnListItem>

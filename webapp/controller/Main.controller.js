@@ -414,8 +414,26 @@ sap.ui.define([
             },
 
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
-            //---------------------------------------------------------------------- Approve Expenses -----------------------------------------------------------------
+            //---------------------------------------------------------------------- Transactions ---------------------------------------------------------------------
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+            handleSynchronize: function () {
+                var oModel = this.getModel(),
+                    sPath = "/SynchronizeRecon(Key='X')";
+
+                oModel.read(sPath, {
+                    success: function () {
+                        this.getModel("global").setProperty("/busy", false);
+                        oModel.refresh();
+                    }.bind(this),
+                    error: function () {
+                        this.getModel("global").setProperty("/busy", false);
+                        this.showErrorMessage({
+                            oText: this.getResourceBundle().getText("errorTitle")
+                        });
+                    }.bind(this)
+                });
+            },
 
             /**
              * Apply initial sorter before table binding.
@@ -426,18 +444,6 @@ sap.ui.define([
 
                 if (!this._bInitialSorterApplied) {
                     oBindingParams.sorter = [new sap.ui.model.Sorter("VYearMonthDay", true)];
-                }
-            },
-
-            //---------------------------------------------------------------------------------------------------------------------------------------------------------
-            //---------------------------------------------------------------------- Unaccounted movements ------------------------------------------------------------
-            //---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-            onBeforeRebindTableUnaccountedMovs: function (oEvent) {
-                var oBindingParams = oEvent.getParameter("bindingParams");
-
-                if (!this._bInitialSorterApplied) {
-                    oBindingParams.sorter = [new sap.ui.model.Sorter("Posteddt", true)];
                 }
             },
 
