@@ -44,6 +44,7 @@ sap.ui.define([
                 this.oCameraModel = this.getView().getModel("Camera");
                 this.oExpensesModel = this.getView().getModel("Expenses");
                 this.oScanningModel = this.getView().getModel("Scanning");
+                this._bInitialSorterApplied = false;
 
 
                 sessionStorage.setItem("goToLaunchpad", "X");
@@ -442,8 +443,12 @@ sap.ui.define([
             onBeforeRebindTableCards: function (oEvent) {
                 var oBindingParams = oEvent.getParameter("bindingParams");
 
+
                 if (!this._bInitialSorterApplied) {
-                    oBindingParams.sorter = [new sap.ui.model.Sorter("VYearMonthDay", true)];
+                    oBindingParams.sorter.push(
+                        new sap.ui.model.Sorter("VYearMonthDay", true)
+                    );
+                    this._bInitialSorterApplied = true; // <<< importante!
                 }
             },
 
