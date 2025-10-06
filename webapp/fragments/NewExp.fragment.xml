@@ -45,11 +45,25 @@
                         <Title text="{i18n>xexp.expTechTitle}"/>
 
                         <Label text="{i18n>xexp.expType}"/>
-                        <Select id="expenseDialog:selectExpType" items="{ path: '/ZFI_EXPENSES_TYPES' }" required="true" change=".onExpTypeChange">
+                        <Select id="expenseDialog:selectExpType" selectedKey="{Expenses>/exptype}" items="{ path: '/ZFI_EXPENSES_TYPES' }" required="true" change=".onExpTypeChange">
                             <items>
                                 <core:Item key="{Exptype}" text="{Description}" />
                             </items>
                         </Select>
+                        <Label text="{i18n>xexp.expBP}"/>
+                        <Select id="expenseDialog:selectBP" items="{ path: '/I_BusinessPartner' }" required="true" visible="{= (${Expenses>/exptype} || '').indexOf('DESREP') > -1 }">
+                            <items>
+                                <core:Item key="{BusinessPartner}" text="{BusinessPartnerName}" />
+                            </items>
+                        </Select>
+
+                        <Label text="{i18n>xexp.expPlate}"/>
+                        <Input id="expenseDialog:inputPlate" visible="{= ((${Expenses>/exptype} || '').indexOf('LAVCIS')  > -1)  
+                                                                      || ((${Expenses>/exptype} || '').indexOf('LAVCISE') > -1)  
+                                                                      || ((${Expenses>/exptype} || '').indexOf('MANVTR')  > -1)
+                                                                      || ((${Expenses>/exptype} || '').indexOf('COMBST')  > -1)
+                                                                      || ((${Expenses>/exptype} || '').indexOf('PORTAG')  > -1)
+                                                                      || ((${Expenses>/exptype} || '').indexOf('ESTACN')  > -1)  }" required="true"/>
 
                         <Label text="{i18n>xexp.expFuelQuantity}"/>
                         <Input id="expenseDialog:inputFuelQuantity" type="Number" visible="{= (${Expenses>/exptype} || '').indexOf('COMBST') > -1 }" required="true"/>
@@ -61,7 +75,7 @@
                             </items>
                         </Select>
 
-                        <Label text="{i18n>xexp.expValue}"/>
+                        <Label id="expenseDialog:labelAmt" text="{i18n>xexp.expValue}"/>
                         <Input id="expenseDialog:inputAmt" type="Number" required="true"/>
 
                         <Label text="{i18n>xexp.expUnit}" visible="{Expenses>/unitVisible}"/>
@@ -110,12 +124,12 @@
 
                                         <HBox renderType="Bare">
                                             <Text text="{Expenses>b}" visible="{= !${Expenses>/vatEditMode} }"/>
-                                            <Input type="Number" value="{Expenses>b}" visible="{Expenses>/vatEditMode}" placeholder="{i18n>xexp.expBaseValue}" required="true"/>
+                                            <Input type="Number" value="{Expenses>b}" visible="{Expenses>/vatEditMode}" placeholder="{i18n>xexp.expBaseValue}" required="true" change=".onVatCellChange"/>
                                         </HBox>
 
                                         <HBox renderType="Bare">
                                             <Text text="{Expenses>v}" visible="{= !${Expenses>/vatEditMode} }"/>
-                                            <Input type="Number" value="{Expenses>v}" visible="{Expenses>/vatEditMode}" placeholder="{i18n>xexp.expVatValue}" required="true"/>
+                                            <Input type="Number" value="{Expenses>v}" visible="{Expenses>/vatEditMode}" placeholder="{i18n>xexp.expVatValue}" required="true" change=".onVatCellChange"/>
                                         </HBox>
 
                                         <Button icon="sap-icon://delete" type="Transparent" visible="{Expenses>/vatEditMode}" press=".onDeleteVatLine"/>

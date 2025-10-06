@@ -16,7 +16,6 @@ sap.ui.define(
 
         this.setModel(oModel, "global");
 
-
         var urlParams = new URLSearchParams(window.location.search),
           token = urlParams.get('token');
 

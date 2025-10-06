@@ -38,7 +38,9 @@ sap.ui.define([
 
                 this.getView().setModel(new JSONModel({ aiScan: true }), "Scan");
 
-                this.getView().setModel(new JSONModel({ title: "A analisar documento", description: "" }), "Scanning");
+                this.getView().setModel(new JSONModel({ title: "", description: "" }), "Scanning");
+
+                this.getView().setModel(new JSONModel({ entries: [] }), "Logs");
 
                 this.oScanModel = this.getView().getModel("Scan");
                 this.oCameraModel = this.getView().getModel("Camera");
@@ -50,8 +52,6 @@ sap.ui.define([
                 sessionStorage.setItem("goToLaunchpad", "X");
                 this.getRouter().attachRouteMatched(this.getUserAuthentication, this);
             },
-
-
 
             /**
              * Handle after rendering, get card values, and set theme.
@@ -75,7 +75,6 @@ sap.ui.define([
                 sessionStorage.setItem("goToLaunchpad", "X");
                 this.getUserAuthentication();
             },
-
 
             /**
              * Handle navigation between pages based on side menu selection.
@@ -120,6 +119,7 @@ sap.ui.define([
                 oToolPage.setSideExpanded(!oToolPage.getSideExpanded());
             },
 
+
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
             //---------------------------------------------------------------------- Manage Expenses ------------------------------------------------------------------
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -137,9 +137,9 @@ sap.ui.define([
             },
 
             /**
-           * Open reason dialog.
-           * @param {sap.ui.base.Event} oEvent
-           */
+             * Open reason dialog.
+             * @param {sap.ui.base.Event} oEvent
+             */
             onPressReason: function (oEvent) {
                 try {
                     var oIcon = oEvent.getSource(),
@@ -177,9 +177,9 @@ sap.ui.define([
             },
 
             /**
-           * Open upload dialog.
-           * @param {sap.ui.base.Event} oEvent
-           */
+             * Open upload dialog.
+             * @param {sap.ui.base.Event} oEvent
+             */
             onUploadPressed: function (oEvent) {
                 try {
                     this.getView().getModel("Main").setData({});
@@ -242,6 +242,9 @@ sap.ui.define([
                 }
             },
 
+            /**
+             * Close upload dialog.
+             */
             onCloseUploadDialog: function () {
                 this._oUploadDialog.close();
                 this._oUploadDialog.destroy();
@@ -448,9 +451,10 @@ sap.ui.define([
                     oBindingParams.sorter.push(
                         new sap.ui.model.Sorter("VYearMonthDay", true)
                     );
-                    this._bInitialSorterApplied = true; // <<< importante!
+                    this._bInitialSorterApplied = true;
                 }
             },
+
 
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
             //---------------------------------------------------------------------- Leader Management -----------------------------------------------------------------
@@ -758,6 +762,11 @@ sap.ui.define([
 
                 aVatLines.push({ p: "", v: "" });
                 this.oExpensesModel.setProperty("/vatLines", aVatLines);
+
+                var idx = aVatLines.length;
+                this.handleLogChange("Nova linha adicionada ao resumo IVA (linha " + idx + ")", "", "", "", true);
+
+                this.handleSetupVatTableLogging("expenseDialog:vatTable");
             },
 
             /**
@@ -773,8 +782,16 @@ sap.ui.define([
                     var iIndex = oTable.indexOfItem(oItem);
 
                     if (iIndex > -1) {
+                        // aLines.splice(iIndex, 1);
+                        // this.oExpensesModel.setProperty("/vatLines", aLines);
+
+                        var snapshot = aLines[iIndex] || {};
+                        this.handleLogChange("Linha do resumo IVA (linha " + (iIndex + 1) + ") eliminada", JSON.stringify(snapshot), "", "", true);
+
                         aLines.splice(iIndex, 1);
                         this.oExpensesModel.setProperty("/vatLines", aLines);
+
+                        this.handleSetupVatTableLogging("expenseDialog:vatTable");
                     }
                 }
             },
@@ -806,6 +823,8 @@ sap.ui.define([
 
                 const oModel = oCtx.getModel();
                 oModel.setProperty(oCtx.getPath() + "/d", sDesc);
+
+                this.onVatCellChange(oEvent);
             },
 
 
@@ -820,6 +839,8 @@ sap.ui.define([
                 this._bError = false;
                 this._bSubmit = false;
                 this._cancel = false;
+
+                this.handleResetModels();
 
                 if (!this.oCameraDialog) {
                     this.oCameraDialog = sap.ui.xmlfragment("zfiexpensesmanage.fragments.Camara", this);
@@ -885,6 +906,17 @@ sap.ui.define([
                     }
 
                     oDialog.open();
+
+                    that.handleSetupFieldsLogging();
+
+                    var oVatTable = that.byId("expenseDialog:vatTable");
+                    if (oVatTable) {
+                        that.handleSetupVatTableLogging("expenseDialog:vatTable");
+
+                        oVatTable.attachUpdateFinished(function () {
+                            that.handleSetupVatTableLogging("expenseDialog:vatTable");
+                        });
+                    }
                 });
             },
 
@@ -897,10 +929,11 @@ sap.ui.define([
 
                 this.oExpensesModel.setProperty("/expNo", oData.ExpNo);
                 this.oExpensesModel.setProperty("/valid", oData.Valid);
+                this.oExpensesModel.setProperty("/nifCompany", oData.Nifc);
 
                 Fragment.byId(oView.getId(), "expenseDialog:inputExpNo").setValue(oData.ExpNo);
                 Fragment.byId(oView.getId(), "expenseDialog:inputLocal").setValue(oData.Local);
-                Fragment.byId(oView.getId(), "expenseDialog:inputNif").setValue(oData.Nif);
+                Fragment.byId(oView.getId(), "expenseDialog:inputNif").setValue(oData.Nifs);
                 Fragment.byId(oView.getId(), "expenseDialog:selectCountry").setSelectedKey(oData.Country);
                 Fragment.byId(oView.getId(), "expenseDialog:selectExpType").setSelectedKey(oData.Exptype);
                 Fragment.byId(oView.getId(), "expenseDialog:inputFuelQuantity").setValue(oData.Fuelqty);
@@ -935,6 +968,8 @@ sap.ui.define([
                 } catch (e) {
                     this.oExpensesModel.setProperty("/vatLines", []);
                 }
+
+                this.handleLogPrefilledFields();
             },
 
             /**
@@ -946,12 +981,14 @@ sap.ui.define([
                 const sIds = [
                     "expenseDialog:inputExpNo",
                     "expenseDialog:inputLocal",
-                    "expenseDialog:selectCountry",
-                    "expenseDialog:inputNif",
-                    "expenseDialog:selectPymtMeth",
-                    "expenseDialog:selectExpType",
-                    "expenseDialog:inputFuelQuantity",
                     "expenseDialog:datePicker",
+                    "expenseDialog:inputNif",
+                    "expenseDialog:selectCountry",
+                    "expenseDialog:selectExpType",
+                    "expenseDialog:selectBP",
+                    "expenseDialog:inputPlate",
+                    "expenseDialog:inputFuelQuantity",
+                    "expenseDialog:selectPymtMeth",
                     "expenseDialog:inputAmt",
                     "expenseDialog:inputUnit",
                     "expenseDialog:vatTable"
@@ -967,8 +1004,9 @@ sap.ui.define([
                     that = this,
                     oEntry = {};
 
-                oEntry.OExpNo = this.oExpensesModel.getProperty("/expNo");
                 oEntry.Valid = this.oExpensesModel.getProperty("/valid");
+                oEntry.OExpNo = this.oExpensesModel.getProperty("/expNo");
+                oEntry.Nifc = this.oExpensesModel.getProperty("/nifCompany");
 
                 oEntry.ExpNo = Fragment.byId(oView.getId(), "expenseDialog:inputExpNo").getValue();
                 oEntry.Bktxt = Fragment.byId(oView.getId(), "expenseDialog:inputLocal").getValue();
@@ -983,8 +1021,15 @@ sap.ui.define([
                 oEntry.Doc = oView.getModel("Expenses").getProperty("/capturedImage");
                 oEntry.DocType = oView.getModel("Expenses").getProperty("/imageExt");
 
+                var aLogs = this.getView().getModel("Logs").getProperty("/entries") || [];
+                oEntry.Log = JSON.stringify(aLogs);
+
                 if ((oEntry.Exptype || '').indexOf('COMBST') > -1) {
                     oEntry.Fuelqty = Fragment.byId(oView.getId(), "expenseDialog:inputFuelQuantity").getValue();
+                }
+
+                if (Fragment.byId(oView.getId(), "expenseDialog:inputPlate").getVisible()) {
+                    oEntry.Plate = Fragment.byId(oView.getId(), "expenseDialog:inputPlate").getValue();
                 }
 
                 if (Fragment.byId(oView.getId(), "expenseDialog:inputUnit").getVisible()) {
@@ -993,35 +1038,75 @@ sap.ui.define([
                     oEntry.Unit = String(iValue);
                 }
 
-                sap.ui.core.BusyIndicator.show(0);
+                if (Fragment.byId(oView.getId(), "expenseDialog:selectBP").getVisible()) {
+                    const sValue = Fragment.byId(oView.getId(), "expenseDialog:selectBP").getSelectedKey();
 
-                oModel.create("/Expense", oEntry, {
-                    success: function (oData, oResponse) {
-                        sap.ui.core.BusyIndicator.hide();
+                    oEntry.Partner = String(sValue);
+                }
 
-                        try {
-                            var sHeaders = oResponse.headers;
+                this.handleCheckTaxID(oEntry.Nif).then(function (canProceed) {
+                    if (!canProceed) {
+                        return;
+                    }
 
-                            if (sHeaders) {
-                                var sResponse = JSON.parse(sHeaders["sap-message"]).message;
+                    sap.ui.core.BusyIndicator.show(0);
 
-                                if (sResponse) {
-                                    sap.m.MessageBox.warning(sResponse);
+                    oModel.create("/Expense", oEntry, {
+                        success: function (oData, oResponse) {
+                            sap.ui.core.BusyIndicator.hide();
+
+                            try {
+                                var sHeaders = oResponse.headers;
+
+                                if (sHeaders) {
+                                    var sResponse = JSON.parse(sHeaders["sap-message"]).message;
+
+                                    if (sResponse) {
+                                        sap.m.MessageBox.warning(sResponse);
+                                        that.handleLogChange("Aviso na criação da despesa", "", "", sResponse);
+                                    } else {
+                                        that.handleLogChange("Sucesso na criação da despesa");
+                                    }
                                 }
+                            } catch (error) {
+
                             }
-                        } catch (error) {
 
+                            that.handleSuccessSubmit();
+                            oModel.refresh(true);
+                        },
+                        error: function (oError) {
+                            sap.ui.core.BusyIndicator.hide();
+
+                            var sError = JSON.parse(oError.responseText).error.message.value;
+                            that.handleErrorMessage(sError);
+                            that.handleLogChange("Erro na criação da despesa", "", "", sError);
                         }
+                    });
+                });
+            },
 
-                        that.handleSuccessSubmit();
-                        oModel.refresh(true);
-                        that.getCardValues();
-                    },
-                    error: function (oError) {
-                        sap.ui.core.BusyIndicator.hide();
+            /**
+             * Checks if the tax ID of the document is valid.
+             */
+            handleCheckTaxID: function () {
+                var that = this;
+                var sNifCompany = this.oExpensesModel.getProperty("/nifCompany");
+                var bValid = this.oExpensesModel.getProperty("/valid");
 
-                        var sError = JSON.parse(oError.responseText).error.message.value;
-                        that.handleErrorMessage(sError);
+                return new Promise(function (resolve) {
+                    var isValidEmpty = bValid === "" || bValid === null || bValid === undefined || bValid === false;
+
+                    if (sNifCompany && isValidEmpty) {
+                        sap.m.MessageBox.warning(that.getResourceBundle().getText("xexp.expNifMismatch", [sNifCompany]), {
+                            actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
+                            emphasizedAction: sap.m.MessageBox.Action.OK,
+                            onClose: function (oAction) {
+                                resolve(oAction === sap.m.MessageBox.Action.OK);
+                            }
+                        });
+                    } else {
+                        resolve(true);
                     }
                 });
             },
@@ -1061,6 +1146,28 @@ sap.ui.define([
                     this.oExpensesModel.setProperty("/capturedImage", "");
                     this.oExpensesModel.setProperty("/vatLines", []);
                 }
+            },
+
+            /**
+             * Reset application models to the same defaults used in onInit.
+             */
+            handleResetModels: function () {
+                this.getView().getModel("Camera")?.setData({});
+
+                this.getView().getModel("Expenses")?.setData({
+                    vatLines: [],
+                    vatEditMode: true,
+                    unitVisible: false
+                });
+
+                this.getView().getModel("Scan")?.setData({ aiScan: true });
+                this.getView().getModel("Scanning")?.setData({
+                    title: "",
+                    description: "",
+                    illustrationType: ""
+                });
+
+                this.getView().getModel("Logs")?.setData({ entries: [] });
             },
 
 
@@ -1438,6 +1545,7 @@ sap.ui.define([
                 const sKey = oItem ? oItem.getKey() : oSelect.getSelectedKey();
 
                 this.oExpensesModel.setProperty("/exptype", sKey);
+                this.oExpensesModel.refresh(true);
 
                 this.handleCheckUnit();
             },
@@ -1447,6 +1555,26 @@ sap.ui.define([
              * @param {Event} oEvent - The event object
              */
             onCountryChange: function () {
+                try {
+                    const viewId = this.getView().getId();
+                    const oItem = oEvent.getParameter("selectedItem");
+                    const oContext = oItem.getBindingContext();
+                    const oObject = oContext.getObject();
+
+                    const isEur = oObject.Waers === "EUR";
+                    const text = this.getResourceBundle().getText("xexp.expValueWithCurr", [oObject.WaersDesc, oObject.Waers]);
+
+                    if (!isEur && oObject.WaersDesc && oObject.Waers) {
+                        Fragment.byId(viewId, "expenseDialog:labelAmt").setText(text);
+                    } else {
+                        Fragment.byId(viewId, "expenseDialog:labelAmt").setText(
+                            this.getResourceBundle().getText("xexp.expValue2")
+                        );
+                    }
+                } catch (sError) {
+                    this.handleErrorMessage(sError);
+                }
+
                 this.handleCheckUnit();
             },
 
@@ -1505,6 +1633,306 @@ sap.ui.define([
                     initialFocus: null,
                     textDirection: sap.ui.core.TextDirection.Inherit
                 });
+            },
+
+            /* ************************************************************************************** */
+            /* *                                        Logs                                        * */
+            /* ************************************************************************************** */
+
+
+            /* ************************************** VAT Table ************************************* */
+
+            /**
+             * Recursively searches for final controls (Input/Select) within a container.
+             * @param {sap.ui.core.Control} ctrl - The control to search within
+             * @param {sap.ui.core.Control[]} out - Array to store found controls
+             */
+            _getInnerInputsAndSelects: function (ctrl, out) {
+                if (!ctrl) { return; }
+
+                if (ctrl instanceof sap.m.Input || ctrl instanceof sap.m.Select) {
+                    out.push(ctrl);
+                    return;
+                }
+
+                var tryAgg = function (name) {
+                    var aggr = ctrl.getAggregation && ctrl.getAggregation(name);
+                    if (Array.isArray(aggr)) {
+                        aggr.forEach(function (child) { this._getInnerInputsAndSelects(child, out); }.bind(this));
+                    } else if (aggr) {
+                        this._getInnerInputsAndSelects(aggr, out);
+                    }
+                }.bind(this);
+
+                tryAgg("items");
+                tryAgg("content");
+                tryAgg("cells");
+                tryAgg("formElements");
+                tryAgg("fields");
+                tryAgg("blocks");
+                tryAgg("subHeader");
+                tryAgg("toolbar");
+            },
+
+            /**
+             * Sets up VAT table logging.
+             * @param {string} sId - The ID of the VAT table
+             */
+            handleSetupVatTableLogging: function (sId) {
+                var oVatTable = this.byId(sId);
+                if (!oVatTable) { return; }
+
+                var that = this;
+
+                if (!(oVatTable.getItems() || []).length) {
+                    oVatTable.attachEventOnce("updateFinished", function () {
+                        that.handleSetupVatTableLogging(sId);
+                    });
+                    return;
+                }
+
+                (oVatTable.getItems() || []).forEach(function (item) {
+                    (item.getCells() || []).forEach(function (cell) {
+                        var leafCtrls = [];
+                        that._getInnerInputsAndSelects(cell, leafCtrls);
+
+                        leafCtrls.forEach(function (leaf) {
+                            that.handleRememberPrev(leaf);
+
+                            if (leaf.attachBrowserEvent) {
+                                leaf.attachBrowserEvent("focusin", that.handleRememberPrev.bind(that, leaf));
+                            }
+                        });
+                    });
+                });
+
+                if (!oVatTable.__loggingHooked) {
+                    oVatTable.__loggingHooked = true;
+                    oVatTable.attachUpdateFinished(function () {
+                        that.handleSetupVatTableLogging(sId);
+                    });
+                }
+            },
+
+            /**
+             * VAT table cell–specific logging (bind to cells' change event).
+             * @param {sap.ui.base.Event} oEvent
+             */
+            onVatCellChange: function (oEvent) {
+                var ctrl = oEvent.getSource();
+                var ctx = ctrl.getBindingContext("Expenses");
+                if (!ctx) {
+                    return;
+                }
+
+                var path = ctx.getPath();
+                var idx = path.split("/").pop();
+
+                var prop = "";
+                if (ctrl.getValue && ctrl.getBinding && ctrl.getBinding("value")) {
+                    prop = ctrl.getBinding("value").getPath();
+
+                } else if (ctrl instanceof sap.m.Select) {
+                    prop = "t";
+                }
+
+                var colLabelMap = {
+                    "t": "campo tipo de IVA",
+                    "b": "campo valor base",
+                    "v": "campo IVA",
+                    "d": "Descrição"
+                };
+                var prettyCol = colLabelMap[prop] || prop;
+
+                var oldVal = ctrl.data("__prev");
+                var newVal = this.handleGetFieldValue(ctrl, oEvent);
+
+                this.handleLogChange("Alteração de valor em resumo IVA (linha " + (Number(idx) + 1) + ") " + prettyCol, oldVal, newVal);
+
+                ctrl.data("__prev", newVal);
+            },
+
+
+            /* ************************************** Other Fields ************************************* */
+
+            /**
+             * Call this when the dialog opens: wires logging to all simple fields.
+             */
+            handleSetupFieldsLogging: function () {
+                var that = this;
+                this.handleGetFieldsMap().forEach(function (m) {
+                    that.handleAttachLoggingForControl(m);
+                });
+            },
+
+            /**
+             * Maps dialog field.
+             * @returns {Array<{id:string,label:string}>}
+             */
+            handleGetFieldsMap: function () {
+                return [
+                    { id: "expenseDialog:inputExpNo", label: "número da despesa" },
+                    { id: "expenseDialog:inputLocal", label: "estabelecimento" },
+                    { id: "expenseDialog:datePicker", label: "data da despesa" },
+                    { id: "expenseDialog:inputNif", label: "número de identificação fiscal do fornecedor" },
+                    { id: "expenseDialog:selectCountry", label: "país" },
+                    { id: "expenseDialog:selectExpType", label: "tipo de despesa" },
+                    { id: "expenseDialog:inputPlate", label: "matrícula" },
+                    { id: "expenseDialog:inputFuelQuantity", label: "quantidade de combustível" },
+                    { id: "expenseDialog:selectPymtMeth", label: "método de pagamento" },
+                    { id: "expenseDialog:inputAmt", label: "montante" },
+                    { id: "expenseDialog:inputUnit", label: "unidade" }
+                ];
+            },
+
+            /**
+             * Attaches focusin/change listeners to a control and stores its initial value.
+             * @param {{id:string, label:string}} meta
+             */
+            handleAttachLoggingForControl: function (meta) {
+                var ctrl = this.byId(meta.id) || sap.ui.getCore().byId(meta.id);
+                if (!ctrl) {
+                    return;
+                }
+
+                this.handleRememberPrev(ctrl);
+
+                if (ctrl.attachBrowserEvent) {
+                    ctrl.attachBrowserEvent("focusin", this.handleRememberPrev.bind(this, ctrl));
+                }
+
+                if (ctrl.attachChange) {
+                    ctrl.attachChange(this.onGenericFieldChange.bind(this, meta));
+                } else if (ctrl.attachEvent) {
+                    ctrl.attachEvent("change", this.onGenericFieldChange.bind(this, meta));
+                }
+            },
+
+            /**
+             * Generic change handler: compares with previous value and logs the change.
+             * @param {{id:string, label:string}} meta
+             * @param {sap.ui.base.Event} oEvent
+             */
+            onGenericFieldChange: function (meta, oEvent) {
+                var oSource = oEvent.getSource(),
+                    sOldValue = oSource.data("__prev"),
+                    sNewValue = this.handleGetFieldValue(oSource, oEvent);
+
+                var bHasOld = sOldValue !== undefined && sOldValue !== null && String(sOldValue).trim() !== "";
+                var sLabel = bHasOld ? ("Alteração de valor no campo " + meta.label) : ("Novo valor para o campo " + meta.label);
+
+                this.handleLogChange(sLabel, sOldValue, sNewValue);
+                oSource.data("__prev", sNewValue);
+            },
+
+
+            /* ************************************** Geral ************************************* */
+
+            /**
+             * Logs the prefilled fields.
+             */
+            handleLogPrefilledFields: function () {
+                var that = this;
+
+                // --- Dialog fields ---
+                this.handleGetFieldsMap().forEach(function (m) {
+                    var ctrl = that.byId(m.id) || sap.ui.getCore().byId(m.id);
+                    if (!ctrl) {
+                        return;
+                    }
+
+                    var val = that.handleGetFieldValue(ctrl);
+                    var empty = (val === undefined || val === null || String(val).trim() === "");
+                    if (!empty) {
+                        that.handleLogChange("Campo " + m.label + " digitalizado", "", val);
+
+                        try {
+                            ctrl.data("__prev", val);
+                        }
+                        catch (e) { }
+                    }
+                });
+
+                // --- VAT table lines ---
+                var aVat = this.oExpensesModel.getProperty("/vatLines") || [];
+                if (aVat.length) {
+                    var colLabelMap = {
+                        "d": "tipo de taxa",
+                        "b": "valor base",
+                        "v": "valor IVA",
+                    };
+
+                    aVat.forEach(function (line, idx) {
+                        ["b", "v", "d"].forEach(function (prop) {
+                            var v = line && line[prop];
+                            var isEmpty = (v === undefined || v === null || String(v).toString().trim() === "");
+
+                            if (!isEmpty) {
+                                that.handleLogChange("Campo " + (colLabelMap[prop] || prop) + " do resumo IVA e linha " + (idx + 1) + " digitalizado", "", String(v));
+                            }
+                        });
+                    });
+                }
+            },
+
+            /**
+             * Adds a log entry to the "Logs" model.
+             * @param {string} sDescription
+             * @param {string} sOldValue
+             * @param {string} sNewValue
+             * @param {boolean} bVatLine
+             */
+            handleLogChange: function (sDescription, sOldValue, sNewValue, sError, bVatLine) {
+                if (!bVatLine) {
+                    if (sOldValue === sNewValue) {
+                        return;
+                    }
+                }
+
+                var oLogs = this.getView().getModel("Logs"),
+                    aLogs = oLogs.getProperty("/entries") || [];
+
+                aLogs.push({
+                    Description: sDescription,
+                    OldValue: sOldValue,
+                    NewValue: sNewValue,
+                    Error: sError,
+                    Time: new Date().toISOString()
+                });
+
+                oLogs.setProperty("/entries", aLogs);
+            },
+
+            /**
+             * Returns a human-readable value from a control.
+             * @param {sap.ui.core.Control} ctrl
+             * @param {sap.ui.base.Event} [evt]
+             * @returns {string}
+             */
+            handleGetFieldValue: function (ctrl, evt) {
+                if (evt && evt.getParameter && evt.getParameter("value") !== undefined) {
+                    return evt.getParameter("value");
+                }
+                if (ctrl instanceof sap.m.Select) {
+                    return ctrl.getSelectedKey();
+                }
+                if (ctrl instanceof sap.m.DatePicker || ctrl instanceof sap.m.DateTimePicker) {
+                    return ctrl.getValue();
+                }
+                if (ctrl.getValue) {
+                    return ctrl.getValue();
+                }
+                return "";
+            },
+
+            /**
+             * Stores the previous value in the control's data (call on focusin).
+             * @param {sap.ui.core.Control} ctrl
+             */
+            handleRememberPrev: function (ctrl) {
+                try {
+                    ctrl.data("__prev", this.handleGetFieldValue(ctrl));
+                } catch (e) { }
             },
         });
     });
