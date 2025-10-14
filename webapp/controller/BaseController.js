@@ -191,49 +191,49 @@ sap.ui.define([
         /**
          * Fetch sum of expenses year from backend and update view.
          */
-        getSumYear: function () {
-            try {
-                var oModel = this.getView().getModel(),
-                    oGraficoModel = this.getView().getModel("graficoModel"),
-                    iAnoAtual = new Date().getFullYear();
+        // getSumYear: function () {
+        //     try {
+        //         var oModel = this.getView().getModel(),
+        //             oGraficoModel = this.getView().getModel("graficoModel"),
+        //             iAnoAtual = new Date().getFullYear();
 
-                oModel.read("/ZFI_EXPENSES_BCP2", {
-                    success: function (oData) {
-                        var aResults = oData.results;
+        //         oModel.read("/ZFI_EXPENSES_BCP2", {
+        //             success: function (oData) {
+        //                 var aResults = oData.results;
 
-                        var oAnoAtual = aResults.find(function (entry) {
-                            return parseInt(entry.VYear) === iAnoAtual;
-                        });
+        //                 var oAnoAtual = aResults.find(function (entry) {
+        //                     return parseInt(entry.VYear) === iAnoAtual;
+        //                 });
 
-                        if (oAnoAtual) {
-                            var fAmount = parseFloat(oAnoAtual.Amount) || 0;
-                            oGraficoModel.setProperty("/totalAno", fAmount);
-                            oGraficoModel.setProperty("/moeda", oAnoAtual.Currency || "");
-                        } else {
-                            oGraficoModel.setProperty("/totalAno", 0);
-                            oGraficoModel.setProperty("/moeda", "");
-                        }
-                    }.bind(this),
+        //                 if (oAnoAtual) {
+        //                     var fAmount = parseFloat(oAnoAtual.Amount) || 0;
+        //                     oGraficoModel.setProperty("/totalAno", fAmount);
+        //                     oGraficoModel.setProperty("/moeda", oAnoAtual.Currency || "");
+        //                 } else {
+        //                     oGraficoModel.setProperty("/totalAno", 0);
+        //                     oGraficoModel.setProperty("/moeda", "");
+        //                 }
+        //             }.bind(this),
 
-                    error: function (oError) {
-                        var sError = JSON.parse(oError.responseText).error.message.value;
-                        sap.m.MessageBox.alert(sError, {
-                            icon: "ERROR",
-                            onClose: null,
-                            styleClass: '',
-                            initialFocus: null,
-                            textDirection: sap.ui.core.TextDirection.Inherit
-                        });
-                    }.bind(this)
-                });
+        //             error: function (oError) {
+        //                 var sError = JSON.parse(oError.responseText).error.message.value;
+        //                 sap.m.MessageBox.alert(sError, {
+        //                     icon: "ERROR",
+        //                     onClose: null,
+        //                     styleClass: '',
+        //                     initialFocus: null,
+        //                     textDirection: sap.ui.core.TextDirection.Inherit
+        //                 });
+        //             }.bind(this)
+        //         });
 
-            } catch (error) {
-                this.showErrorMessage({
-                    oText: error.message,
-                    oTitle: this.getResourceBundle().getText("errorTitle")
-                });
-            }
-        },
+        //     } catch (error) {
+        //         this.showErrorMessage({
+        //             oText: error.message,
+        //             oTitle: this.getResourceBundle().getText("errorTitle")
+        //         });
+        //     }
+        // },
 
         /**
          * Fetch sum of expenses month from backend and update view.
@@ -243,47 +243,63 @@ sap.ui.define([
                 var oModel = this.getView().getModel(),
                     oGraficoModel = this.getView().getModel("graficoModel"),
                     iAnoAtual = new Date().getFullYear(),
-                    iMesAtual = new Date().getMonth() + 1;
+                    iMesAtual = new Date().getMonth() + 1,
+                    sMesAtualKey = iAnoAtual.toString() + (iMesAtual < 10 ? "0" + iMesAtual : iMesAtual);
 
-                oModel.read("/ZFI_EXPENSES_BCP", {
+                oModel.read("/ZFI_BCP_MOVCC", {
                     success: function (oData) {
-                        var aAllResults = oData.results || [];
-
-                        var aDadosAnoAtual = aAllResults.filter(function (oEntry) {
-                            return parseInt(oEntry.VYear, 10) === iAnoAtual;
+                        var aResults = (oData.results || []).map(function (oEntry) {
+                            return {
+                                YearMonth: oEntry.YearMonth,
+                                VYear: parseInt(oEntry.VYear, 10),
+                                Amount: parseFloat(oEntry.Amt) || 0,
+                                Currency: oEntry.Currency
+                            };
                         });
 
-                        aDadosAnoAtual.sort(function (a, b) {
-                            return parseInt(a.YearMonth, 10) - parseInt(b.YearMonth, 10);
+                        var aDadosAnoAtual = aResults.filter(o => o.VYear === iAnoAtual);
+
+                        var mGrouped = {};
+                        aDadosAnoAtual.forEach(function (oItem) {
+                            if (!mGrouped[oItem.YearMonth]) {
+                                mGrouped[oItem.YearMonth] = {
+                                    YearMonth: oItem.YearMonth,
+                                    Amount: 0,
+                                    Currency: oItem.Currency
+                                };
+                            }
+                            mGrouped[oItem.YearMonth].Amount += oItem.Amount;
                         });
 
-                        aDadosAnoAtual.forEach(function (oEntry) {
-                            oEntry.Amount = parseFloat(oEntry.Amount) || 0;
-                        });
+                        var aAgrupado = Object.values(mGrouped)
+                            .map(o => ({
+                                YearMonth: o.YearMonth,
+                                Amount: parseFloat(o.Amount.toFixed(2)),
+                                Currency: o.Currency
+                            }))
+                            .sort((a, b) => a.YearMonth.localeCompare(b.YearMonth));
 
-                        oGraficoModel.setProperty("/gastosPorMes", aDadosAnoAtual);
+                        var fTotalAno = aAgrupado.reduce((acc, curr) => acc + curr.Amount, 0);
+                        fTotalAno = parseFloat(fTotalAno.toFixed(2));
 
-                        var sMesAtualKey = iAnoAtual.toString() + (iMesAtual < 10 ? "0" + iMesAtual : iMesAtual);
-                        var oMesAtual = aDadosAnoAtual.find(function (oEntry) {
-                            return oEntry.YearMonth === sMesAtualKey;
-                        });
+                        var oMesAtual = aAgrupado.find(o => o.YearMonth === sMesAtualKey);
+                        var fGastoMesAtual = oMesAtual ? oMesAtual.Amount : 0;
+                        var sMoeda = oMesAtual ? oMesAtual.Currency : (aAgrupado[0] ? aAgrupado[0].Currency : "");
 
-                        if (oMesAtual) {
-                            oGraficoModel.setProperty("/gastoMesAtual", parseFloat(oMesAtual.Amount) || 0);
-                            oGraficoModel.setProperty("/moeda", oMesAtual.Currency || "");
-
-                            var aSemMesAtual = aDadosAnoAtual.filter(function (oEntry) {
-                                return oEntry.YearMonth !== sMesAtualKey;
-                            });
-                            oGraficoModel.setProperty("/gastosPorMes", aSemMesAtual);
-                        } else {
-                            oGraficoModel.setProperty("/gastoMesAtual", 0);
-                            oGraficoModel.setProperty("/moeda", "");
-                        }
+                        oGraficoModel.setProperty("/gastosPorMes", aAgrupado);
+                        oGraficoModel.setProperty("/totalAno", fTotalAno);
+                        oGraficoModel.setProperty("/gastoMesAtual", fGastoMesAtual);
+                        oGraficoModel.setProperty("/moeda", sMoeda);
 
                         this.getView().byId("barChart").setVizProperties({
                             title: {
                                 text: this.getResourceBundle().getText("Resumo") + " " + iAnoAtual
+                            },
+                            valueAxis: {
+                                title: { text: sMoeda }
+                            },
+                            plotArea: {
+                                dataLabel: { visible: true }
                             }
                         });
 
@@ -291,13 +307,7 @@ sap.ui.define([
 
                     error: function (oError) {
                         var sError = JSON.parse(oError.responseText).error.message.value;
-                        sap.m.MessageBox.alert(sError, {
-                            icon: "ERROR",
-                            onClose: null,
-                            styleClass: '',
-                            initialFocus: null,
-                            textDirection: sap.ui.core.TextDirection.Inherit
-                        });
+                        sap.m.MessageBox.alert(sError, { icon: "ERROR" });
                     }.bind(this)
                 });
             } catch (error) {

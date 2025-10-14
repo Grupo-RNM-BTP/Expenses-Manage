@@ -47,6 +47,7 @@ sap.ui.define([
                 this.oExpensesModel = this.getView().getModel("Expenses");
                 this.oScanningModel = this.getView().getModel("Scanning");
                 this._bInitialSorterApplied = false;
+                this._bInitialSorterApplied2 = false;
 
 
                 sessionStorage.setItem("goToLaunchpad", "X");
@@ -60,12 +61,6 @@ sap.ui.define([
                 this.onCheckLeader();
                 this.getCardValues();
                 sessionStorage.setItem("goToLaunchpad", "X");
-                if (sessionStorage.getItem("selectedTheme").indexOf("dark") !== -1) {
-                    jQuery(".sapUiBlockLayer, .sapUiLocalBusyIndicator").css("background-color", "rgba(28,34,40,0.99)");
-                }
-                else {
-                    jQuery(".sapUiBlockLayer, .sapUiLocalBusyIndicator").css("background-color", "rgba(255, 255, 255, 0.99)");
-                }
             },
 
             /**
@@ -96,7 +91,7 @@ sap.ui.define([
 
                     case "CardMovements":
                         this.getSumMonth();
-                        this.getSumYear();
+                        // this.getSumYear();
                         this.onPressCloseDetail();
                         oNavContainer.to(this.byId("pageCardMovements"));
                         oToolPage.setSideExpanded(false);
@@ -131,8 +126,11 @@ sap.ui.define([
             onBeforeRebindTable: function (oEvent) {
                 var oBindingParams = oEvent.getParameter("bindingParams");
 
-                if (!this._bInitialSorterApplied) {
-                    oBindingParams.sorter = [new sap.ui.model.Sorter("Erdat", true)];
+                if (!this._bInitialSorterApplied2) {
+                    oBindingParams.sorter.push(
+                        new sap.ui.model.Sorter("Erdat", true)
+                    );
+                    this._bInitialSorterApplied2 = true;
                 }
             },
 
