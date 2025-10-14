@@ -137,46 +137,6 @@ sap.ui.define([
             },
 
             /**
-             * Open reason dialog.
-             * @param {sap.ui.base.Event} oEvent
-             */
-            onPressReason: function (oEvent) {
-                try {
-                    var oIcon = oEvent.getSource(),
-                        sReasonText = oIcon.getBindingContext().getProperty("Reason");
-
-                    if (!this._oReasonDialog) {
-                        this._oReasonDialog = new sap.m.Dialog({
-                            title: "Motivo",
-                            content: new sap.m.VBox({
-                                items: [
-                                    new sap.m.Text({ text: sReasonText, textAlign: "Center" })
-                                ],
-                                justifyContent: "Center",
-                                alignItems: "Center"
-                            }),
-                            beginButton: new sap.m.Button({
-                                text: this.getResourceBundle().getText("btnClose"),
-                                press: function () {
-                                    this._oReasonDialog.close();
-                                }.bind(this)
-                            })
-                        });
-                        this.getView().addDependent(this._oReasonDialog);
-                    } else {
-                        this._oReasonDialog.getContent()[0].getItems()[0].setText(sReasonText);
-                    }
-
-                    this._oReasonDialog.open();
-                } catch (error) {
-                    this.showErrorMessage({
-                        oText: error.message,
-                        oTitle: this.getResourceBundle().getText("errorTitle")
-                    });
-                }
-            },
-
-            /**
              * Open upload dialog.
              * @param {sap.ui.base.Event} oEvent
              */

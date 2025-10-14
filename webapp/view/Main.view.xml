@@ -107,12 +107,6 @@
                                         </Column>
                                         <Column>
                                             <customData>
-                                                <core:CustomData key="p13nData" value='{"columnKey":"Reason","leadingProperty":"Reason","type":"text","sortable":true,"filterable":true}'/>
-                                            </customData>
-                                            <Text text="{i18n>Reason}" />
-                                        </Column>
-                                        <Column>
-                                            <customData>
                                                 <core:CustomData key="p13nData" value='{"columnKey":"ExpNo","leadingProperty":"ExpNo","type":"text","sortable":true,"filterable":true}'/>
                                             </customData>
                                             <Text text="{i18n>ExpensesNo}" />
@@ -159,10 +153,6 @@
                                                         </detailBox>
                                                     </Avatar>
                                                     <core:Icon visible="{path: 'Doc', formatter: '.formatter.noExpDoc'}" src="sap-icon://upload-to-cloud" size="3rem" press="onUploadPressed"/>
-                                                </VBox>
-
-                                                <VBox>
-                                                    <core:Icon visible="{path: 'Reason', formatter: '.formatter.hasReason'}" src="sap-icon://comment" size="2rem" press="onPressReason" tooltip="{Reason}" />
                                                 </VBox>
                                                 <Link id="LinkDetail" text="{ExpNo}" press="handleExpensePress" />
                                                 <Text id="Pymtmeth" text="{PayMethodDsc}" />

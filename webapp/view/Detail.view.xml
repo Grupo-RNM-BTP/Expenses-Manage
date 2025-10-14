@@ -23,47 +23,6 @@
         </headerTitle>
 
         <headerContent>
-            <!-- <f:SimpleForm maxContainerCols="2" editable="false" layout="ColumnLayout" width="auto">
-                <f:content>
-                    <m:Label text="{i18n>Reference}"/>
-                    <m:Text text="{ExpNo}"/>
-
-                    <m:Label text="{i18n>DocumentName}"/>
-                    <m:Text id="DocNumber" text="{Belnr}"/>
-
-                    <m:Label text="{i18n>CompanyCode}"/>
-                    <m:Text id="CompanyCode" text="{CompanyCode} ({CompanyDsc})"/>
-
-                    <m:Label text="{i18n>FiscalYear}"/>
-                    <m:Text id="FiscalYear" text="{FiscalYear}"/>
-
-                    <m:Label text="{i18n>Nif}"/>
-                    <m:Text text="{Nif}"/>
-
-                    <m:Label text="{i18n>ExpType}"/>
-                    <m:Text text="{ExpTypeDsc}"/>
-
-                    <m:Label text="{i18n>Amount}"/>
-                    <m:Text text="{Value} {Waers}"/>
-
-                    <m:Label text="{i18n>Country}"/>
-                    <m:Text text="{Land1Desc}"/>
-
-                    <m:Label text="{i18n>ExpPyMethod}"/>
-                    <m:Text text="{PayMethodDsc}"/>
-
-                    <m:Label text="{i18n>CreationDate}"/>
-                    <m:Text text="{ path: 'Sdate', formatter: '.formatter.formatDateToDDMMYYYY' }" />
-
-                    <m:Label text="{i18n>CreatedBy}"/>
-                    <m:Text text="{Ernam}"/>
-
-                    <m:Label text="{i18n>Status}"/>
-                    <m:ObjectStatus text="{path: 'FiStatus', formatter: '.formatter.statusText'}" state="{path: 'FiStatus', formatter: '.formatter.statusState'}" icon="{path: 'FiStatus', formatter: '.formatter.statusIcon'}" iconDensityAware="false" active="false"/>
-                    <m:Text text="{FiStatus}" visible="false" id="StatusNo"/>
-                </f:content>
-            </f:SimpleForm> -->
-
             <f:SimpleForm id="invoiceForm" maxContainerCols="2" editable="false" layout="ColumnLayout" width="auto">
                 <f:content>
 
@@ -75,13 +34,7 @@
                     <m:Label text="{i18n>Reference}"/>
                     <m:Text text="{ExpNo}"/>
 
-                    <!-- <m:Label text="{i18n>DocumentName}"/>
-                    <m:Text id="DocNumber" text="{Belnr}"/>
-
-                    <m:Label text="{i18n>FiscalYear}"/>
-                    <m:Text id="FiscalYear" text="{FiscalYear}"/> -->
-
-                    <m:Label text="{i18n>CreationDate}"/>
+                    <m:Label text="{i18n>IssueDate}"/>
                     <m:Text text="{ path: 'Sdate', formatter: '.formatter.formatDateToDDMMYYYY' }"/>
 
                     <m:Label text="{i18n>CreatedBy}"/>
