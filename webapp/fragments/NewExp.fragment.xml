@@ -62,8 +62,8 @@
                                                                       || ((${Expenses>/exptype} || '').indexOf('LAVCISE') > -1)  
                                                                       || ((${Expenses>/exptype} || '').indexOf('MANVTR')  > -1)
                                                                       || ((${Expenses>/exptype} || '').indexOf('COMBST')  > -1)
-                                                                      || ((${Expenses>/exptype} || '').indexOf('PORTAG')  > -1)
-                                                                      || ((${Expenses>/exptype} || '').indexOf('ESTACN')  > -1)  }" required="true"/>
+                                                                      || ((${Expenses>/exptype} || '').indexOf('PORTA')  > -1)
+                                                                      || ((${Expenses>/exptype} || '').indexOf('ESTACI')  > -1)  }" required="true"/>
 
                         <Label text="{i18n>xexp.expFuelQuantity}"/>
                         <Input id="expenseDialog:inputFuelQuantity" type="Number" visible="{= (${Expenses>/exptype} || '').indexOf('COMBST') > -1 }" required="true"/>

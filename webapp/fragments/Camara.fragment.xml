@@ -14,7 +14,7 @@
                             &lt;path d="M21 15l-5-5L5 21"/&gt;
                         &lt;/svg&gt;
                     &lt;/label&gt;
-                    &lt;input type="file" id="fileUploader" accept="image/*" style="display:none" /&gt;
+                    &lt;input type="file" id="fileUploader" accept="image/*,application/pdf" style="display:none" /&gt;
 
                     &lt;button id="settingsBtn" aria-label="Settings" title="Settings" style="position:absolute;top:20px;right:80px;width:50px;height:50px;border-radius:50%;border:none;background:transparent;color:white;cursor:pointer;user-select:none;"&gt;
                         &lt;svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"&gt;

@@ -1520,6 +1520,7 @@ sap.ui.define([
                     const oObject = oContext.getObject();
 
                     const isEur = oObject.Waers === "EUR";
+                    const isPartOfEU = oObject.IsPartOfEU === true || oObject.IsPartOfEU === "X";
                     const text = this.getResourceBundle().getText("xexp.expValueWithCurr", [oObject.WaersDesc, oObject.Waers]);
 
                     if (!isEur && oObject.WaersDesc && oObject.Waers) {
@@ -1529,6 +1530,8 @@ sap.ui.define([
                             this.getResourceBundle().getText("xexp.expValue2")
                         );
                     }
+
+                    Fragment.byId(viewId, "expenseDialog:inputNif").setVisible(isPartOfEU ? true : false);
                 } catch (sError) {
                     this.handleErrorMessage(sError);
                 }
