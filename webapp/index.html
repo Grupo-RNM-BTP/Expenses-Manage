@@ -15,11 +15,44 @@
             height: 100%;
         }
     </style>
-    <script id="sap-ui-bootstrap" src="resources/sap-ui-core.js" data-sap-ui-theme="sap_horizon"
+    <script>
+        function getSapUiCoreSrc() {
+            var hostname = window.location.hostname;
+
+            if (hostname.includes("sap.grupornm.pt")) {
+                return "https://sap.grupornm.pt:44300/sap/bc/ui5_ui5/sap/zca_auth/resources/sap-ui-core.js";
+            } else if (hostname.includes("sapdev.grupornm.pt")) {
+                return "https://sapdev.grupornm.pt:44300/sap/bc/ui5_ui5/sap/zca_auth/resources/sap-ui-core.js";
+            } else {
+                return "resources/sap-ui-core.js";
+            }
+        }
+
+        var script = document.createElement('script');
+        script.id = "sap-ui-bootstrap";
+        script.src = getSapUiCoreSrc();
+        script.setAttribute('data-sap-ui-theme', 'sap_horizon');
+        script.setAttribute('data-sap-ui-resourceroots', '{"zfiexpensesmanage": "."}');
+        script.setAttribute('data-sap-ui-oninit', 'module:sap/ui/core/ComponentSupport');
+        script.setAttribute('data-sap-ui-compatVersion', 'edge');
+        script.setAttribute('data-sap-ui-async', 'true');
+        script.setAttribute('data-sap-ui-frameOptions', 'trusted');
+
+        document.head.appendChild(script);
+
+        var selectedTheme = sessionStorage.getItem("selectedTheme") || "sap_horizon";
+        var selectedLanguage = sessionStorage.getItem("oLangu") || "EN";
+
+        script.onload = function () {
+            sap.ui.getCore().applyTheme(selectedTheme);
+            sap.ui.getCore().getConfiguration().setLanguage(selectedLanguage);
+        };
+    </script>
+    <!-- <script id="sap-ui-bootstrap" src="resources/sap-ui-core.js" data-sap-ui-theme="sap_horizon"
         data-sap-ui-resourceroots='{
             "zfiexpensesmanage": "./"
         }' data-sap-ui-oninit="module:sap/ui/core/ComponentSupport" data-sap-ui-compatVersion="edge"
-        data-sap-ui-async="true" data-sap-ui-frameOptions="trusted" data-sap-ui-appCacheBuster="true"></script>
+        data-sap-ui-async="true" data-sap-ui-frameOptions="trusted" data-sap-ui-appCacheBuster="true"></script> -->
 </head>
 
 <body class="sapUiBody sapUiSizeCompact" id="content">

@@ -45,17 +45,28 @@
                         <Title text="{i18n>xexp.expTechTitle}"/>
 
                         <Label text="{i18n>xexp.expType}"/>
-                        <Select id="expenseDialog:selectExpType" selectedKey="{Expenses>/exptype}" items="{ path: '/ZFI_EXPENSES_TYPES' }" required="true" change=".onExpTypeChange">
+                        <Select id="expenseDialog:selectExpType" selectedKey="{Expenses>/exptype}" required="true" change=".onExpTypeChange">
                             <items>
                                 <core:Item key="{Exptype}" text="{Description}" />
                             </items>
                         </Select>
-                        <Label text="{i18n>xexp.expBP}"/>
-                        <Select id="expenseDialog:selectBP" items="{ path: '/I_BusinessPartner' }" required="true" visible="{= (${Expenses>/exptype} || '').indexOf('DESREP') > -1 }">
+                        
+                        <Label text="{i18n>xexp.expSubType}"/>
+                        <Select id="expenseDialog:selectExpSubType" items="{ path: '/ZFI_EXPENSES_SUBTYPE' }" visible="{= (${Expenses>/exptype} || '').indexOf('REF') > -1 }" required="true">
                             <items>
-                                <core:Item key="{BusinessPartner}" text="{BusinessPartnerName}" />
+                                <core:Item key="{ExpSubType}" text="{Description}" />
                             </items>
                         </Select>
+
+                        <Label text="{i18n>xexp.expBP}"/>
+                        <Input id="expenseDialog:selectBP" showValueHelp="true" valueHelpRequest="handleOpenPartnerVH" required="true" visible="{= (${Expenses>/exptype} || '').indexOf('DESREP') > -1 || (${Expenses>/exptype} || '').indexOf('UE') > -1 }">
+                            <customData>
+                                <core:CustomData key="BPKey" value=""/>
+                            </customData>
+                            <suggestionItems>
+                                <core:Item key="{BusinessPartner}" text="{BusinessPartnerName}" />
+                            </suggestionItems>
+                        </Input>
 
                         <Label text="{i18n>xexp.expPlate}"/>
                         <Input id="expenseDialog:inputPlate" visible="{= ((${Expenses>/exptype} || '').indexOf('LAVCIS')  > -1)  
@@ -63,10 +74,11 @@
                                                                       || ((${Expenses>/exptype} || '').indexOf('MANVTR')  > -1)
                                                                       || ((${Expenses>/exptype} || '').indexOf('COMBST')  > -1)
                                                                       || ((${Expenses>/exptype} || '').indexOf('PORTA')  > -1)
-                                                                      || ((${Expenses>/exptype} || '').indexOf('ESTACI')  > -1)  }" required="true"/>
+                                                                      || ((${Expenses>/exptype} || '').indexOf('ESTACI')  > -1)  
+                                                                      || ((${Expenses>/exptype} || '').indexOf('UE')  > -1)  }" required="true"/>
 
                         <Label text="{i18n>xexp.expFuelQuantity}"/>
-                        <Input id="expenseDialog:inputFuelQuantity" type="Number" visible="{= (${Expenses>/exptype} || '').indexOf('COMBST') > -1 }" required="true"/>
+                        <Input id="expenseDialog:inputFuelQuantity" type="Number" visible="{= (${Expenses>/exptype} || '').indexOf('COMBST') > -1 || (${Expenses>/exptype} || '').indexOf('UE') > -1 }" required="true"/>
 
                         <Label text="{i18n>xexp.expPymtMeth}"/>
                         <Select id="expenseDialog:selectPymtMeth" items="{ path: '/ZFI_EXPENSES_PYMTMETH' }" required="true">
@@ -82,7 +94,7 @@
                         <StepInput id="expenseDialog:inputUnit" min="1" max="100" step="1" value="1" visible="{Expenses>/unitVisible}" textAlign="Center" width="120px"/>
 
                         <Label text="" visible="false"/>
-                        <Title text="{i18n>xexp.expVatTable}" level="H6" class="sapUiSmallMarginTop"/>
+                        <Title id="expenseDialog:titleVatTable" text="{i18n>xexp.expVatTable}" level="H6" class="sapUiSmallMarginTop"/>
 
                         <Label text="" visible="false"/>
                         <Table id="expenseDialog:vatTable" items="{path: 'Expenses>/vatLines'}" width="auto">
@@ -145,7 +157,7 @@
                         <Label text=""/>
                         <Text text="{i18n>xexp.expAttn}" class="sapMText sapUiSelectable sapUshellFlpSettingsHint"/>
 
-                        <Label text="{i18n>xexp.expAttachment}" />
+                        <Label id="expenseDialog:labelAttachment" text="{i18n>xexp.expAttachment}" />
                         <HBox alignItems="Center" justifyContent="Start">
                             <u:FileUploader id="fileUploader" width="200px" visible="{= !${Expenses>/capturedImage} }" uploadOnChange="false" placeholder="{i18n>xexp.expSelectFile}" buttonText="{i18n>xexp.expBrowse}" change=".onFileSelected"/>
                             <Image src="{Expenses>/capturedImage}" width="230px" height="200px" visible="{= !!${Expenses>/capturedImage} }" class="sapUiTinyMarginBegin">

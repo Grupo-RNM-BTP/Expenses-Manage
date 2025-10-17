@@ -1,0 +1,56 @@
+<core:FragmentDefinition xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:layout="sap.ui.layout">
+
+    <Dialog id="businessPartnerDialog" title="{i18n>Reconcile}" contentWidth="1500px" contentHeight="400px" initialFocus="beginButton" class="sapUiSizeCompact sapUiNoContentPadding" stretchOnPhone="false">
+
+        <VBox class="sapUiSmallMargin sapUiNoContentPadding">
+
+            <MessageStrip text="{i18n>ReconcileMessage}" type="Information" showIcon="true" showCloseButton="false" class="sapUiSmallMarginBottom" />
+
+            <Table id="reconcileTable" mode="MultiSelect" inset="false" width="100%" demandPopin="true" class="sapUiResponsiveContentPadding" fixedLayout="false" growing="true" growingThreshold="7" items="{Main>/ExpensesReconciled}">
+                <columns>
+                    <Column minScreenWidth="Tablet" demandPopin="true" hAlign="Center" width="7rem">
+                        <Text text="{i18n>ExpNo}" />
+                    </Column>
+                    <Column minScreenWidth="Small" demandPopin="true">
+                        <Text text="{i18n>DocumentHeader}" />
+                    </Column>
+                    <Column minScreenWidth="Small" demandPopin="true">
+                        <Text text="{i18n>ExpTypeDsc}" />
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true">
+                        <Text text="{i18n>PayMethodDsc}" />
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true" hAlign="End">
+                        <Text text="{i18n>Value}" />
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true" hAlign="End">
+                        <Text text="{i18n>Sdate}" />
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem type="Active">
+                        <cells>
+                            <Text text="{Main>ExpNo}" />
+                            <Text text="{Main>DocumentHeader}" />
+                            <Text text="{Main>ExpTypeDsc}" />
+                            <Text text="{Main>PayMethodDsc}" />
+                            <ObjectNumber number="{Main>Value}" unit="{Main>Waers}" />
+                            <Text text="{Main>VYearMonthDay}" />
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </VBox>
+
+        <endButton>
+            <Button text="{i18n>xexp.expCancel}" press=".onCancelReconcile" />
+        </endButton>
+
+        <beginButton>
+            <Button text="{i18n>Reconcile}" type="Emphasized" press=".onReconcile" />
+        </beginButton>
+
+    </Dialog>
+</core:FragmentDefinition>

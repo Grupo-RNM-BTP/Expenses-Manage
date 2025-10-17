@@ -27,6 +27,7 @@
                 <tnt:NavigationList selectedKey="Manage">
                     <tnt:NavigationListItem text="{i18n>ManageExpenses}" key="Manage" icon="sap-icon://credit-card"/>
                     <tnt:NavigationListItem text="{i18n>OverviewExpenses}" key="CardMovements" icon="sap-icon://collections-insight"/>
+                    <tnt:NavigationListItem text="{i18n>TransactionReconciliation}" key="TransRecon" icon="sap-icon://unpaid-leave"/>
                     <tnt:NavigationListItem id="idApproveExpenses" text="{i18n>ApproveExpenses}" visible="false" key="ApproveExpenses" icon="sap-icon://accept"/>
                 </tnt:NavigationList>
             </tnt:SideNavigation>
@@ -232,6 +233,22 @@
                                 </Table>
                             </smartTable:SmartTable>
                         </VBox>
+                    </ScrollContainer>
+
+                    <ScrollContainer id="pageTransRecon" horizontal="false" vertical="true" height="100%">
+                        <smartTable:SmartTable id="smartTableTransRecon" entitySet="ZFI_EXPENSES_RECON" smartFilterId="smartFilterBar"  beforeRebindTable="onBeforeRebindTableRecon" tableType="ResponsiveTable" demandPopin="true" useVariantManagement="true" useTablePersonalisation="true" header="{i18n>TransactionReconciliation}" showRowCount="true" persistencyKey="SmartTable" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
+                            <smartTable:customToolbar>
+                                <OverflowToolbar design="Transparent">
+                                    <ToolbarSpacer/>
+                                    <Button text="{i18n>ExpensesWithoutAttach}"  enabled="true" type="Emphasized" press="handleExpenseWithoutAttach" />
+                                    <Button text="{i18n>Reconcile}"   enabled="true" type="Default" press="handleReconcile" />
+                                </OverflowToolbar>
+                            </smartTable:customToolbar>
+                            <Table class="sapUiResponsiveContentPadding" mode="SingleSelectLeft" growing="true" growingThreshold="50">
+                                <ColumnListItem vAlign="Middle">
+                                </ColumnListItem>
+                            </Table>
+                        </smartTable:SmartTable>
                     </ScrollContainer>
 
                     <ScrollContainer id="pageApprovals" horizontal="false" vertical="true" height="100%">

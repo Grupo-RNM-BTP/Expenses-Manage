@@ -37,7 +37,7 @@ sap.ui.define([], function () {
          */
         hasReason: function (sReason) {
             return !!sReason;
-        }, 
+        },
 
         /**
          * Get status text.
@@ -181,6 +181,24 @@ sap.ui.define([], function () {
             });
 
             return oDateFormat.format(oDate);
+        },
+
+        formatDate: function (sValue) {
+            if (!sValue) {
+                return "";
+            }
+
+            let oDate = (sValue instanceof Date) ? sValue : new Date(sValue);
+
+            if (isNaN(oDate.getTime())) {
+                return sValue; 
+            }
+
+            const dd = String(oDate.getDate()).padStart(2, "0");
+            const mm = String(oDate.getMonth() + 1).padStart(2, "0");
+            const yyyy = oDate.getFullYear();
+
+            return `${dd}.${mm}.${yyyy}`;
         }
     };
 });

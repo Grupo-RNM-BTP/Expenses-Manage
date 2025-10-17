@@ -189,53 +189,6 @@ sap.ui.define([
         },
 
         /**
-         * Fetch sum of expenses year from backend and update view.
-         */
-        // getSumYear: function () {
-        //     try {
-        //         var oModel = this.getView().getModel(),
-        //             oGraficoModel = this.getView().getModel("graficoModel"),
-        //             iAnoAtual = new Date().getFullYear();
-
-        //         oModel.read("/ZFI_EXPENSES_BCP2", {
-        //             success: function (oData) {
-        //                 var aResults = oData.results;
-
-        //                 var oAnoAtual = aResults.find(function (entry) {
-        //                     return parseInt(entry.VYear) === iAnoAtual;
-        //                 });
-
-        //                 if (oAnoAtual) {
-        //                     var fAmount = parseFloat(oAnoAtual.Amount) || 0;
-        //                     oGraficoModel.setProperty("/totalAno", fAmount);
-        //                     oGraficoModel.setProperty("/moeda", oAnoAtual.Currency || "");
-        //                 } else {
-        //                     oGraficoModel.setProperty("/totalAno", 0);
-        //                     oGraficoModel.setProperty("/moeda", "");
-        //                 }
-        //             }.bind(this),
-
-        //             error: function (oError) {
-        //                 var sError = JSON.parse(oError.responseText).error.message.value;
-        //                 sap.m.MessageBox.alert(sError, {
-        //                     icon: "ERROR",
-        //                     onClose: null,
-        //                     styleClass: '',
-        //                     initialFocus: null,
-        //                     textDirection: sap.ui.core.TextDirection.Inherit
-        //                 });
-        //             }.bind(this)
-        //         });
-
-        //     } catch (error) {
-        //         this.showErrorMessage({
-        //             oText: error.message,
-        //             oTitle: this.getResourceBundle().getText("errorTitle")
-        //         });
-        //     }
-        // },
-
-        /**
          * Fetch sum of expenses month from backend and update view.
          */
         getSumMonth: function () {

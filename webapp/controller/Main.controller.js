@@ -23,7 +23,8 @@ sap.ui.define([
              */
             onInit: function () {
                 var oModel = new JSONModel({
-                    ExpNo: ""
+                    ExpNo: "",
+                    ExpensesReconciled: []
                 });
                 this.getView().setModel(oModel, "Main");
                 this.getView().setModel(new JSONModel({}), "graficoModel");
@@ -34,7 +35,7 @@ sap.ui.define([
                 this._cancel = false;
 
                 this.getView().setModel(new JSONModel(), "Camera");
-                this.getView().setModel(new JSONModel({ vatLines: [], vatEditMode: true, unitVisible: false }), "Expenses");
+                this.getView().setModel(new JSONModel({ vatLines: [], vatEditMode: true, unitVisible: false, processingDialogBtnVisible: true }), "Expenses");
 
                 this.getView().setModel(new JSONModel({ aiScan: true }), "Scan");
 
@@ -48,6 +49,7 @@ sap.ui.define([
                 this.oScanningModel = this.getView().getModel("Scanning");
                 this._bInitialSorterApplied = false;
                 this._bInitialSorterApplied2 = false;
+                this._bInitialSorterApplied3 = false;
 
 
                 sessionStorage.setItem("goToLaunchpad", "X");
@@ -91,9 +93,13 @@ sap.ui.define([
 
                     case "CardMovements":
                         this.getSumMonth();
-                        // this.getSumYear();
                         this.onPressCloseDetail();
                         oNavContainer.to(this.byId("pageCardMovements"));
+                        oToolPage.setSideExpanded(false);
+                        break;
+
+                    case "TransRecon":
+                        oNavContainer.to(this.byId("pageTransRecon"));
                         oToolPage.setSideExpanded(false);
                         break;
 
@@ -413,6 +419,231 @@ sap.ui.define([
                 }
             },
 
+            //---------------------------------------------------------------------------------------------------------------------------------------------------------
+            //---------------------------------------------------------------------- Reconciliation -----------------------------------------------------------------
+            //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+            /**
+            * Apply initial sorter before table binding.
+            * @param {sap.ui.base.Event} oEvent
+            */
+            onBeforeRebindTableRecon: function (oEvent) {
+                var oBindingParams = oEvent.getParameter("bindingParams");
+
+                if (!this._bInitialSorterApplied3) {
+                    oBindingParams.sorter.push(
+                        new sap.ui.model.Sorter("Posteddt", true)
+                    );
+                    this._bInitialSorterApplied3 = true;
+                }
+            },
+
+            /**
+             * Handle expense without attach.
+             */
+            handleExpenseWithoutAttach: function () {
+                var oData = {},
+                    oTable = this.byId("smartTableTransRecon").getTable().getSelectedItems();
+
+                if (oTable.length === 0) {
+                    sap.m.MessageBox.error(this.getResourceBundle().getText("noSelection"),
+                        {
+                            icon: "ERROR",
+                            onClose: null,
+                            styleClass: '',
+                            initialFocus: null,
+                            textDirection: sap.ui.core.TextDirection.Inherit
+                        }
+                    );
+                    return;
+                }
+
+                oData.ExpNo = "";
+                oData.Valid = true;
+                oData.Nifc = "";
+                oData.Local = "";
+                oData.Nifs = "";
+                oData.Country = "PT";
+                oData.Fuelqty = "";
+                oData.TableIva = "";
+
+                var sFormattedDate = oTable[0].getBindingContext().getObject().sDateFromated,
+                    aParts = sFormattedDate.split("."),
+                    sDateForPicker = aParts[0] + "-" + aParts[1] + "-" + aParts[2];
+
+                oData.Date = new Date(sDateForPicker);
+                oData.Exptype = "UE";
+                oData.Amt = oTable[0].getBindingContext().getObject().Amt;
+
+                this.handleFinishProcess(oData, "M");
+            },
+
+            /**
+             * Handle reconcile.
+             */
+            handleReconcile: function () {
+                var oView = this.getView(),
+                    that = this,
+                    oTableItems = this.byId("smartTableTransRecon").getTable().getSelectedItems();
+
+                if (oTableItems.length === 0) {
+                    sap.m.MessageBox.error(this.getResourceBundle().getText("noSelection"),
+                        {
+                            icon: "ERROR",
+                            onClose: null,
+                            styleClass: '',
+                            initialFocus: null,
+                            textDirection: sap.ui.core.TextDirection.Inherit
+                        }
+                    );
+                    return;
+                }
+
+                if (!this._pReconcileDialog) {
+                    this._pReconcileDialog = Fragment.load({
+                        id: oView.getId(),
+                        name: "zfiexpensesmanage.fragments.Reconcile",
+                        controller: this
+                    }).then(function (oDialog) {
+                        oView.addDependent(oDialog);
+                        return oDialog;
+                    });
+                }
+
+                this.onGetExpenses().then(function (aFiltered) {
+                    if (aFiltered && aFiltered.length) {
+                        that._pReconcileDialog.then(function (oDialog) {
+                            oDialog.open();
+                        });
+                    } else {
+                        this.showErrorMessage({
+                            oText: this.getResourceBundle().getText("noRECON")
+                        });
+                    }
+                }).catch(function (oError) {
+                    return;
+                });
+            },
+
+            /**
+             * Get expenses.
+             */
+            onGetExpenses: function () {
+                var oModel = this.getModel(),
+                    sPath = "/ZFI_EXPENSES_MNG",
+                    that = this;
+
+                this.getView().getModel("Main").setProperty("/ExpensesReconciled", []);
+                this.getModel("global").setProperty("/busy", true);
+
+                return new Promise(function (resolve, reject) {
+                    oModel.read(sPath, {
+                        success: function (oData) {
+                            var aFiltered = oData.results.filter(o => o.Checknum === "");
+                            that.getView().getModel("Main").setProperty("/ExpensesReconciled", aFiltered);
+                            that.getModel("global").setProperty("/busy", false);
+                            resolve(aFiltered);
+                        },
+                        error: function (oError) {
+                            this.getModel("global").setProperty("/busy", false);
+                            var sError = JSON.parse(oError.responseText).error.message.value;
+                            sap.m.MessageBox.alert(sError, {
+                                icon: "ERROR",
+                                onClose: null,
+                                styleClass: '',
+                                initialFocus: null,
+                                textDirection: sap.ui.core.TextDirection.Inherit
+                            });
+                            reject(oError);
+                        }
+                    });
+                });
+            },
+
+            /**
+             * Handle reconcile.
+             */
+            onReconcile: function () {
+                var oModel = this.getModel(),
+                    oGlobalModel = this.getModel("global"),
+                    oTableSmart = this.byId("smartTableTransRecon").getTable(),
+                    oTable = this.byId("reconcileTable"),
+                    aSelectedReconItems = oTable.getSelectedItems(),
+                    aSelectedSmartItems = oTableSmart.getSelectedItems();
+
+                if (!aSelectedReconItems.length) {
+                    sap.m.MessageBox.error(this.getResourceBundle().getText("noSelection"),
+                        {
+                            icon: "ERROR",
+                            onClose: null,
+                            styleClass: '',
+                            initialFocus: null,
+                            textDirection: sap.ui.core.TextDirection.Inherit
+                        }
+                    );
+                    return;
+                }
+
+                var oSmartCtx = aSelectedSmartItems[0].getBindingContext(),
+                    oSmartData = oSmartCtx.getObject(),
+                    sAmt = oSmartData.Amt,
+                    sFormattedDate = oSmartData.sDateFromated,
+                    aParts = sFormattedDate.split("."),
+                    sDateForPicker = aParts[0] + aParts[1] + aParts[2];
+
+                var aReconcileData = aSelectedReconItems.map(oItem => {
+                    var oCtx = oItem.getBindingContext("Main");
+                    var oObj = oCtx.getObject();
+
+                    return {
+                        Amt: sAmt,
+                        Posteddt: sDateForPicker,
+                        ExpNo: oObj.ExpNo
+                    };
+                });
+
+                var oEntry = {
+                    Data: JSON.stringify(aReconcileData)
+                };
+
+                var sPath = "/ReconcileExpense";
+
+                oGlobalModel.setProperty("/busy", true);
+                oModel.create(sPath, oEntry, {
+                    success: function () {
+                        this.getView().getModel("Main").setProperty("/ExpensesReconciled", []);
+                        this.onCancelReconcile();
+                        oTableSmart.removeSelections();
+                        sap.m.MessageBox.success(this.getResourceBundle().getText("reconciledSucess"));
+                        oGlobalModel.setProperty("/busy", false);
+                        oModel.refresh(true);
+                    }.bind(this),
+                    error: function (oError) {
+                        oGlobalModel.setProperty("/busy", false);
+                        var sError = JSON.parse(oError.responseText).error.message.value;
+                        sap.m.MessageBox.alert(sError, {
+                            icon: "ERROR",
+                            onClose: null,
+                            styleClass: '',
+                            initialFocus: null,
+                            textDirection: sap.ui.core.TextDirection.Inherit
+                        });
+                    }.bind(this)
+                });
+            },
+
+            /**
+             * Handle cancel reconcile.
+             */
+            onCancelReconcile: function () {
+                if (this._pReconcileDialog) {
+                    this._pReconcileDialog.then(function (oDialog) {
+                        oDialog.close();
+                        oDialog.destroy();
+                    });
+                    this._pReconcileDialog = null;
+                }
+            },
 
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
             //---------------------------------------------------------------------- Leader Management -----------------------------------------------------------------
@@ -558,7 +789,6 @@ sap.ui.define([
                 })
             },
 
-
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
             //---------------------------------------------------------------------- New Expense ----------------------------------------------------------------------
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -597,7 +827,6 @@ sap.ui.define([
                 }
                 return parseInt(vValue, 10);
             },
-
 
             /**
              * Validates required fields.
@@ -715,10 +944,10 @@ sap.ui.define([
             /**
              * Adds a new VAT line to the expense entry dialog.
              */
-            onAddVatLine: function () {
+            onAddVatLine: function (sT, sB) {
                 var aVatLines = this.oExpensesModel.getProperty("/vatLines");
 
-                aVatLines.push({ p: "", v: "" });
+                aVatLines.push({ p: "", t: sT, v: "", b: sB });
                 this.oExpensesModel.setProperty("/vatLines", aVatLines);
 
                 var idx = aVatLines.length;
@@ -836,7 +1065,7 @@ sap.ui.define([
             /**
              * Loads and opens the expense entry dialog fragment
              */
-            handleFinishProcess: function (oData) {
+            handleFinishProcess: function (oData, oAction) {
                 var that = this,
                     oView = this.getView();
 
@@ -852,6 +1081,17 @@ sap.ui.define([
                 }
 
                 this._pExpenseDialog.then(function (oDialog) {
+                    if (oAction === "M") {
+                        that.handleStateFields();
+                    } else {
+                        Fragment.byId(oView.getId(), "expenseDialog:selectExpType").bindItems({
+                            path: "/ZFI_EXPENSES_TYPES",
+                            template: new sap.ui.core.Item({
+                                key: "{Exptype}",
+                                text: "{Description}"
+                            })
+                        });
+                    }
 
                     if (oData) {
                         that.handleSetValues(oData);
@@ -862,7 +1102,6 @@ sap.ui.define([
                         that.onAddVatLine();
                         that.oExpensesModel.setProperty("/vatEditMode", true);
                     }
-
                     oDialog.open();
 
                     that.handleSetupFieldsLogging();
@@ -876,6 +1115,39 @@ sap.ui.define([
                         });
                     }
                 });
+            },
+
+            /**
+             * Handles the state fields of the expense entry dialog when the action is "M"
+             */
+            handleStateFields: function () {
+                var oView = this.getView();
+                var fnById = (id) => Fragment.byId(oView.getId(), id);
+
+                fnById("expenseDialog:selectExpType").bindItems({
+                    path: "/ZFI_EXPENSES_TYPES3",
+                    template: new sap.ui.core.Item({
+                        key: "{Exptype}",
+                        text: "{Description}"
+                    })
+                });
+
+                fnById("expenseDialog:inputExpNo").setRequired(false);
+                fnById("expenseDialog:inputLocal").setRequired(false);
+                fnById("expenseDialog:datePicker").setEnabled(false);
+                fnById("expenseDialog:inputNif").setRequired(false);
+                fnById("expenseDialog:selectCountry").setRequired(false);
+                fnById("expenseDialog:selectExpType").setEnabled(false);
+                fnById("expenseDialog:selectExpSubType").setRequired(false);
+                fnById("expenseDialog:selectBP").setRequired(false);
+                fnById("expenseDialog:inputPlate").setRequired(false);
+                fnById("expenseDialog:inputFuelQuantity").setRequired(false);
+                fnById("expenseDialog:selectPymtMeth").setEnabled(false);
+                fnById("expenseDialog:inputAmt").setEnabled(false);
+                fnById("expenseDialog:titleVatTable").setVisible(false);
+                fnById("expenseDialog:vatTable").setVisible(false);
+                fnById("expenseDialog:labelAttachment").setVisible(false);
+                fnById("fileUploader").setVisible(false);
             },
 
             /**
@@ -897,10 +1169,6 @@ sap.ui.define([
                 Fragment.byId(oView.getId(), "expenseDialog:inputFuelQuantity").setValue(oData.Fuelqty);
                 Fragment.byId(oView.getId(), "expenseDialog:inputAmt").setValue(oData.Amt);
 
-                if (oData.Exptype) {
-                    this.oExpensesModel.setProperty("/exptype", oData.Exptype);
-                }
-
                 if (oData.Date) {
                     Fragment.byId(oView.getId(), "expenseDialog:datePicker").setDateValue(oData.Date);
                 } else {
@@ -921,7 +1189,11 @@ sap.ui.define([
                         this.oExpensesModel.setProperty("/vatLines", aVatNorm);
                         this.oExpensesModel.setProperty("/vatEditMode", false);
                     } else {
-                        this.onAddVatLine();
+                        if (oData.Exptype === "UE") {
+                            this.onAddVatLine("ISE", oData.Amt);
+                        } else {
+                            this.onAddVatLine("", "");
+                        }
                     }
                 } catch (e) {
                     this.oExpensesModel.setProperty("/vatLines", []);
@@ -933,7 +1205,7 @@ sap.ui.define([
             /**
              * Finishes the expense creation process
              */
-            onFinishProcess: function () {
+            onFinishProcess: async function () {
                 this._bSubmit = true;
 
                 const sIds = [
@@ -943,6 +1215,7 @@ sap.ui.define([
                     "expenseDialog:inputNif",
                     "expenseDialog:selectCountry",
                     "expenseDialog:selectExpType",
+                    "expenseDialog:selectExpSubType",
                     "expenseDialog:selectBP",
                     "expenseDialog:inputPlate",
                     "expenseDialog:inputFuelQuantity",
@@ -951,14 +1224,37 @@ sap.ui.define([
                     "expenseDialog:inputUnit",
                     "expenseDialog:vatTable"
                 ];
+                var oView = this.getView(),
+                    sExpType = Fragment.byId(oView.getId(), "expenseDialog:selectExpType").getSelectedKey(),
+                    sAmt = Fragment.byId(oView.getId(), "expenseDialog:inputAmt").getValue(),
+                    sTotal = parseFloat((sAmt * 1.5).toFixed(2));
 
-                if (!this.handleValidateRequiredFields(sIds)) {
-                    return;
+                if (sExpType !== "UE") {
+                    if (!this.handleValidateRequiredFields(sIds)) {
+                        return;
+                    }
                 }
 
+                if (sExpType === "UE") {
+                    var bContinue = await new Promise(resolve => {
+                        sap.m.MessageBox.confirm(this.getResourceBundle().getText("confirmUE") + " " + sTotal + this.getResourceBundle().getText("confirmUE2"),
+                            {
+                                icon: sap.m.MessageBox.Icon.WARNING,
+                                actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO],
+                                emphasizedAction: sap.m.MessageBox.Action.YES,
+                                onClose: function (sAction) {
+                                    resolve(sAction === sap.m.MessageBox.Action.YES);
+                                }
+                            }
+                        );
+                    });
 
-                var oView = this.getView(),
-                    oModel = oView.getModel(),
+                    if (!bContinue) {
+                        return;
+                    }
+                }
+
+                var oModel = oView.getModel(),
                     that = this,
                     oEntry = {};
 
@@ -997,9 +1293,15 @@ sap.ui.define([
                 }
 
                 if (Fragment.byId(oView.getId(), "expenseDialog:selectBP").getVisible()) {
-                    const sValue = Fragment.byId(oView.getId(), "expenseDialog:selectBP").getSelectedKey();
+                    const sValue = Fragment.byId(oView.getId(), "expenseDialog:selectBP").data("BPKey");
 
                     oEntry.Partner = String(sValue);
+                }
+
+                if (Fragment.byId(oView.getId(), "expenseDialog:selectExpSubType").getVisible()) {
+                    const sValue = Fragment.byId(oView.getId(), "expenseDialog:selectExpSubType").getSelectedKey();
+
+                    oEntry.Expsubtype = String(sValue);
                 }
 
                 this.handleCheckTaxID(oEntry.Nif).then(function (canProceed) {
@@ -1055,8 +1357,15 @@ sap.ui.define([
                 return new Promise(function (resolve) {
                     var isValidEmpty = bValid === "" || bValid === null || bValid === undefined || bValid === false;
 
-                    if (sNifCompany && isValidEmpty) {
-                        sap.m.MessageBox.warning(that.getResourceBundle().getText("xexp.expNifMismatch", [sNifCompany]), {
+                    if (isValidEmpty) {
+                        var sMessage;
+                        if (!sNifCompany) {
+                            sMessage = that.getResourceBundle().getText("xexp.expNifMismatch2");
+                        } else {
+                            sMessage = that.getResourceBundle().getText("xexp.expNifMismatch", [sNifCompany]);
+                        }
+
+                        sap.m.MessageBox.warning(sMessage, {
                             actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
                             emphasizedAction: sap.m.MessageBox.Action.OK,
                             onClose: function (oAction) {
@@ -1078,7 +1387,7 @@ sap.ui.define([
                 this.oScanningModel.setProperty("/description", this.getResourceBundle().getText("xexp.expSuccessDescription"));
 
                 this.handleOpenScanningFrgmnt();
-                this.byId("processingDialog:cancelBtn").setVisible(false);
+                this.getView().getModel("Expenses").setProperty("/processingDialogBtnVisible", false);
 
                 this.onCancelProcess(true);
 
@@ -1118,7 +1427,6 @@ sap.ui.define([
                     unitVisible: false
                 });
 
-                this.getView().getModel("Scan")?.setData({ aiScan: true });
                 this.getView().getModel("Scanning")?.setData({
                     title: "",
                     description: "",
@@ -1127,7 +1435,6 @@ sap.ui.define([
 
                 this.getView().getModel("Logs")?.setData({ entries: [] });
             },
-
 
             /**
              * Starts the device camera stream using the specified facing mode.
@@ -1300,7 +1607,7 @@ sap.ui.define([
                 oModel.create("/ReadImage", oEntry, {
                     success: (oData) => {
                         if (!this._cancel) {
-                            this.handleFinishProcess(oData);
+                            this.handleFinishProcess(oData, "A");
                             this.onStopScanning();
                         }
                     },
@@ -1512,7 +1819,7 @@ sap.ui.define([
              * Handles the change of the country by updating the "Expenses" model.
              * @param {Event} oEvent - The event object
              */
-            onCountryChange: function () {
+            onCountryChange: function (oEvent) {
                 try {
                     const viewId = this.getView().getId();
                     const oItem = oEvent.getParameter("selectedItem");
@@ -1895,5 +2202,182 @@ sap.ui.define([
                     ctrl.data("__prev", this.handleGetFieldValue(ctrl));
                 } catch (e) { }
             },
+
+            /* ************************************** VH PARTNER ************************************* */
+
+            /**
+             * Opens the partner value help dialog
+             */
+            handleOpenPartnerVH: function () {
+                try {
+                    this._oBasicSearchField = new sap.m.SearchField();
+
+                    this._oMaterialVh = this.loadFragment({
+                        name: "zfiexpensesmanage.fragments.BusinessPartner"
+                    }).then(function (oDialogSuggestions) {
+                        var oFilterBar = oDialogSuggestions.getFilterBar();
+
+                        this._oMaterialVh = oDialogSuggestions;
+
+                        this.getView().addDependent(oDialogSuggestions);
+
+                        oDialogSuggestions.setRangeKeyFields([{
+                            label: "BusinessPartner",
+                            key: "BusinessPartner",
+                            type: "string",
+                            typeInstance: new sap.ui.model.type.String({
+                                maxLength: 40
+                            })
+                        }]);
+
+                        oFilterBar.setFilterBarExpanded(false);
+                        oFilterBar.setBasicSearch(this._oBasicSearchField);
+
+                        this._oBasicSearchField.attachSearch(function () {
+                            oFilterBar.search();
+                        });
+
+                        oDialogSuggestions.getTableAsync().then(function (oTable) {
+                            if (oTable.bindRows) {
+                                oTable.bindAggregation("rows", {
+                                    path: '/ZFI_BUSINESS_PARTNER',
+                                    events: {
+                                        dataReceived: function () {
+                                            oDialogSuggestions.update();
+                                        }
+                                    }
+                                });
+
+                                var oBusinessPartner = new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("BusinessPartner") }), template: new sap.m.Text({ wrapping: false, text: "{BusinessPartner}" }) });
+                                oBusinessPartner.data({ fieldName: "BusinessPartner" });
+                                oTable.addColumn(oBusinessPartner);
+
+                                var oBusinessPartnerName = new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("BusinessPartnerName") }), template: new sap.m.Text({ wrapping: false, text: "{BusinessPartnerName}" }) });
+                                oBusinessPartnerName.data({ fieldName: "BusinessPartnerName" });
+                                oTable.addColumn(oBusinessPartnerName);
+                            }
+
+                            if (oTable.bindItems) {
+                                oTable.bindAggregation("items", {
+                                    path: '/ZFI_BUSINESS_PARTNER',
+                                    template: new sap.m.ColumnListItem({
+                                        cells: [
+                                            new sap.m.Label({ text: "{BusinessPartner}" }),
+                                            new sap.m.Label({ text: "{BusinessPartnerName}" })
+                                        ]
+                                    }),
+                                    events: {
+                                        dataReceived: function () {
+                                            oDialogSuggestions.update();
+                                        }
+                                    }
+                                });
+                            }
+                            oDialogSuggestions.update();
+                        }.bind(this));
+
+                        oDialogSuggestions.open();
+                    }.bind(this));
+                } catch (e) {
+                    this.showErrorMessage(e.message);
+                }
+            },
+
+            /**
+             * Handles the partner press event
+             * @param {sap.ui.core.Control} oEvent
+             */
+            handlePartnerPress: function (oEvent) {
+                try {
+                    var aTokens = oEvent.getParameter("tokens");
+                    var oBusinessPartner = Fragment.byId(this.getView().getId(), "expenseDialog:selectBP");
+
+
+                    if (aTokens.length > 0) {
+                        if (aTokens.length > 1) {
+                            this.showErrorMessage(this.getResourceBundle().getText("MultipleSelection"));
+                            return;
+                        }
+
+                        var oToken = aTokens[0],
+                            sBusinessPartner = oToken.getKey(),
+                            sBusinessPartnerName = oToken.getText();
+
+                        oBusinessPartner.setValue(sBusinessPartnerName);
+                        oBusinessPartner.data("BPKey", sBusinessPartner);
+
+                    }
+
+                    this._oMaterialVh.close();
+                } catch (e) {
+                    this.showErrorMessage(e.message);
+                }
+            },
+
+            /**
+             * Handles the partner value help close event
+             */
+            handlePartnerVhClose: function () {
+                try {
+                    this._oMaterialVh.close();
+                    this._oMaterialVh.destroy();
+                    this._oMaterialVh = null;
+                } catch (oError) {
+                    this.showErrorMessage(oError.message);
+                }
+            },
+
+            /**
+             * Handles the partner value help search event
+             * @param {sap.ui.core.Control} oEvent
+             */
+            handlePartnerVhSearch: function (oEvent) {
+                try {
+                    var sSearchQuery = this._oBasicSearchField.getValue().toUpperCase(),
+                        aSelectionSet = oEvent.getParameter("selectionSet");
+
+                    var aFilters = aSelectionSet.reduce(function (aResult, oControl) {
+                        if (oControl.getValue()) {
+                            aResult.push(new sap.ui.model.Filter({
+                                path: oControl.getName(),
+                                operator: sap.ui.model.FilterOperator.Contains,
+                                value1: oControl.getValue()
+                            }));
+                        }
+
+                        return aResult;
+                    }, []);
+
+                    aFilters.push(new sap.ui.model.Filter({
+                        filters: [
+                            new sap.ui.model.Filter({ path: "BusinessPartner", operator: sap.ui.model.FilterOperator.Contains, value1: sSearchQuery }),
+                            new sap.ui.model.Filter({ path: "BusinessPartnerName", operator: sap.ui.model.FilterOperator.Contains, value1: sSearchQuery }),
+                        ],
+                        and: false
+                    }));
+
+                    this.handleFilterVhTable(new sap.ui.model.Filter({ filters: aFilters, and: true }), this._oMaterialVh);
+                } catch (e) {
+                    this.showErrorMessage(e.message);
+                }
+            },
+
+            /**
+             * Filters the value help table
+             * @param {sap.ui.model.Filter} oFilter
+             * @param {sap.ui.core.Control} oValueHelp
+             */
+            handleFilterVhTable: function (oFilter, oValueHelp) {
+                oValueHelp.getTableAsync().then(function (oTable) {
+                    if (oTable.bindRows) {
+                        oTable.getBinding("rows").filter(oFilter);
+                    }
+                    if (oTable.bindItems) {
+                        oTable.getBinding("items").filter(oFilter);
+                    }
+                    oValueHelp.update();
+                });
+            },
+
         });
     });
