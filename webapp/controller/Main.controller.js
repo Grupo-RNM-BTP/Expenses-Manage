@@ -35,9 +35,9 @@ sap.ui.define([
                 this._cancel = false;
 
                 this.getView().setModel(new JSONModel(), "Camera");
-                this.getView().setModel(new JSONModel({ vatLines: [], vatEditMode: true, unitVisible: false, processingDialogBtnVisible: true }), "Expenses");
+                this.getView().setModel(new JSONModel({ vatLines: [], vatEditMode: true, unitVisible: false }), "Expenses");
 
-                this.getView().setModel(new JSONModel({ aiScan: true }), "Scan");
+                this.getView().setModel(new JSONModel({ processingDialogBtnVisible: true, aiScan: true }), "Scan");
 
                 this.getView().setModel(new JSONModel({ title: "", description: "" }), "Scanning");
 
@@ -1387,7 +1387,7 @@ sap.ui.define([
                 this.oScanningModel.setProperty("/description", this.getResourceBundle().getText("xexp.expSuccessDescription"));
 
                 this.handleOpenScanningFrgmnt();
-                this.getView().getModel("Expenses").setProperty("/processingDialogBtnVisible", false);
+                this.getView().getModel("Scan").setProperty("/processingDialogBtnVisible", false);
 
                 this.onCancelProcess(true);
 
@@ -1425,6 +1425,11 @@ sap.ui.define([
                     vatLines: [],
                     vatEditMode: true,
                     unitVisible: false
+                });
+
+                this.getView().getModel("Scan")?.setData({
+                    processingDialogBtnVisible: true,
+                    aiScan: true
                 });
 
                 this.getView().getModel("Scanning")?.setData({
