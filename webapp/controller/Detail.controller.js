@@ -143,7 +143,8 @@ sap.ui.define([
 
                 var oFile = aFiles[0];
 
-                if (!(oFile.type === "image/png" || oFile.type === "image/jpeg")) {
+                var aAllowedTypes = ["image/png", "image/jpeg", "application/pdf"];
+                if (aAllowedTypes.indexOf(oFile.type) === -1) {
                     sap.m.MessageBox.error(this.getResourceBundle().getText("invalidFormat"));
                     return;
                 }
@@ -257,5 +258,38 @@ sap.ui.define([
                     }.bind(this)
                 })
             },
+
+            onPressAvatar: function () {
+                this.getModel("global").setProperty("/busy", true);
+
+                var aAttachments = this.getView().getModel("attachmentModel").getProperty("/attachments");
+
+                if (!aAttachments || aAttachments.length === 0) {
+                    return;
+                }
+
+                var oAttachment = aAttachments[0];
+
+                if (!oAttachment.src.startsWith("data:application/pdf")) {
+                    var oLightBox = new sap.m.LightBox({
+                        imageContent: new sap.m.LightBoxItem({
+                            imageSrc: oAttachment.src
+                        })
+                    });
+
+                    oLightBox.addEventDelegate({
+                        onAfterRendering: function () {
+                        }.bind(this)
+                    });
+
+                    oLightBox.open();
+                } else {
+                    this.openPDF(oAttachment.src);
+
+                }
+                this.getModel("global").setProperty("/busy", false);
+
+            }
+
         });
     });

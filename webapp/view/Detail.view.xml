@@ -187,17 +187,17 @@
                                 </m:HBox>
                             </m:VBox>
 
+
                             <m:List visible="true" id="attachmentList" items="{attachmentModel>/attachments}" width="100%">
-                                <m:CustomListItem>
+                                <m:CustomListItem >
                                     <m:HBox class="sapUiSmallMargin" justifyContent="SpaceBetween" alignItems="Center" width="100%">
                                         <m:HBox alignItems="Center" wrap="Wrap">
-                                            <m:Image src="{attachmentModel>src}" decorative="false" width="170px" densityAware="false">
+                                            <m:Avatar src="sap-icon://image-viewer" press="onPressAvatar" visible="true" displayShape="Square" class="imgClass">
                                                 <m:detailBox>
                                                     <m:LightBox>
-                                                        <m:LightBoxItem imageSrc="{attachmentModel>src}" />
                                                     </m:LightBox>
                                                 </m:detailBox>
-                                            </m:Image>
+                                            </m:Avatar>
                                         </m:HBox>
                                         <m:Button icon="sap-icon://delete" type="Reject" class="sapUiMediumMarginEnd" press="handleDeleteExpense"/>
                                     </m:HBox>

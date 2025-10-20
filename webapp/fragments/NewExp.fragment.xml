@@ -11,7 +11,7 @@
             <ObjectHeader title="{i18n>xexp.expDraft}" iconDensityAware="true" imageShape="Square" titleTextDirection="Inherit" introTextDirection="Inherit" numberTextDirection="Inherit" titleLevel="H3"/>
 
             <VBox direction="Column" fitContainer="false" renderType="Div" justifyContent="Start" alignItems="Stretch" wrap="NoWrap" alignContent="Stretch" backgroundDesign="Transparent">
-                <f:SimpleForm id="sfGeneral" editable="true" layout="ResponsiveLayout" labelMinWidth="192" labelSpanXL="-1" labelSpanL="4" labelSpanM="2" labelSpanS="5" adjustLabelSpan="true" emptySpanXL="-1" emptySpanL="0" emptySpanM="0" emptySpanS="0" columnsXl="-1" columnsL="2" columnsM="7" singleContainerFullSize="true" breakpointXL="1440" breakpointL="1024" breakpointM="600" backgroundDesign="Translucent">
+                <f:SimpleForm id="sfGeneral" editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="3" labelSpanM="4" labelSpanS="12" adjustLabelSpan="false" emptySpanXL="0" emptySpanL="4" emptySpanM="0" emptySpanS="0" columnsXl="2" columnsL="1" columnsM="1" singleContainerFullSize="false" breakpointXL="1440" breakpointL="1024" breakpointM="600" backgroundDesign="Translucent">
                     <f:content>
                         <Label text="" visible="false"/>
                         <Title text="{i18n>xexp.expGenTitle}"/>
@@ -39,7 +39,7 @@
 
                 <core:InvisibleText text=""/>
 
-                <f:SimpleForm id="sfTech" editable="true" layout="ResponsiveLayout" labelMinWidth="192" labelSpanXL="-1" labelSpanL="4" labelSpanM="2" labelSpanS="5" adjustLabelSpan="true" emptySpanXL="-1" emptySpanL="0" emptySpanM="0" emptySpanS="0" columnsXl="-1" columnsL="2" columnsM="7" singleContainerFullSize="true" breakpointXL="1440" breakpointL="1024" breakpointM="600" backgroundDesign="Translucent">
+                <f:SimpleForm id="sfTech" editable="true" layout="ResponsiveGridLayout" labelSpanXL="4" labelSpanL="3" labelSpanM="4" labelSpanS="12" adjustLabelSpan="false" emptySpanXL="0" emptySpanL="4" emptySpanM="0" emptySpanS="0" columnsXl="2" columnsL="1" columnsM="1" singleContainerFullSize="false" breakpointXL="1440" breakpointL="1024" breakpointM="600" backgroundDesign="Translucent">
                     <f:content>
                         <Label text="" visible="false"/>
                         <Title text="{i18n>xexp.expTechTitle}"/>
@@ -50,7 +50,7 @@
                                 <core:Item key="{Exptype}" text="{Description}" />
                             </items>
                         </Select>
-                        
+
                         <Label text="{i18n>xexp.expSubType}"/>
                         <Select id="expenseDialog:selectExpSubType" items="{ path: '/ZFI_EXPENSES_SUBTYPE' }" visible="{= (${Expenses>/exptype} || '').indexOf('REF') > -1 }" required="true">
                             <items>

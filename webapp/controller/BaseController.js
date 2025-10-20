@@ -286,5 +286,35 @@ sap.ui.define([
             this.getModel("global").setProperty("/layout", "OneColumn");
             this.getRouter().navTo("RouteMain");
         },
+
+        openPDF: function (sDocument) {
+            var sBase64 = sDocument.split(",")[1],
+                decodedPdfContent = atob(sBase64),
+                byteNumbers = new Array(decodedPdfContent.length);
+
+            for (var i = 0; i < decodedPdfContent.length; i++) {
+                byteNumbers[i] = decodedPdfContent.charCodeAt(i);
+            }
+
+            var byteArray = new Uint8Array(byteNumbers),
+                blob = new Blob([byteArray], { type: "application/pdf" }),
+                _pdfurl = URL.createObjectURL(blob);
+
+            if (!this._PDFViewer) {
+                this._PDFViewer = new sap.m.PDFViewer({
+                    width: "auto",
+                    title: "Visualização de Documento",
+                    showDownloadButton: false,
+                    source: _pdfurl,
+                    sourceType: "object"
+                });
+                this.getView().addDependent(this._PDFViewer);
+            } else {
+                this._PDFViewer.setSource(_pdfurl);
+            }
+
+            jQuery.sap.addUrlWhitelist("blob");
+            this._PDFViewer.open();
+        }
     });
 });

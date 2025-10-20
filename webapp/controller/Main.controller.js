@@ -253,18 +253,20 @@ sap.ui.define([
 
                 var oFile = aFiles[0];
 
-                if (!(oFile.type === "image/png" || oFile.type === "image/jpeg")) {
+                var aAllowedTypes = ["image/png", "image/jpeg", "application/pdf"];
+                if (aAllowedTypes.indexOf(oFile.type) === -1) {
                     sap.m.MessageBox.error(this.getResourceBundle().getText("invalidFormat"));
                     return;
                 }
 
                 var sType = oFile.type.split("/")[1].toUpperCase();
 
-                if (sType.toUpperCase() === "JPEG") {
+                if (sType === "JPEG") {
                     this._sFileType = "JPG";
-                }
-                else {
-                    this._sFileType = sType.toUpperCase();
+                } else if (sType === "PDF") {
+                    this._sFileType = "PDF";
+                } else {
+                    this._sFileType = sType;
                 }
             },
 
@@ -344,20 +346,38 @@ sap.ui.define([
                     oModel.read(sPath, {
                         success: function (oData) {
                             var sSrc = oData.FileString;
+                            if (!sSrc.startsWith("data:application/pdf")) {
+                                var oLightBox = new sap.m.LightBox({
+                                    imageContent: new sap.m.LightBoxItem({
+                                        imageSrc: sSrc
+                                    })
+                                });
 
-                            var oLightBox = new sap.m.LightBox({
-                                imageContent: new sap.m.LightBoxItem({
-                                    imageSrc: sSrc
-                                })
-                            });
+                                oLightBox.addEventDelegate({
+                                    onAfterRendering: function () {
+                                    }.bind(this)
+                                });
 
-                            oLightBox.addEventDelegate({
-                                onAfterRendering: function () {
-                                    this.getModel("global").setProperty("/busy", false);
-                                }.bind(this)
-                            });
+                                oLightBox.open();
+                            } else {
+                                this.openPDF(sSrc);
+                            }
 
-                            oLightBox.open();
+                            this.getModel("global").setProperty("/busy", false);
+
+                            // var oLightBox = new sap.m.LightBox({
+                            //     imageContent: new sap.m.LightBoxItem({
+                            //         imageSrc: sSrc
+                            //     })
+                            // });
+
+                            // oLightBox.addEventDelegate({
+                            //     onAfterRendering: function () {
+                            //         this.getModel("global").setProperty("/busy", false);
+                            //     }.bind(this)
+                            // });
+
+                            // oLightBox.open();
 
                         }.bind(this),
                         error: function (oError) {
@@ -1601,13 +1621,15 @@ sap.ui.define([
             onScanPhoto: function () {
                 var oEntry = {},
                     oModel = this.getView().getModel(),
-                    vBase64 = this.oExpensesModel.getProperty("/capturedImage");
+                    vBase64 = this.oExpensesModel.getProperty("/capturedImage"),
+                    vDocType = this.oExpensesModel.getProperty("/imageExt");
 
                 if (!vBase64) return;
 
                 if (this._cancel) return;
 
                 oEntry.Base64 = vBase64;
+                oEntry.DocType = vDocType;
 
                 oModel.create("/ReadImage", oEntry, {
                     success: (oData) => {
@@ -1785,12 +1807,23 @@ sap.ui.define([
 
                 reader.onload = function (e) {
                     var sBase64 = e.target.result;
+                    var sMime = oFile.type && oFile.type.length ? oFile.type : "";
+                    if (!sMime) {
+                        var m = /^data:([^;]+);base64,/.exec(sBase64);
+                        sMime = m && m[1] ? m[1] : "";
+                    }
 
-                    var sExt = /^data:image\/([a-zA-Z0-9.+-]+);base64,/.exec(sBase64)[1];
-                    sExt = sExt ? sExt.toLowerCase() : "";
+                    var sExt = "";
+                    if (sMime.startsWith("image/")) {
+                        sExt = sMime.split("/")[1].toLowerCase();
 
-                    if (sExt === "jpeg") {
-                        sExt = "JPG";
+                        if (sExt === "jpeg") sExt = "JPG";
+                        if (sExt === "jpg") sExt = "JPG";
+                    } else if (sMime === "application/pdf") {
+                        sExt = "PDF";
+                    } else {
+                        sap.m.MessageToast.show(this.getResourceBundle().getText("xexp.expScanUnsupportedFile"));
+                        return;
                     }
 
                     if (this.oExpensesModel) {
