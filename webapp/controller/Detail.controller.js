@@ -151,7 +151,7 @@ sap.ui.define([
 
                 var reader = new FileReader();
 
-                reader.onload = function (e) {
+                reader.onload = async function (e) {
                     var sBase64 = e.target.result;
 
                     var oModel = this.getModel(),
@@ -159,23 +159,29 @@ sap.ui.define([
                         match = sFullPath.match(/ExpNo='(.*?)'/),
                         sExpNo = match ? match[1] : null,
                         sPath = "/AttachmentsEvents",
-                        oEntry = {
-                            Expenseno: sExpNo,
-                            FileString: sBase64,
-                        };
+                        oEntry = {};
 
-                    var sType = oFile.type.split("/")[1].toUpperCase();
+                    // oEntry = {
+                    //     Expenseno: sExpNo,
+                    //     FileString: sBase64,
+                    // };
 
-                    if (sType.toUpperCase() === "JPEG") {
-                        sType = "JPG";
-                    }
-                    else {
-                        sType = sType.toUpperCase();
-                    }
+                    // var sType = oFile.type.split("/")[1].toUpperCase();
 
-                    oEntry.FileType = sType;
+                    // if (sType.toUpperCase() === "JPEG") {
+                    //     sType = "JPG";
+                    // }
+                    // else {
+                    //     sType = sType.toUpperCase();
+                    // }
 
+                    // oEntry.FileType = sType;
                     this.getModel("global").setProperty("/busy", true);
+                    var sDocument = await this.onConvertToPDF(sBase64);
+                    oEntry.Expenseno = sExpNo;
+                    oEntry.FileString = sDocument;
+                    oEntry.FileType = "PDF";
+
 
                     oModel.create(sPath, oEntry, {
                         success: function () {

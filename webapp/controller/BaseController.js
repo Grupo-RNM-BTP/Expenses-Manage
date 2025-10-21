@@ -288,6 +288,11 @@ sap.ui.define([
         },
 
         openPDF: function (sDocument) {
+
+            if (sDocument.startsWith("data:application/pdf") || sDocument.startsWith("JVBERi0x")) {
+                return sDocument;
+            }
+
             var sBase64 = sDocument.split(",")[1],
                 decodedPdfContent = atob(sBase64),
                 byteNumbers = new Array(decodedPdfContent.length);
@@ -315,6 +320,71 @@ sap.ui.define([
 
             jQuery.sap.addUrlWhitelist("blob");
             this._PDFViewer.open();
+        },
+
+        onConvertToPDF: async function (base64Image) {
+            const mod = await import("https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js");
+            const JsPDF = mod.jsPDF || (mod.default && mod.default.jsPDF) || window.jspdf.jsPDF;
+            const { optimizedBase64, format, widthMm, heightMm } = await this._prepareImageForPdf(base64Image);
+            const doc = new JsPDF({
+                orientation: "portrait",
+                unit: "mm",
+                format: "a4",
+                compress: true
+            });
+
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const posX = (pageWidth - widthMm) / 2;
+
+            doc.addImage(optimizedBase64, format, posX, 10, widthMm, heightMm);
+
+            const pdfBase64 = doc.output("datauristring");
+            return pdfBase64;
+        },
+
+        _prepareImageForPdf: function (base64Str) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = function () {
+                    const { width, height } = img;
+
+                    const format = base64Str.startsWith("data:image/png")
+                        ? "PNG"
+                        : "JPEG";
+
+                    const maxWidthMm = 180;
+                    const maxHeightMm = 260;
+                    const pxPerMm = 3.78;
+                    const maxWidthPx = maxWidthMm * pxPerMm;
+                    const maxHeightPx = maxHeightMm * pxPerMm;
+                    const ratio = Math.min(maxWidthPx / width, maxHeightPx / height, 1);
+                    const displayWidthPx = width * ratio;
+                    const displayHeightPx = height * ratio;
+                    const scaleFactor = 3;
+                    const canvas = document.createElement("canvas");
+                    canvas.width = displayWidthPx * scaleFactor;
+                    canvas.height = displayHeightPx * scaleFactor;
+
+                    const ctx = canvas.getContext("2d");
+
+                    ctx.scale(scaleFactor, scaleFactor);
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = "high";
+                    ctx.filter = "contrast(105%) brightness(102%)";
+
+                    ctx.drawImage(img, 0, 0, displayWidthPx, displayHeightPx);
+
+                    const outputFormat = format === "PNG" ? "image/png" : "image/jpeg";
+                    const quality = format === "PNG" ? 1.0 : 0.97;
+                    const optimizedBase64 = canvas.toDataURL(outputFormat, quality);
+
+                    const widthMm = displayWidthPx / pxPerMm;
+                    const heightMm = displayHeightPx / pxPerMm;
+
+                    resolve({ optimizedBase64, format, widthMm, heightMm });
+                };
+                img.src = base64Str;
+            });
         }
     });
 });

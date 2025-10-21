@@ -282,14 +282,16 @@ sap.ui.define([
                     if (sap.ui.getCore().byId("fileUploaderMain").getValue() == "") {
                         return sap.ui.getCore().byId("fileUploaderMain").setValueState("Error")
                     }
-
+                    
+                    this.getModel("global").setProperty("/busy", true);
                     var sDocument = await this.onGetDocumentToBase64(sap.ui.getCore().byId("fileUploaderMain"));
+                    var sDocument = await this.onConvertToPDF(sDocument);
 
                     oEntry.Expenseno = this.getView().getModel("Main").getProperty("/ExpNo");
                     oEntry.FileString = sDocument;
-                    oEntry.FileType = this._sFileType;
+                    oEntry.FileType = "PDF";
+                    // oEntry.FileType = this._sFileType;
 
-                    this.getModel("global").setProperty("/busy", true);
                     oModel.create(sPath, oEntry, {
                         success: function () {
                             this.onCloseUploadDialog();
