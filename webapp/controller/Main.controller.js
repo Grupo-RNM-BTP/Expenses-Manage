@@ -334,6 +334,7 @@ sap.ui.define([
                     var sPath = oItem.getBindingContext().sPath;
 
                     this.onNavigation(sPath, "Detail", "/ZFI_EXPENSES_MNG");
+                    this.byId("toolPage").setSideExpanded(false);
                 }
             },
 
