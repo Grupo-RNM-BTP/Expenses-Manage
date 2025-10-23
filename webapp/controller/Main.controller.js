@@ -1250,7 +1250,7 @@ sap.ui.define([
                 var oView = this.getView(),
                     sExpType = Fragment.byId(oView.getId(), "expenseDialog:selectExpType").getSelectedKey(),
                     sAmt = Fragment.byId(oView.getId(), "expenseDialog:inputAmt").getValue(),
-                    sTotal = parseFloat((sAmt * 1.5).toFixed(2));
+                    sTotal = parseFloat((sAmt * 1.75).toFixed(2));
 
                 if (sExpType !== "UE") {
                     if (!this.handleValidateRequiredFields(sIds)) {
