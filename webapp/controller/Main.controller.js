@@ -562,7 +562,7 @@ sap.ui.define([
                 return new Promise(function (resolve, reject) {
                     oModel.read(sPath, {
                         success: function (oData) {
-                            var aFiltered = oData.results.filter(o => o.Checknum === "");
+                            var aFiltered = oData.results.filter(o => o.Checknum === "" && o.Pymtmeth === "A");
                             that.getView().getModel("Main").setProperty("/ExpensesReconciled", aFiltered);
                             that.getModel("global").setProperty("/busy", false);
                             resolve(aFiltered);
