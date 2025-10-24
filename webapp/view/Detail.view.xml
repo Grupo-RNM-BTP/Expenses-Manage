@@ -74,6 +74,9 @@
                     <m:Label text="{i18n>Amount}"/>
                     <m:Text text="{Value} {Waers}"/>
 
+                    <m:Label text="{i18n>ApprovedValue}"/>
+                    <m:Text text="{ApprvdValue} {Waers}"/>
+
                     <!-- Estado -->
                     <core:Title text="{i18n>invoiceForm.Status}"/>
                     <m:Label text="{i18n>Status}"/>

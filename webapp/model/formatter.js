@@ -191,7 +191,7 @@ sap.ui.define([], function () {
             let oDate = (sValue instanceof Date) ? sValue : new Date(sValue);
 
             if (isNaN(oDate.getTime())) {
-                return sValue; 
+                return sValue;
             }
 
             const dd = String(oDate.getDate()).padStart(2, "0");
@@ -199,6 +199,21 @@ sap.ui.define([], function () {
             const yyyy = oDate.getFullYear();
 
             return `${dd}.${mm}.${yyyy}`;
+        },
+
+        formatValue: function (fValue, sCurrency) {
+            if (fValue === null || fValue === undefined || fValue === "") {
+                return "";
+            }
+
+            // Garante número float
+            var nValue = parseFloat(fValue);
+
+            // Arredonda e força duas casas decimais
+            var sFormatted = nValue.toFixed(2);
+
+            // Retorna com ou sem moeda
+            return sCurrency ? sFormatted + " " + sCurrency : sFormatted;
         }
     };
 });

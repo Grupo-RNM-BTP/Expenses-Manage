@@ -24,7 +24,9 @@ sap.ui.define([
             onInit: function () {
                 var oModel = new JSONModel({
                     ExpNo: "",
-                    ExpensesReconciled: []
+                    ExpensesReconciled: [],
+                    inputValue: "",
+                    sliderMax: ""
                 });
                 this.getView().setModel(oModel, "Main");
                 this.getView().setModel(new JSONModel({}), "graficoModel");
@@ -282,7 +284,7 @@ sap.ui.define([
                     if (sap.ui.getCore().byId("fileUploaderMain").getValue() == "") {
                         return sap.ui.getCore().byId("fileUploaderMain").setValueState("Error")
                     }
-                    
+
                     this.getModel("global").setProperty("/busy", true);
                     var sDocument = await this.onGetDocumentToBase64(sap.ui.getCore().byId("fileUploaderMain"));
                     var sDocument = await this.onConvertToPDF(sDocument);
@@ -338,7 +340,10 @@ sap.ui.define([
                 }
             },
 
-
+            /**
+             * Handle avatar press and navigate to detail view.
+             * @param {sap.ui.base.Event} oEvent
+             */
             onPressAvatar: function (oEvent) {
                 try {
                     var oModel = this.getModel(),
@@ -402,6 +407,45 @@ sap.ui.define([
                         oTitle: this.getResourceBundle().getText("errorTitle")
                     });
                 }
+            },
+
+            /**
+             * Handle selection change.
+             */
+            handleSelectionChange: function (oEvent) {
+                this.byId("deleteButton").setEnabled(true);
+            },
+
+            /**
+             * Handle delete expense.
+             */
+            handleDelete: function () {
+                var oModel = this.getModel(),
+                    oTable = this.byId("MyExpensesTable").getTable(),
+                    oSelectedItems = oTable.getSelectedItem(),
+                    sExpNo = oSelectedItems.getBindingContext().getObject().ExpNo,
+                    sPath = "/EditExpense(Exp='" + sExpNo + "')";
+
+                this.getModel("global").setProperty("/busy", true);
+                oModel.remove(sPath, {
+                    success: function () {
+                        this.getModel("global").setProperty("/busy", false);
+                        oModel.refresh();
+                        oTable.removeSelections();
+                        this.byId("deleteButton").setEnabled(false);
+                    }.bind(this),
+                    error: function (oError) {
+                        this.getModel("global").setProperty("/busy", false);
+                        var sError = JSON.parse(oError.responseText).error.message.value;
+                        sap.m.MessageBox.alert(sError, {
+                            icon: "ERROR",
+                            onClose: null,
+                            styleClass: '',
+                            initialFocus: null,
+                            textDirection: sap.ui.core.TextDirection.Inherit
+                        });
+                    }.bind(this)
+                })
             },
 
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -693,8 +737,12 @@ sap.ui.define([
 
                 oModel.read(sPath, {
                     success: function (oData) {
-                        if (oData.results[0].Return === true) {
-                            this.byId("idApproveExpenses").setVisible(true);
+                        if (oData.results.length > 0) {
+                            if (oData.results[0].Return === true) {
+                                this.byId("idApproveExpenses").setVisible(true);
+                            }
+                        } else {
+                            this.byId("idApproveExpenses").setVisible(false);
                         }
                     }.bind(this),
                     error: function (oError) {
@@ -755,9 +803,12 @@ sap.ui.define([
                 oModel.create(sPath, oEntry, {
                     success: function () {
                         this.getModel("global").setProperty("/busy", false);
+                        this.handleButtonsState(false);
                     }.bind(this),
                     error: function (oError) {
                         this.getModel("global").setProperty("/busy", false);
+                        this.byId("idTableApprovals").removeSelections();
+                        this.handleButtonsState(false);
                         var sError = JSON.parse(oError.responseText).error.message.value;
                         sap.m.MessageBox.alert(sError, {
                             icon: "ERROR",
@@ -774,32 +825,150 @@ sap.ui.define([
 
             /**
              * Handle selection change.
-             * @param {sap.ui.base.Event} oEvent
              */
-            handleSelectionChange: function (oEvent) {
-                this.byId("deleteButton").setEnabled(true);
+            onSelectionChangeApprovals: function (oEvent) {
+                var oSelectedItems = oEvent.getParameter("list").getSelectedItems();
+                if (oSelectedItems.length === 0) {
+                    this.handleButtonsState(false);
+                } else {
+                    this.handleButtonsState(true);
+                }
             },
 
             /**
-             * Handle delete expense.
+             * Handle open dialog.
              */
-            handleDelete: function () {
+            handleOpenDialog: function () {
+                var oView = this.getView(),
+                    sValue = this.byId("smartTableApprovals").getTable().getSelectedItems()[0].getBindingContext().getObject().Value,
+                    iValue = parseFloat(sValue),
+                    oSelectedItems = this.byId("smartTableApprovals").getTable().getSelectedItems();
+
+                if (oSelectedItems.length > 1) {
+                    sap.m.MessageBox.error(this.getResourceBundle().getText("noSelection"));
+                    return;
+                }
+
+                this.getView().getModel("Main").setProperty("/inputValue", parseFloat(iValue.toFixed(2)));
+                this.getView().getModel("Main").setProperty("/sliderMax", parseFloat(iValue.toFixed(2)));
+
+                if (this._pPartialApprovalDialog) {
+                    this.onCancelPartial();
+                }
+
+                if (!this._pPartialApprovalDialog) {
+                    this._pPartialApprovalDialog = Fragment.load({
+                        id: oView.getId(),
+                        name: "zfiexpensesmanage.fragments.PartialApproval",
+                        controller: this
+                    }).then(function (oDialog) {
+                        oView.addDependent(oDialog);
+                        return oDialog;
+                    });
+
+                    this._pPartialApprovalDialog.then(function (oDialog) {
+                        oDialog.open();
+                    });
+                }
+            },
+
+            /**
+             * Handle cancel partial.
+             */
+            onCancelPartial: function () {
+                if (this._pPartialApprovalDialog) {
+                    this._pPartialApprovalDialog.then(function (oDialog) {
+                        oDialog.close();
+                        oDialog.destroy();
+                    });
+                    this._pPartialApprovalDialog = null;
+                }
+            },
+
+            /**
+             * Handle buttons state.
+             * @param {boolean} sState
+             */
+            handleButtonsState: function (sState) {
+                this.byId("partialApprovalButton").setEnabled(sState);
+                this.byId("approveButton").setEnabled(sState);
+                this.byId("rejectButton").setEnabled(sState);
+            },
+
+            /**
+             * Handle slider change.
+             * @param {sap.ui.base.Event} oEvent
+             */
+            onSliderChange: function (oEvent) {
+                var iValue = oEvent.getParameter("value");
+                this.getView().getModel("Main").setProperty("/inputValue", parseFloat(iValue.toFixed(2)));
+                this.byId("inputValue").setValue(parseFloat(iValue.toFixed(2)));
+            },
+
+            /**
+             * Handle value change.
+             * @param {sap.ui.base.Event} oEvent
+             */
+            onValueChange: function (oEvent) {
+                var sValue = oEvent.getParameter("value").replace(",", ".");
+                var fValue = parseFloat(sValue),
+                    iSliderMax = this.getView().getModel("Main").getProperty("/sliderMax");
+
+                if (isNaN(fValue)) fValue = 0;
+                if (fValue < 0) fValue = 0;
+                if (fValue > iSliderMax) fValue = iSliderMax;
+
+                fValue = parseFloat(fValue.toFixed(2));
+
+                this.getView().getModel("Main").setProperty("/inputValue", fValue);
+                this.byId("sliderValue").setValue(fValue);
+            },
+
+            onConfirmPartial: function () {
+                var oSelectedItems = this.byId("idTableApprovals").getSelectedItems()[0].getBindingContext().getObject(),
+                    sPernr = oSelectedItems.Pernr,
+                    sExpNo = oSelectedItems.ExpNo,
+                    sFiStatus = oSelectedItems.FiStatus,
+                    sValue = this.getView().getModel("Main").getProperty("/inputValue"),
+                    aSelectedData = [
+                        {
+                            pernr: sPernr,
+                            exp: sExpNo,
+                            fi_status: sFiStatus,
+                            apprvd_value: sValue
+                        }
+                    ];
+
+
+                var oEntry = {
+                    DataExp: JSON.stringify(aSelectedData),
+                };
+
+                this.handleEvents(oEntry, "PA");
+            },
+
+            /**
+             * Handle events.
+             * @param {object} oEntry
+             * @param {string} oAction
+             */
+            handleEvents: function (oEntry, oAction) {
                 var oModel = this.getModel(),
-                    oTable = this.byId("MyExpensesTable").getTable(),
-                    oSelectedItems = oTable.getSelectedItem(),
-                    sExpNo = oSelectedItems.getBindingContext().getObject().ExpNo,
-                    sPath = "/EditExpense(Exp='" + sExpNo + "')";
+                    sPath = "/LeaderEvents";
+
+                oEntry.Action = oAction;
 
                 this.getModel("global").setProperty("/busy", true);
-                oModel.remove(sPath, {
+                oModel.create(sPath, oEntry, {
                     success: function () {
                         this.getModel("global").setProperty("/busy", false);
-                        oModel.refresh();
-                        oTable.removeSelections();
-                        this.byId("deleteButton").setEnabled(false);
+                        this.handleButtonsState(false);
+                        this.onCancelPartial();
                     }.bind(this),
                     error: function (oError) {
                         this.getModel("global").setProperty("/busy", false);
+                        this.byId("idTableApprovals").removeSelections();
+                        this.handleButtonsState(false);
                         var sError = JSON.parse(oError.responseText).error.message.value;
                         sap.m.MessageBox.alert(sError, {
                             icon: "ERROR",
@@ -810,6 +979,8 @@ sap.ui.define([
                         });
                     }.bind(this)
                 })
+
+                oModel.refresh();
             },
 
             //---------------------------------------------------------------------------------------------------------------------------------------------------------

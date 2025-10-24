@@ -1,0 +1,27 @@
+<core:FragmentDefinition xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:layout="sap.ui.layout">
+
+    <Dialog id="partialApprovalDialog" title="{i18n>PartialApproval}" contentWidth="420px" contentHeight="140px" stretch="{device>/system/phone}" class="sapUiSizeCompact customPartialDialog" draggable="false" resizable="false" initialFocus="beginButton">
+
+        <VBox class="sapUiSmallMargin sapUiTinyPadding" renderType="Bare">
+
+            <Text text="{i18n>CompanyApprove}" class="sapUiTinyMarginBottom sapUiMediumFont sapUiStrongText" />
+
+            <Slider id="sliderValue" step="0.01" value="{Main>/inputValue}" width="100%" min="0" max="{Main>/sliderMax}" liveChange=".onSliderChange" showAdvancedTooltip="true" showHandleTooltip="false"/>
+
+            <HBox class="sapUiTinyMarginTop">
+                <Label text="{i18n>ValueApprove}:" class="sapUiSmallMarginEnd" />
+                <Input id="inputValue" width="8rem" value="{Main>/inputValue}" liveChange=".onValueChange" type="Number" textAlign="End" placeholder="0.00" />
+            </HBox>
+        </VBox>
+
+        <beginButton>
+            <Button id="beginButton" text="{i18n>Confirm}" type="Emphasized" press=".onConfirmPartial" />
+        </beginButton>
+        <endButton>
+            <Button text="{i18n>Cancel}" press=".onCancelPartial" />
+        </endButton>
+
+    </Dialog>
+</core:FragmentDefinition>

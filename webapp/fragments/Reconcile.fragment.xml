@@ -2,7 +2,7 @@
     xmlns:core="sap.ui.core"
     xmlns:layout="sap.ui.layout">
 
-    <Dialog id="businessPartnerDialog" title="{i18n>Reconcile}" contentWidth="1500px" contentHeight="400px" initialFocus="beginButton" class="sapUiSizeCompact sapUiNoContentPadding" stretchOnPhone="false">
+    <Dialog id="reconcileDialog" title="{i18n>Reconcile}" contentWidth="1500px" contentHeight="400px" initialFocus="beginButton" class="sapUiSizeCompact sapUiNoContentPadding" stretchOnPhone="false">
 
         <VBox class="sapUiSmallMargin sapUiNoContentPadding">
 
