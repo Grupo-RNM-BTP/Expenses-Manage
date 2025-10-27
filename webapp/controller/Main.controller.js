@@ -684,8 +684,10 @@ sap.ui.define([
                         sap.m.MessageBox.success(this.getResourceBundle().getText("reconciledSucess"));
                         oGlobalModel.setProperty("/busy", false);
                         oModel.refresh(true);
+                        this.onChangeStateReconButtons(false);
                     }.bind(this),
                     error: function (oError) {
+                        this.onChangeStateReconButtons(false);
                         oGlobalModel.setProperty("/busy", false);
                         var sError = JSON.parse(oError.responseText).error.message.value;
                         sap.m.MessageBox.alert(sError, {
@@ -710,6 +712,28 @@ sap.ui.define([
                     });
                     this._pReconcileDialog = null;
                 }
+
+                this.onChangeStateReconButtons(false);
+                var oTableSmart = this.byId("smartTableTransRecon").getTable();
+                oTableSmart.removeSelections();
+            },
+
+            /**
+             * Handle selection change on table reconciliation.
+             */
+            onSelectionChangeRecon: function (oEvent) {
+                var aSelectedItems = oEvent.getSource().getSelectedItems();
+
+                if (aSelectedItems.length === 1) {
+                    this.onChangeStateReconButtons(true);
+                } else {
+                    this.onChangeStateReconButtons(false);
+                }
+            },
+
+            onChangeStateReconButtons: function (sState) {
+                this.byId("idExpensesWithoutAttach").setEnabled(sState);
+                this.byId("idReconcile").setEnabled(sState);
             },
 
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -827,7 +851,7 @@ sap.ui.define([
              * Handle selection change.
              */
             onSelectionChangeApprovals: function (oEvent) {
-                var oSelectedItems = oEvent.getParameter("list").getSelectedItems();
+                var oSelectedItems = oEvent.getSource().getSelectedItems();
                 if (oSelectedItems.length === 0) {
                     this.handleButtonsState(false);
                 } else {

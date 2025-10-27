@@ -238,11 +238,11 @@
                             <smartTable:customToolbar>
                                 <OverflowToolbar design="Transparent">
                                     <ToolbarSpacer/>
-                                    <Button text="{i18n>ExpensesWithoutAttach}" enabled="true" type="Emphasized" press="handleExpenseWithoutAttach" />
-                                    <Button text="{i18n>Reconcile}" enabled="true" type="Default" press="handleReconcile" />
+                                    <Button id="idExpensesWithoutAttach" text="{i18n>ExpensesWithoutAttach}" enabled="false" type="Emphasized" press="handleExpenseWithoutAttach" />
+                                    <Button id="idReconcile" text="{i18n>Reconcile}" enabled="false" type="Default" press="handleReconcile" />
                                 </OverflowToolbar>
                             </smartTable:customToolbar>
-                            <Table class="sapUiResponsiveContentPadding" mode="SingleSelectLeft" growing="true" growingThreshold="50">
+                            <Table class="sapUiResponsiveContentPadding" mode="SingleSelectLeft" selectionChange="onSelectionChangeRecon" growing="true" growingThreshold="50">
                                 <ColumnListItem vAlign="Middle">
                                 </ColumnListItem>
                             </Table>
