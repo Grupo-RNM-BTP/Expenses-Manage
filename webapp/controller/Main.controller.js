@@ -1543,6 +1543,7 @@ sap.ui.define([
                                         sap.m.MessageBox.warning(sResponse);
                                         that.handleLogChange("Aviso na criação da despesa", "", "", sResponse);
                                     } else {
+                                        that.getCardValues();
                                         that.handleLogChange("Sucesso na criação da despesa");
                                     }
                                 }
