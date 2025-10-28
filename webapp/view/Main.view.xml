@@ -97,42 +97,42 @@
                                 </smartTable:customToolbar>
                                 <Table id="idTableExpenses" fixedLayout="false" growing="true" mode="SingleSelectLeft" selectionChange="handleSelectionChange" growingThreshold="10">
                                     <columns>
-                                        <Column customData:p13nData='{"columnKey":"Doc", "leadingProperty":"Doc", "sortProperty":"Doc"}'>
+                                        <Column customData:p13nData='{"columnKey":"Doc", "leadingProperty":"Doc", "sortProperty":"Doc", filterProperty:"Doc"}'>
                                             <header>
                                                 <Text text="{i18n>Document}" />
                                             </header>
                                         </Column>
-                                        <Column customData:p13nData='{"columnKey":"ExpNo", "leadingProperty":"ExpNo", "sortProperty":"ExpNo"}'>
+                                        <Column customData:p13nData='{"columnKey":"ExpNo", "leadingProperty":"ExpNo", "sortProperty":"ExpNo", filterProperty:"ExpNo"}'>
                                             <header>
                                                 <Text text="{i18n>ExpensesNo}" />
                                             </header>
                                         </Column>
-                                        <Column customData:p13nData='{"columnKey":"PayMethodDsc", "leadingProperty":"PayMethodDsc", "sortProperty":"PayMethodDsc"}'>
+                                        <Column customData:p13nData='{"columnKey":"PayMethodDsc", "leadingProperty":"PayMethodDsc", "sortProperty":"PayMethodDsc", filterProperty:"PayMethodDsc"}'>
                                             <header>
                                                 <Text text="{i18n>PaymentMethod}" />
                                             </header>
                                         </Column>
-                                        <Column customData:p13nData='{"columnKey":"ExpTypeDsc", "leadingProperty":"ExpTypeDsc", "sortProperty":"ExpTypeDsc"}'>
+                                        <Column customData:p13nData='{"columnKey":"ExpTypeDsc", "leadingProperty":"ExpTypeDsc", "sortProperty":"ExpTypeDsc", filterProperty:"ExpTypeDsc"}'>
                                             <header>
                                                 <Text text="{i18n>ExpenseType}" />
                                             </header>
                                         </Column>
-                                        <Column customData:p13nData='{"columnKey":"Erdat", "leadingProperty":"Erdat", "sortProperty":"Erdat"}'>
+                                        <Column customData:p13nData='{"columnKey":"Erdat", "leadingProperty":"Erdat", "sortProperty":"Erdat", filterProperty:"Erdat"}'>
                                             <header>
                                                 <Text text="{i18n>Date}" />
                                             </header>
                                         </Column>
-                                        <Column customData:p13nData='{"columnKey":"Value", "leadingProperty":"Value", "sortProperty":"Value"}'>
+                                        <Column customData:p13nData='{"columnKey":"Value", "leadingProperty":"Value", "sortProperty":"Value", filterProperty:"Value"}'>
                                             <header>
                                                 <Text text="{i18n>SubmittedValue}" />
                                             </header>
                                         </Column>
-                                        <Column customData:p13nData='{"columnKey":"ApprvdValue", "leadingProperty":"ApprvdValue", "sortProperty":"ApprvdValue"}'>
+                                        <Column customData:p13nData='{"columnKey":"ApprvdValue", "leadingProperty":"ApprvdValue", "sortProperty":"ApprvdValue", filterProperty:"ApprvdValue"}'>
                                             <header>
                                                 <Text text="{i18n>PostedValue}" />
                                             </header>
                                         </Column>
-                                        <Column customData:p13nData='{"columnKey":"FiStatus", "leadingProperty":"FiStatus", "sortProperty":"FiStatus"}'>
+                                        <Column customData:p13nData='{"columnKey":"FiStatus", "leadingProperty":"FiStatus", "sortProperty":"FiStatus", filterProperty:"FiStatus"}'>
                                             <header>
                                                 <Text text="{i18n>Status}" />
                                             </header>
@@ -252,10 +252,10 @@
                     <ScrollContainer id="pageApprovals" horizontal="false" vertical="true" height="100%">
                         <smartFilterBar:SmartFilterBar id="idSmartFilterBarApprovals" entitySet="ZFI_EXPENSES_LAPPRVD" persistencyKey="SmartFilterBarApprovals"/>
 
-                        <smartTable:SmartTable id="smartTableApprovals" entitySet="ZFI_EXPENSES_LAPPRVD" beforeRebindTable="onBeforeRebindTableApprovals" demandPopin="true" smartFilterId="idSmartFilterBarApprovals" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="false" useTablePersonalisation="false" useVariantManagement="false" requestAtLeastFields="Pernr,CompanyCode,CompanyDsc,Doc,Reason,ExpNo,Belnr,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus,FirstName,LastName,FiscalYear,Nif" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="false">
-                            <smartTable:customData>
+                        <smartTable:SmartTable id="smartTableApprovals" entitySet="ZFI_EXPENSES_LAPPRVD" beforeRebindTable="onBeforeRebindTableApprovals" demandPopin="true" smartFilterId="idSmartFilterBarApprovals" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="false" useTablePersonalisation="true" useVariantManagement="false" requestAtLeastFields="Pernr,CompanyCode,CompanyDsc,Doc,Reason,ExpNo,Belnr,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus,FirstName,LastName,FiscalYear,Nif" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="true">
+                            <!-- <smartTable:customData>
                                 <core:CustomData key="p13nDialogSettings" value='\{"columns":\{"visible": true \},"sort":\{"visible": true\},"filter":\{"visible": false\},"group":\{"visible": true\}\}'/>
-                            </smartTable:customData>
+                            </smartTable:customData> -->
                             <smartTable:customToolbar>
                                 <OverflowToolbar design="Transparent">
                                     <ToolbarSpacer/>
@@ -263,35 +263,54 @@
                                     <Button id="approveButton" enabled="false" icon="sap-icon://accept" text="{i18n>Approve}" type="Emphasized" press="onGetItemsTable('A')" />
                                     <Button id="rejectButton" enabled="false" icon="sap-icon://decline" text="{i18n>Reject}" type="Emphasized" press="onGetItemsTable('R')" />
                                 </OverflowToolbar>
+
                             </smartTable:customToolbar>
                             <Table id="idTableApprovals" fixedLayout="false" class="sapUiResponsiveContentPadding" mode="MultiSelect" selectionChange="onSelectionChangeApprovals" growing="true" growingThreshold="10">
                                 <columns>
-                                    <Column>
-                                        <Text text="{i18n>Document}" />
+                                    <Column customData:p13nData='{"columnKey":"Doc", "leadingProperty":"Doc", "sortProperty":"Doc", filterProperty:"Doc"}'>
+                                        <header>
+                                            <Text text="{i18n>Document}" />
+                                        </header>
                                     </Column>
-                                    <Column>
-                                        <Text text="{i18n>NamePernr}" />
+                                    <Column customData:p13nData='{"columnKey":"Pernr", "leadingProperty":"Pernr", "sortProperty":"Pernr", filterProperty:"Pernr"}'>
+                                        <header>
+                                            <Text text="{i18n>NamePernr}" />
+                                        </header>
                                     </Column>
-                                    <Column>
-                                        <Text text="{i18n>Company}" />
+                                    <Column customData:p13nData='{"columnKey":"CompanyCode", "leadingProperty":"CompanyCode", "sortProperty":"CompanyCode", filterProperty:"CompanyCode"}'>
+                                        <header>
+                                            <Text text="{i18n>Company}" />
+                                        </header>
                                     </Column>
-                                    <Column>
-                                        <Text text="{i18n>ExpNoAndDocNo}" />
+                                    <Column customData:p13nData='{"columnKey":"ExpNo", "leadingProperty":"ExpNo", "sortProperty":"ExpNo", filterProperty:"ExpNo"}'>
+                                        <header>
+                                            <Text text="{i18n>ExpNoAndDocNo}" />
+                                        </header>
                                     </Column>
-                                    <Column>
-                                        <Text text="{i18n>PaymentMethod}" />
+                                    <Column customData:p13nData='{"columnKey":"PayMethodDsc", "leadingProperty":"PayMethodDsc", "sortProperty":"PayMethodDsc", filterProperty:"PayMethodDsc"}'>
+                                        <header>
+                                            <Text text="{i18n>PaymentMethod}" />
+                                        </header>
                                     </Column>
-                                    <Column>
-                                        <Text text="{i18n>ExpenseType}" />
+                                    <Column customData:p13nData='{"columnKey":"ExpTypeDsc", "leadingProperty":"ExpTypeDsc", "sortProperty":"ExpTypeDsc", filterProperty:"ExpTypeDsc"}'>
+                                        <header>
+                                            <Text text="{i18n>ExpenseType}" />
+                                        </header>
                                     </Column>
-                                    <Column>
-                                        <Text text="{i18n>Date}" />
+                                    <Column customData:p13nData='{"columnKey":"Erdat", "leadingProperty":"Erdat", "sortProperty":"Erdat", filterProperty:"Erdat"}'>
+                                        <header>
+                                            <Text text="{i18n>Date}" />
+                                        </header>
                                     </Column>
-                                    <Column>
-                                        <Text text="{i18n>Value}" />
+                                    <Column customData:p13nData='{"columnKey":"Value", "leadingProperty":"Value", "sortProperty":"Value", filterProperty:"Value"}'>
+                                        <header>
+                                            <Text text="{i18n>Value}" />
+                                        </header>
                                     </Column>
-                                    <Column>
-                                        <Text text="{i18n>Status}" />
+                                    <Column customData:p13nData='{"columnKey":"FiStatus", "leadingProperty":"FiStatus", "sortProperty":"FiStatus", filterProperty:"FiStatus"}'>
+                                        <header>
+                                            <Text text="{i18n>Status}" />
+                                        </header>
                                     </Column>
                                 </columns>
                                 <items>
