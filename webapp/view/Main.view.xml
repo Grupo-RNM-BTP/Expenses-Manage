@@ -253,9 +253,6 @@
                         <smartFilterBar:SmartFilterBar id="idSmartFilterBarApprovals" entitySet="ZFI_EXPENSES_LAPPRVD" persistencyKey="SmartFilterBarApprovals"/>
 
                         <smartTable:SmartTable id="smartTableApprovals" entitySet="ZFI_EXPENSES_LAPPRVD" beforeRebindTable="onBeforeRebindTableApprovals" demandPopin="true" smartFilterId="idSmartFilterBarApprovals" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="false" useTablePersonalisation="true" useVariantManagement="false" requestAtLeastFields="Pernr,CompanyCode,CompanyDsc,Doc,Reason,ExpNo,Belnr,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus,FirstName,LastName,FiscalYear,Nif" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="true">
-                            <!-- <smartTable:customData>
-                                <core:CustomData key="p13nDialogSettings" value='\{"columns":\{"visible": true \},"sort":\{"visible": true\},"filter":\{"visible": false\},"group":\{"visible": true\}\}'/>
-                            </smartTable:customData> -->
                             <smartTable:customToolbar>
                                 <OverflowToolbar design="Transparent">
                                     <ToolbarSpacer/>
