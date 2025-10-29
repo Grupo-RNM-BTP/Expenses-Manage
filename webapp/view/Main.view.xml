@@ -29,6 +29,7 @@
                     <tnt:NavigationListItem text="{i18n>ManageExpenses}" key="Manage" icon="sap-icon://credit-card"/>
                     <tnt:NavigationListItem text="{i18n>OverviewExpenses}" key="CardMovements" icon="sap-icon://collections-insight"/>
                     <tnt:NavigationListItem text="{i18n>TransactionReconciliation}" key="TransRecon" icon="sap-icon://unpaid-leave"/>
+                    <tnt:NavigationListItem text="{i18n>CurrentAccount}" key="CurrentAccount" icon="sap-icon://order-status"/>
                     <tnt:NavigationListItem id="idApproveExpenses" text="{i18n>ApproveExpenses}" visible="false" key="ApproveExpenses" icon="sap-icon://accept"/>
                 </tnt:NavigationList>
             </tnt:SideNavigation>
@@ -247,6 +248,30 @@
                                 </ColumnListItem>
                             </Table>
                         </smartTable:SmartTable>
+                    </ScrollContainer>
+
+                    <ScrollContainer id="pageCurrentAccount" horizontal="false" vertical="true" height="100%">
+
+                        <layout:Grid defaultSpan="L6 M12 S12" width="100%" vSpacing="1" hSpacing="1">
+
+                            <layout:content>
+                                <smartTable:SmartTable id="smartTableCurrentAccount_1" entitySet="ZFI_EXPENSES_CURRENTE_ACC_1" tableType="ResponsiveTable" demandPopin="true" useVariantManagement="true" useTablePersonalisation="true" header="{i18n>CurrentAccount}" showRowCount="true" persistencyKey="123" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
+                                    <Table class="sapUiResponsiveContentPadding" growing="true" growingThreshold="50">
+                                        <ColumnListItem vAlign="Middle">
+                                        </ColumnListItem>
+                                    </Table>
+                                </smartTable:SmartTable>
+                            </layout:content>
+                            <layout:content>
+                                <smartTable:SmartTable id="smartTableCurrentAccount_2" entitySet="ZFI_EXPENSES_CURRENTE_ACC_2" tableType="ResponsiveTable" demandPopin="true" useVariantManagement="true" useTablePersonalisation="true" header="{i18n>CurrentAccount}" showRowCount="true" persistencyKey="1234" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
+                                    <Table class="sapUiResponsiveContentPadding" growing="true" growingThreshold="50">
+                                        <ColumnListItem vAlign="Middle">
+                                        </ColumnListItem>
+                                    </Table>
+                                </smartTable:SmartTable>
+                            </layout:content>
+
+                        </layout:Grid>
                     </ScrollContainer>
 
                     <ScrollContainer id="pageApprovals" horizontal="false" vertical="true" height="100%">

@@ -102,6 +102,13 @@ sap.ui.define([
 
                     case "TransRecon":
                         oNavContainer.to(this.byId("pageTransRecon"));
+                        this.onPressCloseDetail();
+                        oToolPage.setSideExpanded(false);
+                        break;
+
+                    case "CurrentAccount":
+                        oNavContainer.to(this.byId("pageCurrentAccount"));
+                        this.onPressCloseDetail();
                         oToolPage.setSideExpanded(false);
                         break;
 
