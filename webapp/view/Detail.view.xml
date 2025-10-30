@@ -199,7 +199,7 @@
                                                 </m:detailBox>
                                             </m:Avatar>
                                         </m:HBox>
-                                        <m:Button icon="sap-icon://delete" type="Reject" class="sapUiMediumMarginEnd" press="handleDeleteExpense"/>
+                                        <!-- <m:Button icon="sap-icon://delete" type="Reject" class="sapUiMediumMarginEnd" press="handleDeleteExpense"/> -->
                                     </m:HBox>
                                 </m:CustomListItem>
                             </m:List>
