@@ -64,6 +64,7 @@ sap.ui.define([
             onAfterRendering: function () {
                 this.onCheckLeader();
                 this.getCardValues();
+                this.byId("idTitle1").setText(this.getResourceBundle().getText("ManageMyExpenses"));
                 sessionStorage.setItem("goToLaunchpad", "X");
             },
 
@@ -89,6 +90,7 @@ sap.ui.define([
                         this.byId("MyExpensesTable").getTable().removeSelections();
                         this.getCardValues();
                         this.onPressCloseDetail();
+                        this.byId("idTitle1").setText(this.getResourceBundle().getText("ManageMyExpenses"));
                         oNavContainer.to(this.byId("pageManage"));
                         oToolPage.setSideExpanded(false);
                         break;
@@ -96,6 +98,7 @@ sap.ui.define([
                     case "CardMovements":
                         this.getSumMonth();
                         this.onPressCloseDetail();
+                        this.byId("idTitle1").setText(this.getResourceBundle().getText("OverviewExpenses"));
                         oNavContainer.to(this.byId("pageCardMovements"));
                         oToolPage.setSideExpanded(false);
                         break;
@@ -103,18 +106,21 @@ sap.ui.define([
                     case "TransRecon":
                         oNavContainer.to(this.byId("pageTransRecon"));
                         this.onPressCloseDetail();
+                        this.byId("idTitle1").setText(this.getResourceBundle().getText("TransactionReconciliation"));
                         oToolPage.setSideExpanded(false);
                         break;
 
                     case "CurrentAccount":
                         oNavContainer.to(this.byId("pageCurrentAccount"));
                         this.onPressCloseDetail();
+                        this.byId("idTitle1").setText(this.getResourceBundle().getText("CurrentAccount"));
                         oToolPage.setSideExpanded(false);
                         break;
 
                     case "ApproveExpenses":
                         this.byId("smartTableApprovals").getTable().removeSelections();
                         this.onPressCloseDetail();
+                        this.byId("idTitle1").setText(this.getResourceBundle().getText("ApproveExpenses"));
                         oNavContainer.to(this.byId("pageApprovals"));
                         oToolPage.setSideExpanded(false);
                         break;

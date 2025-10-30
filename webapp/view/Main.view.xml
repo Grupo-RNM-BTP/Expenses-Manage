@@ -19,7 +19,8 @@
         <tnt:header>
             <tnt:ToolHeader>
                 <Button icon="sap-icon://menu2" press="onSideNavToggle"/>
-                <Title text="{i18n>ManageMyExpenses}" />
+                <!-- <Title id="idTitle1" text="{i18n>ManageMyExpenses}" /> -->
+                <Title id="idTitle1" />
             </tnt:ToolHeader>
         </tnt:header>
 
@@ -251,11 +252,9 @@
                     </ScrollContainer>
 
                     <ScrollContainer id="pageCurrentAccount" horizontal="false" vertical="true" height="100%">
-
                         <layout:Grid defaultSpan="L6 M12 S12" width="100%" vSpacing="1" hSpacing="1">
-
                             <layout:content>
-                                <smartTable:SmartTable id="smartTableCurrentAccount_1" entitySet="ZFI_EXPENSES_CURRENTE_ACC_1" tableType="ResponsiveTable" demandPopin="true" useVariantManagement="true" useTablePersonalisation="true" header="{i18n>CurrentAccount}" showRowCount="true" persistencyKey="123" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
+                                <smartTable:SmartTable id="smartTableCurrentAccount_1" entitySet="ZFI_EXPENSES_CURRENTE_ACC_1" tableType="ResponsiveTable" demandPopin="true" useExportToExcel="false" useVariantManagement="false" useTablePersonalisation="true" header="{i18n>CurrentAccount_1}" showRowCount="true" persistencyKey="123" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
                                     <Table class="sapUiResponsiveContentPadding" growing="true" growingThreshold="50">
                                         <ColumnListItem vAlign="Middle">
                                         </ColumnListItem>
@@ -263,14 +262,13 @@
                                 </smartTable:SmartTable>
                             </layout:content>
                             <layout:content>
-                                <smartTable:SmartTable id="smartTableCurrentAccount_2" entitySet="ZFI_EXPENSES_CURRENTE_ACC_2" tableType="ResponsiveTable" demandPopin="true" useVariantManagement="true" useTablePersonalisation="true" header="{i18n>CurrentAccount}" showRowCount="true" persistencyKey="1234" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
+                                <smartTable:SmartTable id="smartTableCurrentAccount_2" entitySet="ZFI_EXPENSES_CURRENTE_ACC_2" tableType="ResponsiveTable" demandPopin="true" useExportToExcel="false" useVariantManagement="false" useTablePersonalisation="true" header="{i18n>CurrentAccount_2}" showRowCount="true" persistencyKey="1234" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
                                     <Table class="sapUiResponsiveContentPadding" growing="true" growingThreshold="50">
                                         <ColumnListItem vAlign="Middle">
                                         </ColumnListItem>
                                     </Table>
                                 </smartTable:SmartTable>
                             </layout:content>
-
                         </layout:Grid>
                     </ScrollContainer>
 

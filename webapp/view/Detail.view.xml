@@ -68,13 +68,10 @@
                     <m:Label text="{i18n>LicensePlate}"/>
                     <m:Text id="LicensePlate" text="{Plate}" visible="{= (${ExpType} || '').indexOf('COMBST') > -1 }"/>
 
-                    <!-- <m:Label text="{i18n>FuelQuantity}"/> -->
-                    <!-- <m:Text id="FuelQty" text="{FuelQty} {FuelUom}" visible="{= (${ExpType} || '').indexOf('COMBST') > -1 }"/> -->
-
                     <m:Label text="{i18n>Amount}"/>
                     <m:Text text="{Value} {Waers}"/>
 
-                    <m:Label text="{i18n>ApprovedValue}"/>
+                    <m:Label text="{i18n>PostedValue}"/>
                     <m:Text text="{ApprvdValue} {Waers}"/>
 
                     <!-- Estado -->
