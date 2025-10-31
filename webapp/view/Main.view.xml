@@ -87,7 +87,7 @@
                                 <Title text="{i18n>AllExpenses}" titleStyle="H4" />
                             </FlexBox>
 
-                            <smartFilterBar:SmartFilterBar id="idSmartFilterBar" entitySet="ZFI_EXPENSES_MNG"  />
+                            <smartFilterBar:SmartFilterBar id="idSmartFilterBar" entitySet="ZFI_EXPENSES_MNG" />
                             <smartTable:SmartTable id="MyExpensesTable" demandPopin="true" enableAutoBinding="true" entitySet="ZFI_EXPENSES_MNG" persistencyKey='pKeyOperationsTable' useVariantManagement="false" smartFilterId="idSmartFilterBar" tableType="ResponsiveTable" beforeRebindTable="onBeforeRebindTable" useExportToExcel="false" width="100%" useTablePersonalisation="true" requestAtLeastFields="Doc,Reason,ExpNo,ApprvdValue,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus">
                                 <smartTable:customToolbar>
                                     <OverflowToolbar design="Transparent">
@@ -306,14 +306,19 @@
                                             <Text text="{i18n>ExpNoAndDocNo}" />
                                         </header>
                                     </Column>
+                                    <Column customData:p13nData='{"columnKey":"ExpTypeDsc", "leadingProperty":"ExpTypeDsc", "sortProperty":"ExpTypeDsc", filterProperty:"ExpTypeDsc"}'>
+                                        <header>
+                                            <Text text="{i18n>ExpenseType}" />
+                                        </header>
+                                    </Column>
                                     <Column customData:p13nData='{"columnKey":"PayMethodDsc", "leadingProperty":"PayMethodDsc", "sortProperty":"PayMethodDsc", filterProperty:"PayMethodDsc"}'>
                                         <header>
                                             <Text text="{i18n>PaymentMethod}" />
                                         </header>
                                     </Column>
-                                    <Column customData:p13nData='{"columnKey":"ExpTypeDsc", "leadingProperty":"ExpTypeDsc", "sortProperty":"ExpTypeDsc", filterProperty:"ExpTypeDsc"}'>
+                                    <Column customData:p13nData='{"columnKey":"Reason", "leadingProperty":"Reason", "sortProperty":"Reason", filterProperty:"Reason"}'>
                                         <header>
-                                            <Text text="{i18n>ExpenseType}" />
+                                            <Text text="{i18n>Reason}" />
                                         </header>
                                     </Column>
                                     <Column customData:p13nData='{"columnKey":"Erdat", "leadingProperty":"Erdat", "sortProperty":"Erdat", filterProperty:"Erdat"}'>
@@ -347,8 +352,9 @@
                                             <Text text="{FirstName} {LastName} ({Pernr})" />
                                             <Text text="{CompanyDsc} ({CompanyCode})" />
                                             <Text text="{ExpNo} / {Belnr}" />
-                                            <Text text="{PayMethodDsc}" />
                                             <Text text="{ExpTypeDsc}" />
+                                            <Text text="{PayMethodDsc}" />
+                                            <Text text="{Reason}" />
                                             <Text text="{path: 'Erdat', formatter: '.formatter.formatDateTime'}" />
                                             <Text text="{Value} {Waers}" />
                                             <ObjectStatus text="{path: 'FiStatus', formatter: '.formatter.statusText'}" state="{path: 'FiStatus', formatter: '.formatter.statusState'}" icon="{path: 'FiStatus', formatter: '.formatter.statusIcon'}" iconDensityAware="false" active="false"/>

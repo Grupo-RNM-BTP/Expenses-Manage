@@ -2,8 +2,9 @@ sap.ui.define([
     "./BaseController",
     "../model/formatter",
     "sap/ui/model/json/JSONModel",
+    "../util/ScanUtil",
 ],
-    function (BaseController, formatter, JSONModel) {
+    function (BaseController, formatter, JSONModel, ScanUtil) {
         "use strict";
 
         /**
@@ -24,6 +25,9 @@ sap.ui.define([
                 var oAttachmentModel = new sap.ui.model.json.JSONModel({
                     attachments: []
                 });
+
+                new ScanUtil().handleAttachToController(this);
+
                 this.getView().setModel(oAttachmentModel, "attachmentModel");
                 this.getOwnerComponent().getRouter().getRoute("Detail").attachPatternMatched(this.onObjectDetail, this);
             },
@@ -161,27 +165,12 @@ sap.ui.define([
                         sPath = "/AttachmentsEvents",
                         oEntry = {};
 
-                    // oEntry = {
-                    //     Expenseno: sExpNo,
-                    //     FileString: sBase64,
-                    // };
 
-                    // var sType = oFile.type.split("/")[1].toUpperCase();
-
-                    // if (sType.toUpperCase() === "JPEG") {
-                    //     sType = "JPG";
-                    // }
-                    // else {
-                    //     sType = sType.toUpperCase();
-                    // }
-
-                    // oEntry.FileType = sType;
                     this.getModel("global").setProperty("/busy", true);
                     var sDocument = await this.onConvertToPDF(sBase64);
                     oEntry.Expenseno = sExpNo;
                     oEntry.FileString = sDocument;
                     oEntry.FileType = "PDF";
-
 
                     oModel.create(sPath, oEntry, {
                         success: function () {

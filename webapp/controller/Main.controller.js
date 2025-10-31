@@ -3,9 +3,10 @@ sap.ui.define([
     "../model/formatter",
     "sap/ui/model/json/JSONModel",
     "sap/ui/unified/FileUploader",
-    "sap/ui/core/Fragment"
+    "sap/ui/core/Fragment",
+    "../util/ScanUtil"
 ],
-    function (BaseController, formatter, JSONModel, FileUploader, Fragment) {
+    function (BaseController, formatter, JSONModel, FileUploader, Fragment, ScanUtil) {
         "use strict";
         /**
          * MainController: Handles main view, navigation, uploads, and card data.
@@ -35,6 +36,10 @@ sap.ui.define([
                 this._bError = false;
                 this._bSubmit = false;
                 this._cancel = false;
+
+                this._bScan = false;
+
+                new ScanUtil().handleAttachToController(this);
 
                 this.getView().setModel(new JSONModel(), "Camera");
                 this.getView().setModel(new JSONModel({ vatLines: [], vatEditMode: true, unitVisible: false }), "Expenses");
@@ -305,7 +310,6 @@ sap.ui.define([
                     oEntry.Expenseno = this.getView().getModel("Main").getProperty("/ExpNo");
                     oEntry.FileString = sDocument;
                     oEntry.FileType = "PDF";
-                    // oEntry.FileType = this._sFileType;
 
                     oModel.create(sPath, oEntry, {
                         success: function () {
@@ -1200,9 +1204,6 @@ sap.ui.define([
                     var iIndex = oTable.indexOfItem(oItem);
 
                     if (iIndex > -1) {
-                        // aLines.splice(iIndex, 1);
-                        // this.oExpensesModel.setProperty("/vatLines", aLines);
-
                         var snapshot = aLines[iIndex] || {};
                         this.handleLogChange("Linha do resumo IVA (linha " + (iIndex + 1) + ") eliminada", JSON.stringify(snapshot), "", "", true);
 
@@ -1388,6 +1389,8 @@ sap.ui.define([
             handleSetValues: function (oData) {
                 var oView = this.getView();
 
+                this._bScan = true;
+
                 this.oExpensesModel.setProperty("/expNo", oData.ExpNo);
                 this.oExpensesModel.setProperty("/valid", oData.Valid);
                 this.oExpensesModel.setProperty("/nifCompany", oData.Nifc);
@@ -1452,6 +1455,7 @@ sap.ui.define([
                     "expenseDialog:inputFuelQuantity",
                     "expenseDialog:selectPymtMeth",
                     "expenseDialog:inputAmt",
+                    "expenseDialog:textAreaComments",
                     "expenseDialog:inputUnit",
                     "expenseDialog:vatTable"
                 ];
@@ -1501,10 +1505,11 @@ sap.ui.define([
                 oEntry.Land1 = Fragment.byId(oView.getId(), "expenseDialog:selectCountry").getSelectedKey();
                 oEntry.Sdate = Fragment.byId(oView.getId(), "expenseDialog:datePicker").getValue();
                 oEntry.Value = Fragment.byId(oView.getId(), "expenseDialog:inputAmt").getValue();
+                oEntry.Comments = Fragment.byId(oView.getId(), "expenseDialog:textAreaComments").getValue();
                 oEntry.TableIva = JSON.stringify(oView.getModel("Expenses").getProperty("/vatLines"));
 
-                oEntry.Doc = oView.getModel("Expenses").getProperty("/capturedImage");
-                oEntry.DocType = oView.getModel("Expenses").getProperty("/imageExt");
+                oEntry.Doc = await this.onConvertToPDF(oView.getModel("Expenses").getProperty("/capturedImage"));
+                oEntry.DocType = "PDF";
 
                 var aLogs = this.getView().getModel("Logs").getProperty("/entries") || [];
                 oEntry.Log = JSON.stringify(aLogs);
@@ -1588,7 +1593,7 @@ sap.ui.define([
                 return new Promise(function (resolve) {
                     var isValidEmpty = bValid === "" || bValid === null || bValid === undefined || bValid === false;
 
-                    if (isValidEmpty) {
+                    if (isValidEmpty && that._bScan === true) {
                         var sMessage;
                         if (!sNifCompany) {
                             sMessage = that.getResourceBundle().getText("xexp.expNifMismatch2");
@@ -1672,13 +1677,81 @@ sap.ui.define([
                 this.getView().getModel("Logs")?.setData({ entries: [] });
             },
 
+            // /**
+            //  * Starts the device camera stream using the specified facing mode.
+            //  * @param {string} facingMode - Camera direction ("user" or "environment")
+            //  */
+            // handleStartCamera: async function (facingMode, oDomRef) {
+            //     this.getView().getModel("Camera").setProperty("/mode", facingMode);
+
+            //     try {
+            //         var video = oDomRef.querySelector("#cameraVideo");
+            //         if (!video) {
+            //             sap.m.MessageToast.show("Vídeo não encontrado.");
+            //             return;
+            //         }
+
+            //         let stream;
+            //         try {
+            //             stream = await navigator.mediaDevices.getUserMedia({
+            //                 audio: false,
+            //                 video: {
+            //                     facingMode: { exact: facingMode },
+            //                     width: { ideal: 1920 },
+            //                     height: { ideal: 1080 },
+            //                     frameRate: { ideal: 60 },
+            //                     aspectRatio: 16 / 9
+            //                 }
+            //             });
+            //         } catch (e) {
+            //             stream = await navigator.mediaDevices.getUserMedia({
+            //                 audio: false,
+            //                 video: { facingMode }
+            //             });
+            //         }
+
+            //         // 2) Ligar stream ao vídeo
+            //         video.playsInline = true;
+            //         video.muted = true;
+            //         video.srcObject = stream;
+            //         await video.play();
+
+            //         this._photoTaken = false;
+            //         this.handleScheduleCameraAutoClose(120000);
+
+            //         // 3) Puxar para o máximo com applyConstraints (quando suportado)
+            //         var track = stream.getVideoTracks()[0],
+            //             caps = track.getCapabilities && track.getCapabilities();
+            //         if (caps) {
+            //             const wanted = {
+            //                 width: caps.width ? caps.width.max : undefined,
+            //                 height: caps.height ? caps.height.max : undefined,
+            //                 frameRate: caps.frameRate ? Math.min(60, caps.frameRate.max) : undefined
+            //             };
+            //             await track.applyConstraints({
+            //                 width: wanted.width,
+            //                 height: wanted.height,
+            //                 frameRate: wanted.frameRate
+            //             }).catch(() => { });
+            //         }
+
+            //         this._cameraStream = stream;
+            //     } catch (err) {
+            //         sap.m.MessageToast.show(this.getResourceBundle().getText("xexp.expErrorStartCamera"));
+            //     }
+            // },
+
             /**
              * Starts the device camera stream using the specified facing mode.
              * @param {string} facingMode - Camera direction ("user" or "environment")
+             * @param {Element} oDomRef - DOM do diálogo/view que contém #cameraVideo
              */
             handleStartCamera: async function (facingMode, oDomRef) {
                 this.getView().getModel("Camera").setProperty("/mode", facingMode);
+
                 try {
+                    this.handleStopAllDetect(oDomRef);
+
                     var video = oDomRef.querySelector("#cameraVideo");
                     if (!video) {
                         sap.m.MessageToast.show("Vídeo não encontrado.");
@@ -1704,7 +1777,6 @@ sap.ui.define([
                         });
                     }
 
-                    // 2) Ligar stream ao vídeo
                     video.playsInline = true;
                     video.muted = true;
                     video.srcObject = stream;
@@ -1713,21 +1785,26 @@ sap.ui.define([
                     this._photoTaken = false;
                     this.handleScheduleCameraAutoClose(120000);
 
-                    // 3) Puxar para o máximo com applyConstraints (quando suportado)
                     var track = stream.getVideoTracks()[0],
                         caps = track.getCapabilities && track.getCapabilities();
+
                     if (caps) {
                         const wanted = {
                             width: caps.width ? caps.width.max : undefined,
                             height: caps.height ? caps.height.max : undefined,
                             frameRate: caps.frameRate ? Math.min(60, caps.frameRate.max) : undefined
                         };
+
                         await track.applyConstraints({
                             width: wanted.width,
                             height: wanted.height,
                             frameRate: wanted.frameRate
                         }).catch(() => { });
                     }
+
+                    this.handleCreateOverlayCanvas(video);
+                    this.onLiveDetect(oDomRef);
+                    this.onStartAutoDetect();
 
                     this._cameraStream = stream;
                 } catch (err) {
@@ -1773,6 +1850,8 @@ sap.ui.define([
              */
             onCloseCamera: function () {
                 try {
+                    this.handleStopAllDetect();
+
                     var video = null;
 
                     if (this.oCameraDialog && this.oCameraDialog.getDomRef()) {
@@ -1792,8 +1871,10 @@ sap.ui.define([
 
                     if (video) {
                         try { video.pause(); } catch (e) { }
+
                         video.srcObject = null;
                         video.removeAttribute("src");
+
                         try { video.load(); } catch (e) { }
                     }
                 } finally {
@@ -1977,30 +2058,114 @@ sap.ui.define([
                 });
             },
 
+            // /**
+            //  * Captures a photo from the live camera stream,
+            //  * saves it as a base64 PNG in the "Expenses" model, and opens the expense dialog.
+            //  */
+            // onTakePhoto: function () {
+            //     this._photoTaken = true;
+
+            //     var video = document.getElementById('cameraVideo'),
+            //         canvas = document.createElement('canvas'),
+            //         context = canvas.getContext('2d');
+
+            //     canvas.width = video.videoWidth;
+            //     canvas.height = video.videoHeight;
+            //     context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            //     var imageData = canvas.toDataURL('image/png');
+
+            //     if (this.oExpensesModel) {
+            //         this.oExpensesModel.setProperty("/capturedImage", imageData);
+            //         this.oExpensesModel.setProperty("/imageExt", "PNG");
+            //     }
+
+            //     this.handleClearCameraAutoClose();
+            //     this.handleStopAllDetect();
+            //     this.handleScanPhoto();
+            // },
+
+            /**
+             * Captures a photo from the live camera stream,
+             * Saves it as a base64 PNG in the "Expenses" model, and opens the expense dialog.
+             */
+            // onTakePhoto: async function () {
+            //     this._photoTaken = true;
+
+            //     const root =
+            //         (this.oCameraDialog && this.oCameraDialog.getDomRef()) ||
+            //         (this.getView() && this.getView().getDomRef()) || document;
+
+            //     const video = root.querySelector && root.querySelector("#cameraVideo");
+            //     if (!video || !video.videoWidth || !video.videoHeight) {
+            //         // sap.m.MessageToast.show("Vídeo indisponível.");
+            //         return;
+            //     }
+
+            //     let dataURL;
+            //     try {
+            //         const quad = this._lastQuadVideoPx;
+            //         if (quad && quad.length === 4) {
+            //             dataURL = await this.handleWarp(video, quad);
+            //         } else {
+            //             dataURL = this.handleCaptureFrame(video);
+            //         }
+            //     } catch (e) {
+            //         dataURL = this.handleCaptureFrame(video);
+            //     }
+
+            //     if (this.oExpensesModel) {
+            //         this.oExpensesModel.setProperty("/capturedImage", dataURL);
+            //         this.oExpensesModel.setProperty("/imageExt", "PNG");
+            //     }
+
+            //     this.handleStopAllDetect?.();
+            //     this.handleClearCameraAutoClose?.();
+            //     this.handleScanPhoto?.();
+            // },
+
+
             /**
              * Captures a photo from the live camera stream,
              * saves it as a base64 PNG in the "Expenses" model, and opens the expense dialog.
              */
-            onTakePhoto: function () {
+            onTakePhoto: async function () {
                 this._photoTaken = true;
 
-                var video = document.getElementById('cameraVideo'),
-                    canvas = document.createElement('canvas'),
-                    context = canvas.getContext('2d');
+                const root =
+                    (this.oCameraDialog && this.oCameraDialog.getDomRef()) ||
+                    (this.getView() && this.getView().getDomRef()) || document;
 
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const video = root.querySelector && root.querySelector("#cameraVideo");
+                if (!video || !video.videoWidth || !video.videoHeight) {
+                    return;
+                }
 
-                var imageData = canvas.toDataURL('image/png');
+                let dataURL;
+                try {
+                    const quad = this._aLastQuadVideoPx;
+                    if (quad && quad.length === 4) {
+                        dataURL = await this.handleWarp(video, quad);
+                    } else {
+                        dataURL = this.handleCaptureFrame(video);
+                    }
+                } catch (e) {
+                    dataURL = this.handleCaptureFrame(video);
+                }
 
                 if (this.oExpensesModel) {
-                    this.oExpensesModel.setProperty("/capturedImage", imageData);
+                    this.oExpensesModel.setProperty("/capturedImage", dataURL);
                     this.oExpensesModel.setProperty("/imageExt", "PNG");
                 }
 
-                this.handleClearCameraAutoClose();
-                this.handleScanPhoto();
+                if (!this._aLastQuadVideoPx) {
+                    this.onCloseCamera();
+
+                    await this.openManualCropDialog();
+                    return;
+                }
+
+                this.handleScanPhoto?.();
             },
 
             /**
@@ -2164,7 +2329,7 @@ sap.ui.define([
              * @param {sap.ui.core.Control} ctrl - The control to search within
              * @param {sap.ui.core.Control[]} out - Array to store found controls
              */
-            _getInnerInputsAndSelects: function (ctrl, out) {
+            handleGetInputsAndSelects: function (ctrl, out) {
                 if (!ctrl) { return; }
 
                 if (ctrl instanceof sap.m.Input || ctrl instanceof sap.m.Select) {
@@ -2175,9 +2340,9 @@ sap.ui.define([
                 var tryAgg = function (name) {
                     var aggr = ctrl.getAggregation && ctrl.getAggregation(name);
                     if (Array.isArray(aggr)) {
-                        aggr.forEach(function (child) { this._getInnerInputsAndSelects(child, out); }.bind(this));
+                        aggr.forEach(function (child) { this.handleGetInputsAndSelects(child, out); }.bind(this));
                     } else if (aggr) {
-                        this._getInnerInputsAndSelects(aggr, out);
+                        this.handleGetInputsAndSelects(aggr, out);
                     }
                 }.bind(this);
 
@@ -2211,7 +2376,7 @@ sap.ui.define([
                 (oVatTable.getItems() || []).forEach(function (item) {
                     (item.getCells() || []).forEach(function (cell) {
                         var leafCtrls = [];
-                        that._getInnerInputsAndSelects(cell, leafCtrls);
+                        that.handleGetInputsAndSelects(cell, leafCtrls);
 
                         leafCtrls.forEach(function (leaf) {
                             that.handleRememberPrev(leaf);
@@ -2294,10 +2459,13 @@ sap.ui.define([
                     { id: "expenseDialog:inputNif", label: "número de identificação fiscal do fornecedor" },
                     { id: "expenseDialog:selectCountry", label: "país" },
                     { id: "expenseDialog:selectExpType", label: "tipo de despesa" },
+                    { id: "expenseDialog:selectExpSubType", label: "subtipo de despesa" },
+                    { id: "expenseDialog:selectBP", label: "parceiro" },
                     { id: "expenseDialog:inputPlate", label: "matrícula" },
                     { id: "expenseDialog:inputFuelQuantity", label: "quantidade de combustível" },
                     { id: "expenseDialog:selectPymtMeth", label: "método de pagamento" },
                     { id: "expenseDialog:inputAmt", label: "montante" },
+                    { id: "expenseDialog:textAreaComments", label: "observações" },
                     { id: "expenseDialog:inputUnit", label: "unidade" }
                 ];
             },
@@ -2554,7 +2722,6 @@ sap.ui.define([
 
                         oBusinessPartner.setValue(sBusinessPartnerName);
                         oBusinessPartner.data("BPKey", sBusinessPartner);
-
                     }
 
                     this._oMaterialVh.close();
@@ -2621,11 +2788,104 @@ sap.ui.define([
                     if (oTable.bindRows) {
                         oTable.getBinding("rows").filter(oFilter);
                     }
+
                     if (oTable.bindItems) {
                         oTable.getBinding("items").filter(oFilter);
                     }
+
                     oValueHelp.update();
                 });
+            },
+
+
+
+            /* ************************************************************************************** */
+            /* *                                        Crop                                        * */
+            /* ************************************************************************************** */
+
+            openManualCropDialog: async function () {
+                if (!this._pManualCropFrag) {
+                    this._pManualCropFrag = sap.ui.core.Fragment.load({
+                        id: this.getView().getId(),
+                        name: "zfiexpensesmanage.fragments.Crop",
+                        controller: this
+                    }).then((oFrag) => {
+                        this.getView().addDependent(oFrag);
+                        return oFrag;
+                    });
+                }
+
+                const oDlg = await this._pManualCropFrag;
+                oDlg.open();
+
+                const dataURL = this.oExpensesModel?.getProperty("/capturedImage");
+                if (!dataURL) {
+                    return;
+                }
+
+                const root = oDlg.getDomRef();
+                const img = root.querySelector("#cameraImage");
+
+                img.onload = () => {
+                    const overlay = root.querySelector("#cameraOverlay");
+
+                    const resize = () => {
+                        const r = img.getBoundingClientRect();
+
+                        overlay.width = Math.max(1, Math.round(r.width));
+                        overlay.height = Math.max(1, Math.round(r.height));
+
+                        const ctx = overlay.getContext("2d");
+                        ctx && ctx.clearRect(0, 0, overlay.width, overlay.height);
+                    };
+
+                    resize();
+                    try {
+                        new ResizeObserver(resize).observe(img);
+                    }
+                    catch (e) { }
+
+                    this.handleEnableDrawModeImage(root);
+                };
+
+                img.src = dataURL;
+            },
+
+            onUseFullPhoto: function () {
+                const oDlg = this.byId("cropDialog");
+                if (oDlg) {
+                    this.handleDisableDrawModeImage(oDlg.getDomRef());
+                    oDlg.close();
+                }
+
+                this.handleScanPhoto?.();
+            },
+
+            onUseCroppedPhoto: async function () {
+                const oDlg = this.byId("cropDialog");
+                if (!oDlg) return;
+
+                const root = oDlg.getDomRef();
+                const img = root.querySelector("#cameraImage");
+
+                try {
+                    const quad = this._aLastQuadImagePx;
+                    if (!quad || quad.length !== 4) {
+                        return;
+                    }
+
+                    const dataURL = await this.handleWarp(img, quad);
+                    if (this.oExpensesModel) {
+                        this.oExpensesModel.setProperty("/capturedImage", dataURL);
+                        this.oExpensesModel.setProperty("/imageExt", "PNG");
+                    }
+                } catch (e) {
+
+                } finally {
+                    this.handleDisableDrawModeImage(root);
+                    oDlg.close();
+                    this.handleScanPhoto?.();
+                }
             },
 
         });

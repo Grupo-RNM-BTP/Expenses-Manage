@@ -6,7 +6,7 @@
                 <CustomListItem>
                     <HBox fitContainer="true" alignItems="Center" justifyContent="SpaceBetween">
                         <Text text="Extrair dados c/ AI"/>
-                        <Switch id="settingsPopover:switchAiScan" state="true" change=".handleAiExtractToggle"/>
+                        <Switch id="settingsPopover:switchAiScan" state="{Scan>/aiScan}" change=".handleAiExtractToggle"/>
                     </HBox>
                 </CustomListItem>
 

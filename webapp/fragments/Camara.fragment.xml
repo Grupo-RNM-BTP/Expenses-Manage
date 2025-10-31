@@ -5,6 +5,7 @@
             <core:HTML id="cameraHTML" sanitizeContent="false" content='
                 &lt;div class="cameraContainer"&gt;
                     &lt;video id="cameraVideo" autoplay playsinline&gt;&lt;/video&gt;
+                    &lt;canvas id="cameraOverlay" style="position:absolute;inset:0;pointer-events:none;"&gt;&lt;/canvas&gt;
                     &lt;button id="captureBtn"&gt;&lt;/button&gt;
 
                     &lt;label id="uploadBtn" for="fileUploader" title="Upload photo" tabindex="0" role="button" aria-label="Upload photo"&gt;

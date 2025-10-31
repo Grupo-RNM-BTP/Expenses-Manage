@@ -324,27 +324,33 @@ sap.ui.define([
         },
 
         onConvertToPDF: async function (base64Image) {
-            if (base64Image.startsWith("data:application/pdf") || base64Image.startsWith("JVBERi0x")) {
-                return base64Image;
+            sap.ui.core.BusyIndicator.show(0);
+
+            try {
+                if (base64Image.startsWith("data:application/pdf") || base64Image.startsWith("JVBERi0x")) {
+                    return base64Image;
+                }
+
+                const mod = await import("https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js");
+                const JsPDF = mod.jsPDF || (mod.default && mod.default.jsPDF) || window.jspdf.jsPDF;
+                const { optimizedBase64, format, widthMm, heightMm } = await this._prepareImageForPdf(base64Image);
+                const doc = new JsPDF({
+                    orientation: "portrait",
+                    unit: "mm",
+                    format: "a4",
+                    compress: true
+                });
+
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const posX = (pageWidth - widthMm) / 2;
+
+                doc.addImage(optimizedBase64, format, posX, 10, widthMm, heightMm);
+
+                const pdfBase64 = doc.output("datauristring");
+                return pdfBase64;
+            } finally {
+                sap.ui.core.BusyIndicator.hide();
             }
-
-            const mod = await import("https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js");
-            const JsPDF = mod.jsPDF || (mod.default && mod.default.jsPDF) || window.jspdf.jsPDF;
-            const { optimizedBase64, format, widthMm, heightMm } = await this._prepareImageForPdf(base64Image);
-            const doc = new JsPDF({
-                orientation: "portrait",
-                unit: "mm",
-                format: "a4",
-                compress: true
-            });
-
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const posX = (pageWidth - widthMm) / 2;
-
-            doc.addImage(optimizedBase64, format, posX, 10, widthMm, heightMm);
-
-            const pdfBase64 = doc.output("datauristring");
-            return pdfBase64;
         },
 
         _prepareImageForPdf: function (base64Str) {
@@ -391,5 +397,6 @@ sap.ui.define([
                 img.src = base64Str;
             });
         }
+
     });
 });
