@@ -24,7 +24,7 @@
             "port": 9229,
             "env": {
                 "DEBUG": "--inspect",
-                "FIORI_TOOLS_URL_PARAMS": "sap-client=300&sap-ui-xx-viewCache=false"
+                "FIORI_TOOLS_URL_PARAMS": "sap-client=200&sap-ui-xx-viewCache=false"
             }
         },
         {
@@ -51,7 +51,7 @@
             "outputCapture": "std",
             "port": 9229,
             "env": {
-                "FIORI_TOOLS_URL_PARAMS": "sap-client=300&sap-ui-xx-viewCache=false"
+                "FIORI_TOOLS_URL_PARAMS": "sap-client=200&sap-ui-xx-viewCache=false"
             }
         },
         {
@@ -78,7 +78,7 @@
             "outputCapture": "std",
             "port": 9229,
             "env": {
-                "FIORI_TOOLS_URL_PARAMS": "sap-client=300&sap-ui-xx-viewCache=false"
+                "FIORI_TOOLS_URL_PARAMS": "sap-client=200&sap-ui-xx-viewCache=false"
             }
         }
     ]

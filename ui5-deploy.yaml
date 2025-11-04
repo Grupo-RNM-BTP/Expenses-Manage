@@ -15,11 +15,11 @@ builder:
       configuration:
         target:
           url: https://sapdev.grupornm.pt:44300/
-          client: "300"
+          client: "200"
         app:
           name: ZFI_EXP_MNG
           description: ""
           package: ZFI_EXPENSES
-          transport: DD2K906282
+          transport: DD2K906315
         exclude:
           - /test/

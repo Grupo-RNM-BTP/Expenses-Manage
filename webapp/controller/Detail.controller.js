@@ -85,6 +85,7 @@ sap.ui.define([
             * @param {string} sExpNo
             */
             onGetDocument: function (sObjectPath, sExpNo) {
+                debugger;
                 var oModel = this.getModel(),
                     sPath;
 
@@ -95,7 +96,7 @@ sap.ui.define([
                     sPath = "/AttachmentsEvents(Expenseno='" + sExpNo + "')";
                 }
 
-                this.getModel("global").setProperty("/busy", true);
+                // this.getModel("global").setProperty("/busy", true);
                 oModel.read(sPath, {
                     success: function (oData) {
                         var oModel = this.getView().getModel("attachmentModel"),
@@ -119,10 +120,10 @@ sap.ui.define([
                             this.byId("attachmentIllustration").setVisible(true);
                             this.byId("attachmentList").setVisible(false);
                         }
-                        this.getModel("global").setProperty("/busy", false);
+                        // this.getModel("global").setProperty("/busy", false);
                     }.bind(this),
                     error: function (oError) {
-                        this.getModel("global").setProperty("/busy", false);
+                        // this.getModel("global").setProperty("/busy", false);
                         var sError = JSON.parse(oError.responseText).error.message.value;
                         sap.m.MessageBox.alert(sError, {
                             icon: "ERROR",
