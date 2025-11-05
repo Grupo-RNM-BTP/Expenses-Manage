@@ -85,7 +85,6 @@ sap.ui.define([
             * @param {string} sExpNo
             */
             onGetDocument: function (sObjectPath, sExpNo) {
-                debugger;
                 var oModel = this.getModel(),
                     sPath;
 

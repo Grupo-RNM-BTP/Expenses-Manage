@@ -294,40 +294,87 @@ sap.ui.define([
         },
 
         openPDF: function (sDocument) {
-            var sBase64 = sDocument.split(",")[1],
-                decodedPdfContent = atob(sBase64),
-                byteNumbers = new Array(decodedPdfContent.length);
+            try {
+                if (sap.ui.Device.system.phone || sap.ui.Device.system.tablet) {
+                    this.openPDFMobile(sDocument);
+                    return;
+                }
 
-            for (var i = 0; i < decodedPdfContent.length; i++) {
-                byteNumbers[i] = decodedPdfContent.charCodeAt(i);
-            }
+                var sBase64 = sDocument.split(",")[1],
+                    decodedPdfContent = atob(sBase64),
+                    byteNumbers = new Array(decodedPdfContent.length);
 
-            var byteArray = new Uint8Array(byteNumbers),
-                blob = new Blob([byteArray], { type: "application/pdf" }),
-                _pdfurl = URL.createObjectURL(blob);
+                for (var i = 0; i < decodedPdfContent.length; i++) {
+                    byteNumbers[i] = decodedPdfContent.charCodeAt(i);
+                }
 
-            if (!this._PDFViewer) {
-                this._PDFViewer = new sap.m.PDFViewer({
-                    width: "auto",
-                    title: "Visualização de Documento",
-                    showDownloadButton: false,
-                    source: _pdfurl,
-                    sourceType: "object"
+                var byteArray = new Uint8Array(byteNumbers),
+                    blob = new Blob([byteArray], { type: "application/pdf" }),
+                    _pdfurl = URL.createObjectURL(blob);
+
+                if (!this._PDFViewer) {
+                    this._PDFViewer = new sap.m.PDFViewer({
+                        width: "auto",
+                        title: "Visualização de Documento",
+                        showDownloadButton: false,
+                        source: _pdfurl,
+                        displayType: sap.m.PDFViewerDisplayType.Auto,
+                        isTrustedSource: true
+                    });
+                    this.getView().addDependent(this._PDFViewer);
+                } else {
+                    this._PDFViewer.setSource(_pdfurl);
+                }
+
+                jQuery.sap.addUrlWhitelist("blob");
+                this._PDFViewer.open();
+            } catch (error) {
+                this.showErrorMessage({
+                    oText: error.message,
+                    oTitle: this.getResourceBundle().getText("errorTitle")
                 });
-                this.getView().addDependent(this._PDFViewer);
-            } else {
-                this._PDFViewer.setSource(_pdfurl);
             }
+        },
 
-            jQuery.sap.addUrlWhitelist("blob");
-            this._PDFViewer.open();
+        openPDFMobile: function (sDocument) {
+            try {
+                var base64PDF = sDocument.split(",")[1];
+                var arrayBuffer = this.base64ToArrayBuffer(base64PDF);
+                var blob = new Blob([arrayBuffer], { type: 'application/pdf' });
+                var url = URL.createObjectURL(blob);
+                // window.open(url);
+
+                var win = window.open(url, "_blank");
+
+                if (!win || win.closed || typeof win.closed === "undefined") {
+                    sap.m.MessageBox.error(this.getResourceBundle().getText("popUpBlocked"));
+                }
+            } catch (error) {
+                this.showErrorMessage({
+                    oText: error.message,
+                    oTitle: this.getResourceBundle().getText("errorTitle")
+                });
+            }
+        },
+
+        base64ToArrayBuffer: function (base64) {
+            var binaryString = atob(base64);
+            var len = binaryString.length;
+            var bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
         },
 
         onConvertToPDF: async function (base64Image) {
             sap.ui.core.BusyIndicator.show(0);
 
             try {
-                if (base64Image.startsWith("data:application/pdf") || base64Image.startsWith("JVBERi0x")) {
+                if (!base64Image) {
+                    return "";
+                }
+                else if (base64Image.startsWith("data:application/pdf") || base64Image.startsWith("JVBERi0x")) {
                     return base64Image;
                 }
 

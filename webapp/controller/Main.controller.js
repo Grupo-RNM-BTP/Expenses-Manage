@@ -390,20 +390,6 @@ sap.ui.define([
 
                             this.getModel("global").setProperty("/busy", false);
 
-                            // var oLightBox = new sap.m.LightBox({
-                            //     imageContent: new sap.m.LightBoxItem({
-                            //         imageSrc: sSrc
-                            //     })
-                            // });
-
-                            // oLightBox.addEventDelegate({
-                            //     onAfterRendering: function () {
-                            //         this.getModel("global").setProperty("/busy", false);
-                            //     }.bind(this)
-                            // });
-
-                            // oLightBox.open();
-
                         }.bind(this),
                         error: function (oError) {
                             this.getModel("global").setProperty("/busy", false);
