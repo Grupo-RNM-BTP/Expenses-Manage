@@ -72,7 +72,7 @@
                     <m:Text text="{Value} {Waers}"/>
 
                     <m:Label text="{i18n>PostedValue}"/>
-                    <m:Text text="{ApprvdValue} {Waers}"/>
+                    <m:Text text="{parts: [{path: 'ApprvdValue'}, {path: 'Waers'}], formatter: '.formatter.formatValue'}"/>
 
                     <!-- Estado -->
                     <core:Title text="{i18n>invoiceForm.Status}"/>

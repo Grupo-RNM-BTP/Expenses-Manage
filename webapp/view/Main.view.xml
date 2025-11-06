@@ -88,7 +88,7 @@
                             </FlexBox>
 
                             <smartFilterBar:SmartFilterBar id="idSmartFilterBar" entitySet="ZFI_EXPENSES_MNG" />
-                            <smartTable:SmartTable id="MyExpensesTable" demandPopin="true" enableAutoBinding="true" entitySet="ZFI_EXPENSES_MNG" persistencyKey='pKeyOperationsTable' useVariantManagement="false" smartFilterId="idSmartFilterBar" tableType="ResponsiveTable" beforeRebindTable="onBeforeRebindTable" useExportToExcel="false" width="100%" useTablePersonalisation="true" requestAtLeastFields="Doc,Reason,ExpNo,ApprvdValue,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus">
+                            <smartTable:SmartTable id="MyExpensesTable" demandPopin="true" header="{i18n>AllExpenses}" showRowCount="true" enableAutoBinding="true" entitySet="ZFI_EXPENSES_MNG"  persistencyKey='pKeyOperationsTable' useVariantManagement="false" smartFilterId="idSmartFilterBar" tableType="ResponsiveTable" beforeRebindTable="onBeforeRebindTable" useExportToExcel="false" width="100%" useTablePersonalisation="true" requestAtLeastFields="Doc,Reason,ExpNo,ApprvdValue,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus">
                                 <smartTable:customToolbar>
                                     <OverflowToolbar design="Transparent">
                                         <ToolbarSpacer/>
@@ -274,7 +274,7 @@
                     <ScrollContainer id="pageApprovals" horizontal="false" vertical="true" height="100%">
                         <smartFilterBar:SmartFilterBar id="idSmartFilterBarApprovals" entitySet="ZFI_EXPENSES_LAPPRVD" />
 
-                        <smartTable:SmartTable id="smartTableApprovals" entitySet="ZFI_EXPENSES_LAPPRVD" beforeRebindTable="onBeforeRebindTableApprovals" demandPopin="true" smartFilterId="idSmartFilterBarApprovals" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="false" useTablePersonalisation="true" useVariantManagement="false" requestAtLeastFields="Pernr,CompanyCode,CompanyDsc,Doc,Reason,ExpNo,Belnr,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus,FirstName,LastName,FiscalYear,Nif" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="true">
+                        <smartTable:SmartTable id="smartTableApprovals" entitySet="ZFI_EXPENSES_LAPPRVD" header="{i18n>Approvals}" showRowCount="true" beforeRebindTable="onBeforeRebindTableApprovals" demandPopin="true" smartFilterId="idSmartFilterBarApprovals" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="false" useTablePersonalisation="true" useVariantManagement="false" requestAtLeastFields="Pernr,CompanyCode,CompanyDsc,Doc,Reason,ExpNo,Belnr,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus,FirstName,LastName,FiscalYear,Nif" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="true">
                             <smartTable:customToolbar>
                                 <OverflowToolbar design="Transparent">
                                     <ToolbarSpacer/>
