@@ -1350,6 +1350,7 @@ sap.ui.define([
                     })
                 });
 
+                fnById("expenseDialog:textAreaComments").setRequired(true);
                 fnById("expenseDialog:inputExpNo").setRequired(false);
                 fnById("expenseDialog:inputLocal").setRequired(false);
                 fnById("expenseDialog:datePicker").setEnabled(false);
