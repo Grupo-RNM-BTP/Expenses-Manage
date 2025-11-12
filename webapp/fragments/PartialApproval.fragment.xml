@@ -20,7 +20,7 @@
             <Button id="beginButton" text="{i18n>Confirm}" type="Emphasized" press=".onConfirmPartial" />
         </beginButton>
         <endButton>
-            <Button text="{i18n>Cancel}" press=".onCancelPartial" />
+            <Button text="{i18n>btnCancel}" press=".onCancelPartial" />
         </endButton>
 
     </Dialog>
