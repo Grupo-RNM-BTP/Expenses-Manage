@@ -67,6 +67,14 @@ sap.ui.define([
              * Handle after rendering, get card values, and set theme.
              */
             onAfterRendering: function () {
+                var oCard = this.byId("idNewCard");
+                if (oCard) {
+                    oCard.addEventDelegate({
+                        onclick: function () {
+                            this.handleStartProcess();
+                        }.bind(this)
+                    });
+                }
                 this.onCheckLeader();
                 this.getCardValues();
                 this.byId("idTitle1").setText(this.getResourceBundle().getText("ManageMyExpenses"));
@@ -1232,6 +1240,10 @@ sap.ui.define([
                 this.onVatCellChange(oEvent);
             },
 
+            handlePressCard: function () {
+                debugger;
+                sap.m.MessageToast.show("Card clicado!");
+            },
 
             /**
              * Starts the expense creation process by opening the camera fragment,

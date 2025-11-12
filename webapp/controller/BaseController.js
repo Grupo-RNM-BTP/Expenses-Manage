@@ -165,11 +165,11 @@ sap.ui.define([
                 oModel.read("/GetCardValues", {
                     success: function (oData) {
                         if (oData.results.length > 0) {
-                            this.getView().byId("idSumOfExpensesNoAttach").setText(oData.results[0].NdocV + " EUR");
+                            // this.getView().byId("idSumOfExpensesNoAttach").setText(oData.results[0].NdocV + " EUR");
                             this.getView().byId("idSumOfApprovedExpenses").setText(oData.results[0].ApprvdV + " EUR");
                             this.getView().byId("idSumOfExpensesLast30Days").setText(oData.results[0].Last30V + " EUR");
                         } else {
-                            this.getView().byId("idSumOfExpensesNoAttach").setText("0 EUR");
+                            // this.getView().byId("idSumOfExpensesNoAttach").setText("0 EUR");
                             this.getView().byId("idSumOfApprovedExpenses").setText("0 EUR");
                             this.getView().byId("idSumOfExpensesLast30Days").setText("0 EUR");
                         }
