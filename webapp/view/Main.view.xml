@@ -50,17 +50,6 @@
 
                             <l:Grid defaultSpan="XL4 L6 M12 S12" position="Center" hSpacing="1" vSpacing="1">
 
-                                <!-- <f:Card class="sapUiSmallMargin">
-                                    <f:header>
-                                        <card:Header title="{i18n>SumOfExpensesNoAttach}" />
-                                    </f:header>
-                                    <f:content>
-                                        <VBox class="sapUiSmallMargin">
-                                            <Title id="idSumOfExpensesNoAttach" level="H2" titleStyle="H3" />
-                                        </VBox>
-                                    </f:content>
-                                </f:Card> -->
-
                                 <f:Card class="sapUiSmallMargin">
                                     <f:header>
                                         <card:Header title="{i18n>SumOfApprovedExpenses}" />
@@ -83,26 +72,25 @@
                                     </f:content>
                                 </f:Card>
 
-                                <f:Card id="idNewCard" class="sapUiSmallMargin" height="110px">
+                                <f:Card class="sapUiSmallMargin">
+                                    <f:header>
+                                        <card:Header title="{i18n>NoTheExpensesNonReconciled}" />
+                                    </f:header>
                                     <f:content>
-                                        <FlexBox direction="Column" alignItems="Center" justifyContent="Center" height="100%" width="100%" renderType="Div">
-                                            <Title level="H2" titleStyle="H3" text="{i18n>New}" />
-                                        </FlexBox>
+                                        <VBox class="sapUiSmallMargin">
+                                            <Title id="idNoTheExpensesNonReconciled" level="H2" titleStyle="H3" />
+                                        </VBox>
                                     </f:content>
                                 </f:Card>
                             </l:Grid>
 
-                            <!-- <FlexBox justifyContent="SpaceBetween" class="sapUiLargeMarginTop" wrap="Wrap" alignItems="Center">
-                                <Title text="{i18n>AllExpenses}" titleStyle="H4" />
-                            </FlexBox> -->
-
                             <smartFilterBar:SmartFilterBar id="idSmartFilterBar" entitySet="ZFI_EXPENSES_MNG" />
-                            <smartTable:SmartTable id="MyExpensesTable" demandPopin="true" header="{i18n>AllExpenses}" showRowCount="true" enableAutoBinding="true" entitySet="ZFI_EXPENSES_MNG" persistencyKey='pKeyOperationsTable' useVariantManagement="false" smartFilterId="idSmartFilterBar" tableType="ResponsiveTable" beforeRebindTable="onBeforeRebindTable" useExportToExcel="true" width="100%" useTablePersonalisation="true" requestAtLeastFields="Doc,Reason,ExpNo,ApprvdValue,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus">
+                            <smartTable:SmartTable id="MyExpensesTable" demandPopin="true" header="{i18n>AllExpenses}" showRowCount="true" enableAutoBinding="true" entitySet="ZFI_EXPENSES_MNG" persistencyKey='pKeyOperationsTable' useVariantManagement="false" smartFilterId="idSmartFilterBar" tableType="ResponsiveTable" beforeRebindTable="onBeforeRebindTable" useExportToExcel="false" width="100%" useTablePersonalisation="true" requestAtLeastFields="Doc,Reason,ExpNo,ApprvdValue,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus">
                                 <smartTable:customToolbar>
                                     <OverflowToolbar design="Transparent">
                                         <ToolbarSpacer/>
+                                        <Button text="{i18n>New}" type="Emphasized" press="handleStartProcess" />
                                         <Button id="deleteButton" text="{i18n>Delete}" enabled="false" type="Default" press="handleDelete" />
-                                        <!-- <Button text="{i18n>New}" type="Emphasized" press="handleStartProcess" /> -->
                                     </OverflowToolbar>
                                 </smartTable:customToolbar>
                                 <Table id="idTableExpenses" fixedLayout="false" growing="true" mode="SingleSelectLeft" selectionChange="handleSelectionChange" growingThreshold="10">
