@@ -534,7 +534,19 @@ sap.ui.define([
                         }
                     );
                     return;
+                } else if (oTable.length > 1) {
+                    sap.m.MessageBox.error(this.getResourceBundle().getText("multipleSelection"),
+                        {
+                            icon: "ERROR",
+                            onClose: null,
+                            styleClass: '',
+                            initialFocus: null,
+                            textDirection: sap.ui.core.TextDirection.Inherit
+                        }
+                    );
+                    return;
                 }
+
 
                 oData.ExpNo = "";
                 oData.Valid = true;
@@ -566,6 +578,17 @@ sap.ui.define([
 
                 if (oTableItems.length === 0) {
                     sap.m.MessageBox.error(this.getResourceBundle().getText("noSelection"),
+                        {
+                            icon: "ERROR",
+                            onClose: null,
+                            styleClass: '',
+                            initialFocus: null,
+                            textDirection: sap.ui.core.TextDirection.Inherit
+                        }
+                    );
+                    return;
+                } else if (oTableItems.length > 1) {
+                    sap.m.MessageBox.error(this.getResourceBundle().getText("multipleSelection"),
                         {
                             icon: "ERROR",
                             onClose: null,
@@ -676,7 +699,7 @@ sap.ui.define([
                     return {
                         Amt: sAmt,
                         Posteddt: sDateForPicker,
-                        ExpNo: oObj.ExpNo
+                        ExpNo: oObj.ExpNo,
                     };
                 });
 
@@ -695,10 +718,10 @@ sap.ui.define([
                         sap.m.MessageBox.success(this.getResourceBundle().getText("reconciledSucess"));
                         oGlobalModel.setProperty("/busy", false);
                         oModel.refresh(true);
-                        this.onChangeStateReconButtons(false);
+                        this.onChangeStateReconButtons(false, false);
                     }.bind(this),
                     error: function (oError) {
-                        this.onChangeStateReconButtons(false);
+                        this.onChangeStateReconButtons(false, false);
                         oGlobalModel.setProperty("/busy", false);
                         var sError = JSON.parse(oError.responseText).error.message.value;
                         sap.m.MessageBox.alert(sError, {
@@ -736,15 +759,69 @@ sap.ui.define([
                 var aSelectedItems = oEvent.getSource().getSelectedItems();
 
                 if (aSelectedItems.length === 1) {
-                    this.onChangeStateReconButtons(true);
-                } else {
-                    this.onChangeStateReconButtons(false);
+                    this.onChangeStateReconButtons(true, false);
+                } else if (aSelectedItems.length > 1) {
+                    this.onChangeStateReconButtons(false, true);
+                } else if (aSelectedItems.length === 0) {
+                    this.onChangeStateReconButtons(false, false);
                 }
             },
 
-            onChangeStateReconButtons: function (sState) {
+            onChangeStateReconButtons: function (sState, sStateCompensation) {
                 this.byId("idExpensesWithoutAttach").setEnabled(sState);
                 this.byId("idReconcile").setEnabled(sState);
+                this.byId("idCompensation").setEnabled(sStateCompensation);
+            },
+
+            handleCompensation: function () {
+                var oModel = this.getModel(),
+                    sPath = "/Compensation",
+                    oTableSmart = this.byId("smartTableTransRecon").getTable(),
+                    aSelectedItems = oTableSmart.getSelectedItems(),
+                    oGlobalModel = this.getModel("global"),
+                    Items = [];
+
+                if (aSelectedItems.length < 2) {
+                    sap.m.MessageBox.error(this.getResourceBundle().getText("SelectAtLeastTwo"));
+                    return;
+                }
+
+                aSelectedItems.forEach(oItem => {
+                    var oData = oItem.getBindingContext().getObject();
+
+                    Items.push({
+                        amt: oData.Amt,
+                        posteddt: oData.sDateFromated.replace(/\./g, ""),
+                        chknum: oData.Chknum
+                    });
+                });
+
+                var oEntry = {
+                    ExpNo: '999999',
+                    Items: JSON.stringify(Items)
+                };
+
+                oGlobalModel.setProperty("/busy", true);
+                oModel.create(sPath, oEntry, {
+                    success: function () {
+                        oTableSmart.removeSelections();
+                        oGlobalModel.setProperty("/busy", false);
+                        oModel.refresh(true);
+                        this.onChangeStateReconButtons(false, false);
+                    }.bind(this),
+                    error: function (oError) {
+                        this.onChangeStateReconButtons(false, false);
+                        oGlobalModel.setProperty("/busy", false);
+                        var sError = JSON.parse(oError.responseText).error.message.value;
+                        sap.m.MessageBox.alert(sError, {
+                            icon: "ERROR",
+                            onClose: null,
+                            styleClass: '',
+                            initialFocus: null,
+                            textDirection: sap.ui.core.TextDirection.Inherit
+                        });
+                    }.bind(this)
+                });
             },
 
             //---------------------------------------------------------------------------------------------------------------------------------------------------------

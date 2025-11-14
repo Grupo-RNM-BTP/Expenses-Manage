@@ -130,11 +130,6 @@
                                                 <Text text="{i18n>PostedValue}" />
                                             </header>
                                         </Column>
-                                        <Column customData:p13nData='{"columnKey":"FiStatus", "leadingProperty":"FiStatus", "sortProperty":"FiStatus", filterProperty:"FiStatus"}'>
-                                            <header>
-                                                <Text text="{i18n>Status}" />
-                                            </header>
-                                        </Column>
                                     </columns>
                                     <items>
                                         <ColumnListItem id="idColumnListItem">
@@ -154,7 +149,6 @@
                                                 <Text text="{path: 'Erdat', formatter: '.formatter.formatDateTime'}" />
                                                 <Text id="Totalvalue" text="{parts: [{path: 'Value'}, {path: 'Waers'}], formatter: '.formatter.formatValue'}" />
                                                 <Text id="ApprovedValue" text="{parts: [{path: 'ApprvdValue'}, {path: 'Waers'}], formatter: '.formatter.formatValue'}" />
-                                                <ObjectStatus text="{path: 'FiStatus', formatter: '.formatter.statusText'}" state="{path: 'FiStatus', formatter: '.formatter.statusState'}" icon="{path: 'FiStatus', formatter: '.formatter.statusIcon'}" iconDensityAware="false" active="false"/>
                                             </cells>
                                         </ColumnListItem>
                                     </items>
@@ -232,15 +226,16 @@
                     <ScrollContainer id="pageTransRecon" horizontal="false" vertical="true" height="100%">
                         <smartFilterBar:SmartFilterBar id="sfbReconCC" entitySet="ZFI_EXPENSES_RECON" />
 
-                        <smartTable:SmartTable id="smartTableTransRecon" entitySet="ZFI_EXPENSES_RECON" smartFilterId="sfbReconCC" beforeRebindTable="onBeforeRebindTableRecon" tableType="ResponsiveTable" demandPopin="true" useVariantManagement="false" useExportToExcel="true" useTablePersonalisation="true" header="{i18n>TransactionReconciliation}" showRowCount="true" persistencyKey="SmartTable" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
+                        <smartTable:SmartTable id="smartTableTransRecon" entitySet="ZFI_EXPENSES_RECON" smartFilterId="sfbReconCC" beforeRebindTable="onBeforeRebindTableRecon" tableType="ResponsiveTable" demandPopin="true" useVariantManagement="false" useExportToExcel="false" useTablePersonalisation="true" header="{i18n>TransactionReconciliation}" showRowCount="true" persistencyKey="SmartTable" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
                             <smartTable:customToolbar>
                                 <OverflowToolbar design="Transparent">
                                     <ToolbarSpacer/>
                                     <Button id="idExpensesWithoutAttach" text="{i18n>ExpensesWithoutAttach}" enabled="false" type="Emphasized" press="handleExpenseWithoutAttach" />
                                     <Button id="idReconcile" text="{i18n>Reconcile}" enabled="false" type="Default" press="handleReconcile" />
+                                    <Button id="idCompensation" text="{i18n>Compensation}" enabled="false" type="Default" press="handleCompensation" />
                                 </OverflowToolbar>
                             </smartTable:customToolbar>
-                            <Table class="sapUiResponsiveContentPadding" mode="SingleSelectLeft" selectionChange="onSelectionChangeRecon" growing="true" growingThreshold="50">
+                            <Table class="sapUiResponsiveContentPadding" mode="MultiSelect" selectionChange="onSelectionChangeRecon" growing="true" growingThreshold="50">
                                 <ColumnListItem vAlign="Middle">
                                 </ColumnListItem>
                             </Table>
@@ -328,11 +323,11 @@
                                             <Text text="{i18n>Value}" />
                                         </header>
                                     </Column>
-                                    <Column customData:p13nData='{"columnKey":"FiStatus", "leadingProperty":"FiStatus", "sortProperty":"FiStatus", filterProperty:"FiStatus"}'>
+                                    <!-- <Column customData:p13nData='{"columnKey":"FiStatus", "leadingProperty":"FiStatus", "sortProperty":"FiStatus", filterProperty:"FiStatus"}'>
                                         <header>
                                             <Text text="{i18n>Status}" />
                                         </header>
-                                    </Column>
+                                    </Column> -->
                                 </columns>
                                 <items>
                                     <ColumnListItem id="idColumnListItemApprovals">
@@ -354,7 +349,7 @@
                                             <Text text="{Reason}" />
                                             <Text text="{path: 'Erdat', formatter: '.formatter.formatDateTime'}" />
                                             <Text text="{Value} {Waers}" />
-                                            <ObjectStatus text="{path: 'FiStatus', formatter: '.formatter.statusText'}" state="{path: 'FiStatus', formatter: '.formatter.statusState'}" icon="{path: 'FiStatus', formatter: '.formatter.statusIcon'}" iconDensityAware="false" active="false"/>
+                                            <!-- <ObjectStatus text="{path: 'FiStatus', formatter: '.formatter.statusText'}" state="{path: 'FiStatus', formatter: '.formatter.statusState'}" icon="{path: 'FiStatus', formatter: '.formatter.statusIcon'}" iconDensityAware="false" active="false"/> -->
                                         </cells>
                                     </ColumnListItem>
                                 </items>
