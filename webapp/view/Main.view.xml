@@ -323,11 +323,6 @@
                                             <Text text="{i18n>Value}" />
                                         </header>
                                     </Column>
-                                    <!-- <Column customData:p13nData='{"columnKey":"FiStatus", "leadingProperty":"FiStatus", "sortProperty":"FiStatus", filterProperty:"FiStatus"}'>
-                                        <header>
-                                            <Text text="{i18n>Status}" />
-                                        </header>
-                                    </Column> -->
                                 </columns>
                                 <items>
                                     <ColumnListItem id="idColumnListItemApprovals">
@@ -349,7 +344,6 @@
                                             <Text text="{Reason}" />
                                             <Text text="{path: 'Erdat', formatter: '.formatter.formatDateTime'}" />
                                             <Text text="{Value} {Waers}" />
-                                            <!-- <ObjectStatus text="{path: 'FiStatus', formatter: '.formatter.statusText'}" state="{path: 'FiStatus', formatter: '.formatter.statusState'}" icon="{path: 'FiStatus', formatter: '.formatter.statusIcon'}" iconDensityAware="false" active="false"/> -->
                                         </cells>
                                     </ColumnListItem>
                                 </items>
