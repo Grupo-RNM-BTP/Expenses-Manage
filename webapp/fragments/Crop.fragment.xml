@@ -9,12 +9,8 @@
                     &lt;canvas id="cameraOverlay" style="position:absolute;inset:0;pointer-events:auto;width:100%;height:100%;"&gt;&lt;/canvas&gt;
                 &lt;/div&gt;' />
         </content>
-
-        <beginButton>
-            <Button text="{i18n>xexp.useFullPhoto}" press=".onUseFullPhoto"/>
-        </beginButton>
         <endButton>
-            <Button text="{i18n>xexp.useCroppedPhoto}" type="Emphasized" press=".onUseCroppedPhoto"/>
+            <Button text="{i18n>xexp.continue}" type="Emphasized" press=".onUseCroppedPhoto"/>
         </endButton>
     </Dialog>
 </core:FragmentDefinition>

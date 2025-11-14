@@ -2802,6 +2802,9 @@ sap.ui.define([
             /* *                                        Crop                                        * */
             /* ************************************************************************************** */
 
+            /**
+             * Opens the manual crop dialog.
+             */
             openManualCropDialog: async function () {
                 if (!this._pManualCropFrag) {
                     this._pManualCropFrag = sap.ui.core.Fragment.load({
@@ -2850,17 +2853,12 @@ sap.ui.define([
                 img.src = dataURL;
             },
 
-            onUseFullPhoto: function () {
-                const oDlg = this.byId("cropDialog");
-                if (oDlg) {
-                    this.handleDisableDrawModeImage(oDlg.getDomRef());
-                    oDlg.close();
-                }
-
-                this.handleScanPhoto?.();
-            },
-
+            /**
+             * Uses the cropped photo.
+             */
             onUseCroppedPhoto: async function () {
+                var bContinue = false;
+
                 const oDlg = this.byId("cropDialog");
                 if (!oDlg) return;
 
@@ -2870,8 +2868,11 @@ sap.ui.define([
                 try {
                     const quad = this._aLastQuadImagePx;
                     if (!quad || quad.length !== 4) {
+                        sap.m.MessageBox.error(this.getResourceBundle().getText("xexp.cropArea"));
                         return;
                     }
+
+                    bContinue = true;
 
                     const dataURL = await this.handleWarp(img, quad);
                     if (this.oExpensesModel) {
@@ -2881,6 +2882,10 @@ sap.ui.define([
                 } catch (e) {
 
                 } finally {
+                    if (!bContinue) {
+                        return;
+                    }
+
                     this.handleDisableDrawModeImage(root);
                     oDlg.close();
                     this.handleScanPhoto?.();
