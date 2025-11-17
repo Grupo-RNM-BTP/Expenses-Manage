@@ -811,6 +811,7 @@ sap.ui.define([
                     }.bind(this),
                     error: function (oError) {
                         this.onChangeStateReconButtons(false, false);
+                        oTableSmart.removeSelections();
                         oGlobalModel.setProperty("/busy", false);
                         var sError = JSON.parse(oError.responseText).error.message.value;
                         sap.m.MessageBox.alert(sError, {
