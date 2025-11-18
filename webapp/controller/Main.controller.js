@@ -26,6 +26,7 @@ sap.ui.define([
                 var oModel = new JSONModel({
                     ExpNo: "",
                     ExpensesReconciled: [],
+                    ExpenseDevolution: [],
                     inputValue: "",
                     sliderMax: ""
                 });
@@ -501,10 +502,6 @@ sap.ui.define([
             //---------------------------------------------------------------------- Reconciliation -----------------------------------------------------------------
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-            /**
-            * Apply initial sorter before table binding.
-            * @param {sap.ui.base.Event} oEvent
-            */
             onBeforeRebindTableRecon: function (oEvent) {
                 var oBindingParams = oEvent.getParameter("bindingParams");
 
@@ -516,9 +513,66 @@ sap.ui.define([
                 }
             },
 
-            /**
-             * Handle expense without attach.
-             */
+            onGetExpenses: function (oAction) {
+                var oModel = this.getModel(),
+                    sPath = "/ZFI_EXPENSES_MNG",
+                    that = this;
+
+                this.getView().getModel("Main").setProperty("/ExpensesReconciled", []);
+                this.getView().getModel("Main").setProperty("/ExpenseDevolution", []);
+
+                this.getModel("global").setProperty("/busy", true);
+
+                return new Promise(function (resolve, reject) {
+                    oModel.read(sPath, {
+                        success: function (oData) {
+                            if (oAction === 'R') {
+                                var aFiltered = oData.results.filter(o => o.Checknum === "" && o.Pymtmeth === "A" && o.FiStatus !== "1" && o.FiStatus !== "2" && o.FiStatus !== "4" && o.FiStatus !== "7");
+                                that.getView().getModel("Main").setProperty("/ExpensesReconciled", aFiltered);
+                            } else if (oAction === 'D') {
+                                var aFiltered = oData.results.filter(o => o.ExpType != "DEV" && o.Pymtmeth === "A" && o.FiStatus !== "1" && o.FiStatus !== "2" && o.FiStatus !== "4" && o.FiStatus !== "7");
+                                that.getView().getModel("Main").setProperty("/ExpenseDevolution", aFiltered);
+                            }
+
+                            that.getModel("global").setProperty("/busy", false);
+                            resolve(aFiltered);
+                        },
+                        error: function (oError) {
+                            this.getModel("global").setProperty("/busy", false);
+                            var sError = JSON.parse(oError.responseText).error.message.value;
+                            sap.m.MessageBox.alert(sError, {
+                                icon: "ERROR",
+                                onClose: null,
+                                styleClass: '',
+                                initialFocus: null,
+                                textDirection: sap.ui.core.TextDirection.Inherit
+                            });
+                            reject(oError);
+                        }
+                    });
+                });
+            },
+
+            onSelectionChangeRecon: function (oEvent) {
+                var aSelectedItems = oEvent.getSource().getSelectedItems();
+
+                if (aSelectedItems.length === 1) {
+                    this.onChangeStateReconButtons(true, true);
+                } else if (aSelectedItems.length > 1) {
+                    this.onChangeStateReconButtons(false, true);
+                } else if (aSelectedItems.length === 0) {
+                    this.onChangeStateReconButtons(false, false);
+                }
+            },
+
+            onChangeStateReconButtons: function (sState, CompState) {
+                this.byId("idExpensesWithoutAttach").setEnabled(sState);
+                this.byId("idReconcile").setEnabled(sState);
+                this.byId("idCompensation").setEnabled(CompState);
+            },
+
+            //-------------CONFIDENCIAL EXPENSE
+
             handleExpenseWithoutAttach: function () {
                 var oData = {},
                     oTable = this.byId("smartTableTransRecon").getTable().getSelectedItems();
@@ -568,9 +622,8 @@ sap.ui.define([
                 this.handleFinishProcess(oData, "M");
             },
 
-            /**
-             * Handle reconcile.
-             */
+            //-------------RECONCILIATION
+
             handleReconcile: function () {
                 var oView = this.getView(),
                     that = this,
@@ -611,7 +664,7 @@ sap.ui.define([
                     });
                 }
 
-                this.onGetExpenses().then(function (aFiltered) {
+                this.onGetExpenses('R').then(function (aFiltered) {
                     if (aFiltered && aFiltered.length) {
                         that._pReconcileDialog.then(function (oDialog) {
                             oDialog.open();
@@ -626,44 +679,6 @@ sap.ui.define([
                 });
             },
 
-            /**
-             * Get expenses.
-             */
-            onGetExpenses: function () {
-                var oModel = this.getModel(),
-                    sPath = "/ZFI_EXPENSES_MNG",
-                    that = this;
-
-                this.getView().getModel("Main").setProperty("/ExpensesReconciled", []);
-                this.getModel("global").setProperty("/busy", true);
-
-                return new Promise(function (resolve, reject) {
-                    oModel.read(sPath, {
-                        success: function (oData) {
-                            var aFiltered = oData.results.filter(o => o.Checknum === "" && o.Pymtmeth === "A" && o.FiStatus !== "1" && o.FiStatus !== "2" && o.FiStatus !== "4" && o.FiStatus !== "7");
-                            that.getView().getModel("Main").setProperty("/ExpensesReconciled", aFiltered);
-                            that.getModel("global").setProperty("/busy", false);
-                            resolve(aFiltered);
-                        },
-                        error: function (oError) {
-                            this.getModel("global").setProperty("/busy", false);
-                            var sError = JSON.parse(oError.responseText).error.message.value;
-                            sap.m.MessageBox.alert(sError, {
-                                icon: "ERROR",
-                                onClose: null,
-                                styleClass: '',
-                                initialFocus: null,
-                                textDirection: sap.ui.core.TextDirection.Inherit
-                            });
-                            reject(oError);
-                        }
-                    });
-                });
-            },
-
-            /**
-             * Handle reconcile.
-             */
             onReconcile: function () {
                 var oModel = this.getModel(),
                     oGlobalModel = this.getModel("global"),
@@ -735,9 +750,6 @@ sap.ui.define([
                 });
             },
 
-            /**
-             * Handle cancel reconcile.
-             */
             onCancelReconcile: function () {
                 if (this._pReconcileDialog) {
                     this._pReconcileDialog.then(function (oDialog) {
@@ -745,33 +757,74 @@ sap.ui.define([
                         oDialog.destroy();
                     });
                     this._pReconcileDialog = null;
+
                 }
 
-                this.onChangeStateReconButtons(false);
+                this.onChangeStateReconButtons(false, false);
                 var oTableSmart = this.byId("smartTableTransRecon").getTable();
                 oTableSmart.removeSelections();
             },
 
-            /**
-             * Handle selection change on table reconciliation.
-             */
-            onSelectionChangeRecon: function (oEvent) {
-                var aSelectedItems = oEvent.getSource().getSelectedItems();
+            //-------------DECISION
 
-                if (aSelectedItems.length === 1) {
-                    this.onChangeStateReconButtons(true, false);
-                } else if (aSelectedItems.length > 1) {
-                    this.onChangeStateReconButtons(false, true);
-                } else if (aSelectedItems.length === 0) {
-                    this.onChangeStateReconButtons(false, false);
+            handleOpenDecisionDialog: function () {
+                var oView = this.getView();
+
+                if (!this._DecisionDialog) {
+                    this._DecisionDialog = Fragment.load({
+                        id: oView.getId(),
+                        name: "zfiexpensesmanage.fragments.Decision",
+                        controller: this
+                    }).then(function (oDialog) {
+                        oView.addDependent(oDialog);
+                        return oDialog;
+                    });
+                }
+
+                this._DecisionDialog.then(function (oDialog) {
+                    oDialog.open();
+                });
+            },
+
+            onSelectCompensacao: function (oEvent) {
+                if (oEvent.getParameter("selected")) {
+                    this.byId("cbDev").setSelected(false);
                 }
             },
 
-            onChangeStateReconButtons: function (sState, sStateCompensation) {
-                this.byId("idExpensesWithoutAttach").setEnabled(sState);
-                this.byId("idReconcile").setEnabled(sState);
-                this.byId("idCompensation").setEnabled(sStateCompensation);
+            onSelectDevolucao: function (oEvent) {
+                if (oEvent.getParameter("selected")) {
+                    this.byId("cbComp").setSelected(false);
+                }
             },
+
+            onCancelDecision: function () {
+                if (this._DecisionDialog) {
+                    this._DecisionDialog.then(function (oDialog) {
+                        oDialog.close();
+                        oDialog.destroy();
+                    });
+                    this._DecisionDialog = null;
+
+                }
+
+                this.onChangeStateReconButtons(false, false);
+                var oTableSmart = this.byId("smartTableTransRecon").getTable();
+                oTableSmart.removeSelections();
+            },
+
+            onDecision: function () {
+                var oCheckBoxDev = this.byId("cbDev").getSelected(),
+                    oCheckBoxComp = this.byId("cbComp").getSelected();
+
+                if (oCheckBoxDev === true) {
+                    this.handleDevolution();
+                } else if (oCheckBoxComp === true) {
+                    this.handleCompensation();
+                }
+            },
+
+            //-------------COMPENSION
 
             handleCompensation: function () {
                 var oModel = this.getModel(),
@@ -804,14 +857,12 @@ sap.ui.define([
                 oGlobalModel.setProperty("/busy", true);
                 oModel.create(sPath, oEntry, {
                     success: function () {
-                        oTableSmart.removeSelections();
                         oGlobalModel.setProperty("/busy", false);
                         oModel.refresh(true);
-                        this.onChangeStateReconButtons(false, false);
+                        this.onCancelDecision();
                     }.bind(this),
                     error: function (oError) {
-                        this.onChangeStateReconButtons(false, false);
-                        oTableSmart.removeSelections();
+                        this.onCancelDecision();
                         oGlobalModel.setProperty("/busy", false);
                         var sError = JSON.parse(oError.responseText).error.message.value;
                         sap.m.MessageBox.alert(sError, {
@@ -823,6 +874,111 @@ sap.ui.define([
                         });
                     }.bind(this)
                 });
+            },
+
+            //-------------DEVOLUTION
+
+            handleDevolution: function () {
+                var oView = this.getView(),
+                    that = this,
+                    oTableItems = this.byId("smartTableTransRecon").getTable().getSelectedItems();
+
+                if (oTableItems.length > 1) {
+                    sap.m.MessageBox.error(this.getResourceBundle().getText("multipleSelection"),
+                        {
+                            icon: "ERROR",
+                            onClose: null,
+                            styleClass: '',
+                            initialFocus: null,
+                            textDirection: sap.ui.core.TextDirection.Inherit
+                        }
+                    );
+                    return;
+                }
+
+                if (!this._pDevolutionDialog) {
+                    this._pDevolutionDialog = Fragment.load({
+                        id: oView.getId(),
+                        name: "zfiexpensesmanage.fragments.Devolution",
+                        controller: this
+                    }).then(function (oDialog) {
+                        oView.addDependent(oDialog);
+                        return oDialog;
+                    });
+                }
+
+                this.onGetExpenses('D').then(function (aFiltered) {
+                    if (aFiltered && aFiltered.length) {
+                        that._pDevolutionDialog.then(function (oDialog) {
+                            oDialog.open();
+                        });
+                    } else {
+                        this.showErrorMessage({
+                            oText: this.getResourceBundle().getText("noRECON")
+                        });
+                    }
+                }).catch(function (oError) {
+                    return;
+                });
+            },
+
+            onCancelDevolution: function () {
+                if (this._pDevolutionDialog) {
+                    this._pDevolutionDialog.then(function (oDialog) {
+                        oDialog.close();
+                        oDialog.destroy();
+                    });
+                    this._pDevolutionDialog = null;
+
+                }
+            },
+
+            onDevolution: function () {
+                var oModel = this.getModel(),
+                    oGlobalModel = this.getModel("global"),
+                    sPath = "/Devolution",
+                    oTable = this.byId("DevolutionTable"),
+                    oSmartTable = this.byId("smartTableTransRecon").getTable(),
+                    oItemData = {},
+                    oEntry = {};
+
+                if (oTable.getSelectedItems().length != 1) {
+                    sap.m.MessageBox.error(this.getResourceBundle().getText("noSelection"));
+                    return;
+                }
+
+                oItemData.ExpNo = oTable.getSelectedItem().getBindingContext("Main").getObject().ExpNo;
+                oItemData.chknum = oSmartTable.getSelectedItem().getBindingContext().getObject().Chknum;
+                oItemData.Date = oSmartTable.getSelectedItem().getBindingContext().getObject().sDateFromated.replace(/\./g, "");
+                oItemData.Amt = oSmartTable.getSelectedItem().getBindingContext().getObject().Amt;
+
+                oEntry.ExpNo = oItemData.ExpNo
+                oEntry.ItemData = JSON.stringify(oItemData)
+
+                oGlobalModel.setProperty("/busy", true);
+                oModel.create(sPath, oEntry, {
+                    success: function () {
+                        oGlobalModel.setProperty("/busy", false);
+                        oModel.refresh(true);
+                        this.onCancelDecision();
+                        this.onCancelDevolution();
+                    }.bind(this),
+                    error: function (oError) {
+                        oGlobalModel.setProperty("/busy", false);
+                        this.onCancelDevolution();
+                        this.onCancelDecision();
+                        var sError = JSON.parse(oError.responseText).error.message.value;
+                        sap.m.MessageBox.alert(sError, {
+                            icon: "ERROR",
+                            onClose: null,
+                            styleClass: '',
+                            initialFocus: null,
+                            textDirection: sap.ui.core.TextDirection.Inherit
+                        });
+                    }.bind(this)
+                })
+
+
             },
 
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1316,11 +1472,6 @@ sap.ui.define([
                 oModel.setProperty(oCtx.getPath() + "/d", sDesc);
 
                 this.onVatCellChange(oEvent);
-            },
-
-            handlePressCard: function () {
-                debugger;
-                sap.m.MessageToast.show("Card clicado!");
             },
 
             /**

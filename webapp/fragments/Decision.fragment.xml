@@ -1,0 +1,23 @@
+<core:FragmentDefinition xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:layout="sap.ui.layout">
+
+    <Dialog id="DecisionDialog" title="{i18n>Decision}" contentWidth="400px" contentHeight="180px" initialFocus="beginButton" class="sapUiSizeCompact sapUiNoContentPadding" stretchOnPhone="false">
+
+        <VBox class="sapUiSmallMargin sapUiNoContentPadding">
+            <MessageStrip text="{i18n>DecisionMessage}" type="Information" showIcon="true" showCloseButton="false" class="sapUiSmallMarginBottom" />
+            <CheckBox id="cbComp" text="Compensação" selected="true" select=".onSelectCompensacao" />
+            <CheckBox id="cbDev" text="Devolução" select=".onSelectDevolucao" />
+
+        </VBox>
+
+        <endButton>
+            <Button text="{i18n>xexp.expCancel}" press=".onCancelDecision" />
+        </endButton>
+
+        <beginButton>
+            <Button text="{i18n>Ok}" type="Emphasized" press=".onDecision" />
+        </beginButton>
+
+    </Dialog>
+</core:FragmentDefinition>

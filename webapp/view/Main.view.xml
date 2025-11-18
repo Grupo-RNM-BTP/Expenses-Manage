@@ -232,7 +232,8 @@
                                     <ToolbarSpacer/>
                                     <Button id="idExpensesWithoutAttach" text="{i18n>ExpensesWithoutAttach}" enabled="false" type="Emphasized" press="handleExpenseWithoutAttach" />
                                     <Button id="idReconcile" text="{i18n>Reconcile}" enabled="false" type="Default" press="handleReconcile" />
-                                    <Button id="idCompensation" text="{i18n>Compensation}" enabled="false" type="Default" press="handleCompensation" />
+                                    <!-- <Button id="idCompensation" text="{i18n>Compensation}" enabled="false" type="Default" press="handleCompensation" /> -->
+                                    <Button id="idCompensation" text="{i18n>Compensation}" enabled="false" type="Default" press="handleOpenDecisionDialog" />
                                 </OverflowToolbar>
                             </smartTable:customToolbar>
                             <Table class="sapUiResponsiveContentPadding" mode="MultiSelect" selectionChange="onSelectionChangeRecon" growing="true" growingThreshold="50">
