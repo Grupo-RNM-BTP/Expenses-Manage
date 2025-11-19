@@ -2381,6 +2381,9 @@ sap.ui.define([
                 this.oExpensesModel.setProperty("/exptype", sKey);
                 this.oExpensesModel.refresh(true);
 
+                const oPlateInput = Fragment.byId(this.getView().getId(), "expenseDialog:inputPlate");
+                oPlateInput.setRequired(sKey !== "ADR");
+
                 this.handleCheckUnit();
             },
 
