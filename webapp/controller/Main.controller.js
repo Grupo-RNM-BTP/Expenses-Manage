@@ -728,6 +728,8 @@ sap.ui.define([
                 var oSmartCtx = aSelectedSmartItems[0].getBindingContext(),
                     oSmartData = oSmartCtx.getObject(),
                     sAmt = oSmartData.Amt,
+                    sCardNumber = oSmartData.Cardnumber,
+                    sChckNum = oSmartData.Chknum,
                     sFormattedDate = oSmartData.sDateFromated,
                     aParts = sFormattedDate.split("."),
                     sDateForPicker = aParts[0] + aParts[1] + aParts[2];
@@ -739,6 +741,8 @@ sap.ui.define([
                     return {
                         Amt: sAmt,
                         Posteddt: sDateForPicker,
+                        Chknum: sChckNum,
+                        Cardnumber: sCardNumber,
                         ExpNo: oObj.ExpNo,
                     };
                 });
@@ -893,7 +897,8 @@ sap.ui.define([
                     Items.push({
                         amt: oData.Amt,
                         posteddt: oData.sDateFromated.replace(/\./g, ""),
-                        chknum: oData.Chknum
+                        chknum: oData.Chknum,
+                        Cardnumber: oData.Cardnumber
                     });
                 });
 
@@ -992,6 +997,7 @@ sap.ui.define([
 
                 oItemData.ExpNo = oTable.getSelectedItem().getBindingContext("Main").getObject().ExpNo;
                 oItemData.chknum = oSmartTable.getSelectedItem().getBindingContext().getObject().Chknum;
+                oItemData.Cardnumber = oSmartTable.getSelectedItem().getBindingContext().getObject().Cardnumber;
                 oItemData.Date = oSmartTable.getSelectedItem().getBindingContext().getObject().sDateFromated.replace(/\./g, "");
                 oItemData.Amt = oSmartTable.getSelectedItem().getBindingContext().getObject().Amt;
 
