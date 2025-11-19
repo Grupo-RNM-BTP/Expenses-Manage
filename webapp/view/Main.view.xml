@@ -226,13 +226,14 @@
                     <ScrollContainer id="pageTransRecon" horizontal="false" vertical="true" height="100%">
                         <smartFilterBar:SmartFilterBar id="sfbReconCC" entitySet="ZFI_EXPENSES_RECON" />
 
-                        <smartTable:SmartTable id="smartTableTransRecon" entitySet="ZFI_EXPENSES_RECON" smartFilterId="sfbReconCC" beforeRebindTable="onBeforeRebindTableRecon" tableType="ResponsiveTable" demandPopin="true" useVariantManagement="false" useExportToExcel="false" useTablePersonalisation="true" header="{i18n>TransactionReconciliation}" showRowCount="true" persistencyKey="SmartTable" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
+                        <smartTable:SmartTable id="smartTableTransRecon" entitySet="ZFI_EXPENSES_RECON" smartFilterId="sfbReconCC" beforeRebindTable="onBeforeRebindTableRecon" tableType="ResponsiveTable" demandPopin="true" useVariantManagement="false" useExportToExcel="false" useTablePersonalisation="true" persistencyKey="SmartTable" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
                             <smartTable:customToolbar>
                                 <OverflowToolbar design="Transparent">
                                     <ToolbarSpacer/>
                                     <Button id="idExpensesWithoutAttach" text="{i18n>ExpensesWithoutAttach}" enabled="false" type="Emphasized" press="handleExpenseWithoutAttach" />
                                     <Button id="idReconcile" text="{i18n>Reconcile}" enabled="false" type="Default" press="handleReconcile" />
-                                    <Button id="idCompensation" text="{i18n>Compensation}" enabled="false" type="Default" press="handleCompensation" />
+                                    <!-- <Button id="idCompensation" text="{i18n>Compensation}" enabled="false" type="Default" press="handleCompensation" /> -->
+                                    <Button id="idCompensation" text="{i18n>CompensationBtn}" enabled="false" type="Default" press="handleOpenDecisionDialog" />
                                 </OverflowToolbar>
                             </smartTable:customToolbar>
                             <Table class="sapUiResponsiveContentPadding" mode="MultiSelect" selectionChange="onSelectionChangeRecon" growing="true" growingThreshold="50">
@@ -266,7 +267,7 @@
                     <ScrollContainer id="pageApprovals" horizontal="false" vertical="true" height="100%">
                         <smartFilterBar:SmartFilterBar id="idSmartFilterBarApprovals" entitySet="ZFI_EXPENSES_LAPPRVD" />
 
-                        <smartTable:SmartTable id="smartTableApprovals" entitySet="ZFI_EXPENSES_LAPPRVD" header="{i18n>ApproveExpenses}" showRowCount="true" beforeRebindTable="onBeforeRebindTableApprovals" demandPopin="true" smartFilterId="idSmartFilterBarApprovals" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="true" useTablePersonalisation="true" useVariantManagement="false" requestAtLeastFields="Pernr,CompanyCode,CompanyDsc,Doc,Reason,ExpNo,Belnr,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus,FirstName,LastName,FiscalYear,Nif" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="true">
+                        <smartTable:SmartTable id="smartTableApprovals" entitySet="ZFI_EXPENSES_LAPPRVD" beforeRebindTable="onBeforeRebindTableApprovals" demandPopin="true" smartFilterId="idSmartFilterBarApprovals" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="true" useTablePersonalisation="true" useVariantManagement="false" requestAtLeastFields="Pernr,CompanyCode,CompanyDsc,Doc,Reason,ExpNo,Belnr,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus,FirstName,LastName,FiscalYear,Nif" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="true">
                             <smartTable:customToolbar>
                                 <OverflowToolbar design="Transparent">
                                     <ToolbarSpacer/>
