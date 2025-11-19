@@ -1600,8 +1600,14 @@ sap.ui.define([
                     if (oAction === "M") {
                         that.handleStateFields();
                     } else {
+                        var aFilters = [
+                            new sap.ui.model.Filter("Exptype", sap.ui.model.FilterOperator.NE, "UE"),
+                            new sap.ui.model.Filter("Exptype", sap.ui.model.FilterOperator.NE, "DEV")
+                        ];
+
                         Fragment.byId(oView.getId(), "expenseDialog:selectExpType").bindItems({
                             path: "/ZFI_EXPENSES_TYPES",
+                            filters: aFilters,
                             template: new sap.ui.core.Item({
                                 key: "{Exptype}",
                                 text: "{Description}"
