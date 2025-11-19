@@ -6,8 +6,8 @@
 
         <VBox class="sapUiSmallMargin sapUiNoContentPadding">
             <MessageStrip text="{i18n>DecisionMessage}" type="Information" showIcon="true" showCloseButton="false" class="sapUiSmallMarginBottom" />
-            <CheckBox id="cbComp" text="{i18n>Compensation}" selected="true" select=".onSelectCompensacao" />
-            <CheckBox id="cbDev" text="{i18n>Devolution}" select=".onSelectDevolucao" />
+            <CheckBox id="cbComp" text="{i18n>Compensation}" selected="true" select=".onSelectCompensation" />
+            <CheckBox id="cbDev" text="{i18n>Devolution}" select=".onSelectDevolution" />
 
         </VBox>
 

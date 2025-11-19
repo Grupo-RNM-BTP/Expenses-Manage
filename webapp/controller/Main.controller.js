@@ -502,6 +502,10 @@ sap.ui.define([
             //---------------------------------------------------------------------- Reconciliation -----------------------------------------------------------------
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+            /**
+             * Apply initial sorter before table binding.
+             * @param {sap.ui.base.Event} oEvent
+             */
             onBeforeRebindTableRecon: function (oEvent) {
                 var oBindingParams = oEvent.getParameter("bindingParams");
 
@@ -513,6 +517,10 @@ sap.ui.define([
                 }
             },
 
+            /**
+             * Get expenses.
+             * @param {string} oAction - The action to be performed
+             */
             onGetExpenses: function (oAction) {
                 var oModel = this.getModel(),
                     sPath = "/ZFI_EXPENSES_MNG",
@@ -553,6 +561,10 @@ sap.ui.define([
                 });
             },
 
+            /**
+             * Handle selection change in the reconciliation table.
+             * @param {sap.ui.base.Event} oEvent - The event object
+             */
             onSelectionChangeRecon: function (oEvent) {
                 var aSelectedItems = oEvent.getSource().getSelectedItems();
 
@@ -565,14 +577,22 @@ sap.ui.define([
                 }
             },
 
+            /**
+             * Change the state of the reconciliation buttons.
+             * @param {boolean} sState - The state of the reconciliation button and the Without Attach button
+             * @param {boolean} CompState - The state of the compensation button
+             */
             onChangeStateReconButtons: function (sState, CompState) {
                 this.byId("idExpensesWithoutAttach").setEnabled(sState);
                 this.byId("idReconcile").setEnabled(sState);
                 this.byId("idCompensation").setEnabled(CompState);
             },
 
-            //-------------CONFIDENCIAL EXPENSE
+            /* ************************************** CONFIDENCIAL EXPENSE ************************************* */
 
+            /**
+             * Handle expense without attach.
+             */
             handleExpenseWithoutAttach: function () {
                 var oData = {},
                     oTable = this.byId("smartTableTransRecon").getTable().getSelectedItems();
@@ -622,8 +642,11 @@ sap.ui.define([
                 this.handleFinishProcess(oData, "M");
             },
 
-            //-------------RECONCILIATION
+            /* ************************************** RECONCILIATION ************************************* */
 
+            /**
+             * Handle reconcile.
+             */
             handleReconcile: function () {
                 var oView = this.getView(),
                     that = this,
@@ -679,6 +702,9 @@ sap.ui.define([
                 });
             },
 
+            /**
+             * Send reconcile to Backend.
+             */
             onReconcile: function () {
                 var oModel = this.getModel(),
                     oGlobalModel = this.getModel("global"),
@@ -750,6 +776,9 @@ sap.ui.define([
                 });
             },
 
+            /**
+             * Cancel reconcile.
+             */
             onCancelReconcile: function () {
                 if (this._pReconcileDialog) {
                     this._pReconcileDialog.then(function (oDialog) {
@@ -765,8 +794,11 @@ sap.ui.define([
                 oTableSmart.removeSelections();
             },
 
-            //-------------DECISION
+            /* ************************************** DECISION ************************************* */
 
+            /**
+             * Handle open decision dialog.
+             */
             handleOpenDecisionDialog: function () {
                 var oView = this.getView();
 
@@ -786,18 +818,43 @@ sap.ui.define([
                 });
             },
 
-            onSelectCompensacao: function (oEvent) {
+            /**
+             * Handle selection change in the compensation table.
+             * @param {sap.ui.base.Event} oEvent - The event object
+             */
+            onSelectCompensation: function (oEvent) {
                 if (oEvent.getParameter("selected")) {
                     this.byId("cbDev").setSelected(false);
                 }
             },
 
-            onSelectDevolucao: function (oEvent) {
+            /**
+             * Handle selection change in the devolution table.
+             * @param {sap.ui.base.Event} oEvent - The event object
+             */
+            onSelectDevolution: function (oEvent) {
                 if (oEvent.getParameter("selected")) {
                     this.byId("cbComp").setSelected(false);
                 }
             },
 
+            /**
+             * Handle decision.
+             */
+            onDecision: function () {
+                var oCheckBoxDev = this.byId("cbDev").getSelected(),
+                    oCheckBoxComp = this.byId("cbComp").getSelected();
+
+                if (oCheckBoxDev === true) {
+                    this.handleDevolution();
+                } else if (oCheckBoxComp === true) {
+                    this.handleCompensation();
+                }
+            },
+
+            /**
+             * Handle cancel decision.
+             */
             onCancelDecision: function () {
                 if (this._DecisionDialog) {
                     this._DecisionDialog.then(function (oDialog) {
@@ -813,19 +870,11 @@ sap.ui.define([
                 oTableSmart.removeSelections();
             },
 
-            onDecision: function () {
-                var oCheckBoxDev = this.byId("cbDev").getSelected(),
-                    oCheckBoxComp = this.byId("cbComp").getSelected();
+            /* ************************************** COMPENSION ************************************* */
 
-                if (oCheckBoxDev === true) {
-                    this.handleDevolution();
-                } else if (oCheckBoxComp === true) {
-                    this.handleCompensation();
-                }
-            },
-
-            //-------------COMPENSION
-
+            /**
+             * Handle compensation.
+             */
             handleCompensation: function () {
                 var oModel = this.getModel(),
                     sPath = "/Compensation",
@@ -876,8 +925,11 @@ sap.ui.define([
                 });
             },
 
-            //-------------DEVOLUTION
+            /* ************************************** DEVOLUTION ************************************* */
 
+            /**
+             * Handle devolution.
+             */
             handleDevolution: function () {
                 var oView = this.getView(),
                     that = this,
@@ -922,17 +974,9 @@ sap.ui.define([
                 });
             },
 
-            onCancelDevolution: function () {
-                if (this._pDevolutionDialog) {
-                    this._pDevolutionDialog.then(function (oDialog) {
-                        oDialog.close();
-                        oDialog.destroy();
-                    });
-                    this._pDevolutionDialog = null;
-
-                }
-            },
-
+            /**
+             * Send devolution to Backend.
+             */
             onDevolution: function () {
                 var oModel = this.getModel(),
                     oGlobalModel = this.getModel("global"),
@@ -979,6 +1023,20 @@ sap.ui.define([
                 })
 
 
+            },
+
+            /**
+             * Cancel devolution.
+             */
+            onCancelDevolution: function () {
+                if (this._pDevolutionDialog) {
+                    this._pDevolutionDialog.then(function (oDialog) {
+                        oDialog.close();
+                        oDialog.destroy();
+                    });
+                    this._pDevolutionDialog = null;
+
+                }
             },
 
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -2662,7 +2720,6 @@ sap.ui.define([
                 ctrl.data("__prev", newVal);
             },
 
-
             /* ************************************** Other Fields ************************************* */
 
             /**
@@ -2737,7 +2794,6 @@ sap.ui.define([
                 this.handleLogChange(sLabel, sOldValue, sNewValue);
                 oSource.data("__prev", sNewValue);
             },
-
 
             /* ************************************** Geral ************************************* */
 
@@ -3024,8 +3080,6 @@ sap.ui.define([
                     oValueHelp.update();
                 });
             },
-
-
 
             /* ************************************************************************************** */
             /* *                                        Crop                                        * */
