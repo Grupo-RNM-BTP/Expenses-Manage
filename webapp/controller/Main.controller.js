@@ -2,19 +2,18 @@ sap.ui.define([
     "./BaseController",
     "../model/formatter",
     "sap/ui/model/json/JSONModel",
-    "sap/ui/unified/FileUploader",
     "sap/ui/core/Fragment",
     "../util/ScanUtil"
 ],
-    function (BaseController, formatter, JSONModel, FileUploader, Fragment, ScanUtil) {
+    function (BaseController, formatter, JSONModel, Fragment, ScanUtil) {
         "use strict";
+
         /**
          * MainController: Handles main view, navigation, uploads, and card data.
          *
          * @namespace zfiexpensesmanage.controller
          * @extends zfiexpensesmanage.controller.BaseController
          */
-
         return BaseController.extend("zfiexpensesmanage.controller.Main", {
 
             formatter: formatter,
@@ -1317,11 +1316,6 @@ sap.ui.define([
                 this.onVatCellChange(oEvent);
             },
 
-            handlePressCard: function () {
-                debugger;
-                sap.m.MessageToast.show("Card clicado!");
-            },
-
             /**
              * Starts the expense creation process by opening the camera fragment,
              * initializing the camera, and binding click handlers for capture/upload/close actions.
@@ -1753,70 +1747,6 @@ sap.ui.define([
                 this.getView().getModel("Logs")?.setData({ entries: [] });
             },
 
-            // /**
-            //  * Starts the device camera stream using the specified facing mode.
-            //  * @param {string} facingMode - Camera direction ("user" or "environment")
-            //  */
-            // handleStartCamera: async function (facingMode, oDomRef) {
-            //     this.getView().getModel("Camera").setProperty("/mode", facingMode);
-
-            //     try {
-            //         var video = oDomRef.querySelector("#cameraVideo");
-            //         if (!video) {
-            //             sap.m.MessageToast.show("Vídeo não encontrado.");
-            //             return;
-            //         }
-
-            //         let stream;
-            //         try {
-            //             stream = await navigator.mediaDevices.getUserMedia({
-            //                 audio: false,
-            //                 video: {
-            //                     facingMode: { exact: facingMode },
-            //                     width: { ideal: 1920 },
-            //                     height: { ideal: 1080 },
-            //                     frameRate: { ideal: 60 },
-            //                     aspectRatio: 16 / 9
-            //                 }
-            //             });
-            //         } catch (e) {
-            //             stream = await navigator.mediaDevices.getUserMedia({
-            //                 audio: false,
-            //                 video: { facingMode }
-            //             });
-            //         }
-
-            //         // 2) Ligar stream ao vídeo
-            //         video.playsInline = true;
-            //         video.muted = true;
-            //         video.srcObject = stream;
-            //         await video.play();
-
-            //         this._photoTaken = false;
-            //         this.handleScheduleCameraAutoClose(120000);
-
-            //         // 3) Puxar para o máximo com applyConstraints (quando suportado)
-            //         var track = stream.getVideoTracks()[0],
-            //             caps = track.getCapabilities && track.getCapabilities();
-            //         if (caps) {
-            //             const wanted = {
-            //                 width: caps.width ? caps.width.max : undefined,
-            //                 height: caps.height ? caps.height.max : undefined,
-            //                 frameRate: caps.frameRate ? Math.min(60, caps.frameRate.max) : undefined
-            //             };
-            //             await track.applyConstraints({
-            //                 width: wanted.width,
-            //                 height: wanted.height,
-            //                 frameRate: wanted.frameRate
-            //             }).catch(() => { });
-            //         }
-
-            //         this._cameraStream = stream;
-            //     } catch (err) {
-            //         sap.m.MessageToast.show(this.getResourceBundle().getText("xexp.expErrorStartCamera"));
-            //     }
-            // },
-
             /**
              * Starts the device camera stream using the specified facing mode.
              * @param {string} facingMode - Camera direction ("user" or "environment")
@@ -2133,72 +2063,6 @@ sap.ui.define([
                     oPopover.close();
                 });
             },
-
-            // /**
-            //  * Captures a photo from the live camera stream,
-            //  * saves it as a base64 PNG in the "Expenses" model, and opens the expense dialog.
-            //  */
-            // onTakePhoto: function () {
-            //     this._photoTaken = true;
-
-            //     var video = document.getElementById('cameraVideo'),
-            //         canvas = document.createElement('canvas'),
-            //         context = canvas.getContext('2d');
-
-            //     canvas.width = video.videoWidth;
-            //     canvas.height = video.videoHeight;
-            //     context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            //     var imageData = canvas.toDataURL('image/png');
-
-            //     if (this.oExpensesModel) {
-            //         this.oExpensesModel.setProperty("/capturedImage", imageData);
-            //         this.oExpensesModel.setProperty("/imageExt", "PNG");
-            //     }
-
-            //     this.handleClearCameraAutoClose();
-            //     this.handleStopAllDetect();
-            //     this.handleScanPhoto();
-            // },
-
-            /**
-             * Captures a photo from the live camera stream,
-             * Saves it as a base64 PNG in the "Expenses" model, and opens the expense dialog.
-             */
-            // onTakePhoto: async function () {
-            //     this._photoTaken = true;
-
-            //     const root =
-            //         (this.oCameraDialog && this.oCameraDialog.getDomRef()) ||
-            //         (this.getView() && this.getView().getDomRef()) || document;
-
-            //     const video = root.querySelector && root.querySelector("#cameraVideo");
-            //     if (!video || !video.videoWidth || !video.videoHeight) {
-            //         // sap.m.MessageToast.show("Vídeo indisponível.");
-            //         return;
-            //     }
-
-            //     let dataURL;
-            //     try {
-            //         const quad = this._lastQuadVideoPx;
-            //         if (quad && quad.length === 4) {
-            //             dataURL = await this.handleWarp(video, quad);
-            //         } else {
-            //             dataURL = this.handleCaptureFrame(video);
-            //         }
-            //     } catch (e) {
-            //         dataURL = this.handleCaptureFrame(video);
-            //     }
-
-            //     if (this.oExpensesModel) {
-            //         this.oExpensesModel.setProperty("/capturedImage", dataURL);
-            //         this.oExpensesModel.setProperty("/imageExt", "PNG");
-            //     }
-
-            //     this.handleStopAllDetect?.();
-            //     this.handleClearCameraAutoClose?.();
-            //     this.handleScanPhoto?.();
-            // },
 
 
             /**
@@ -2731,9 +2595,11 @@ sap.ui.define([
                         });
 
                         oDialogSuggestions.getTableAsync().then(function (oTable) {
+                            oTable.setModel(this.getView().getModel());
+
                             if (oTable.bindRows) {
                                 oTable.bindAggregation("rows", {
-                                    path: '/ZFI_BUSINESS_PARTNER',
+                                    path: "/ZFI_BUSINESS_PARTNER",
                                     events: {
                                         dataReceived: function () {
                                             oDialogSuggestions.update();
@@ -2741,22 +2607,58 @@ sap.ui.define([
                                     }
                                 });
 
-                                var oBusinessPartner = new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("BusinessPartner") }), template: new sap.m.Text({ wrapping: false, text: "{BusinessPartner}" }) });
+                                var oBusinessPartner = new sap.ui.table.Column({
+                                    label: new sap.m.Label({
+                                        text: this.getResourceBundle().getText("BusinessPartner")
+                                    }),
+                                    template: new sap.m.Text({
+                                        wrapping: false,
+                                        text: "{BusinessPartner}"
+                                    })
+                                });
                                 oBusinessPartner.data({ fieldName: "BusinessPartner" });
                                 oTable.addColumn(oBusinessPartner);
 
-                                var oBusinessPartnerName = new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("BusinessPartnerName") }), template: new sap.m.Text({ wrapping: false, text: "{BusinessPartnerName}" }) });
+                                var oBusinessPartnerName = new sap.ui.table.Column({
+                                    label: new sap.m.Label({
+                                        text: this.getResourceBundle().getText("BusinessPartnerName")
+                                    }),
+                                    template: new sap.m.Text({
+                                        wrapping: false,
+                                        text: "{BusinessPartnerName}"
+                                    })
+                                });
                                 oBusinessPartnerName.data({ fieldName: "BusinessPartnerName" });
                                 oTable.addColumn(oBusinessPartnerName);
                             }
 
                             if (oTable.bindItems) {
+                                if (oTable.removeAllColumns) {
+                                    oTable.removeAllColumns();
+                                }
+
+                                var oColBP = new sap.m.Column({
+                                    header: new sap.m.Label({
+                                        text: this.getResourceBundle().getText("BusinessPartner")
+                                    })
+                                });
+                                oColBP.data({ fieldName: "BusinessPartner" });
+                                oTable.addColumn(oColBP);
+
+                                var oColBPName = new sap.m.Column({
+                                    header: new sap.m.Label({
+                                        text: this.getResourceBundle().getText("BusinessPartnerName")
+                                    })
+                                });
+                                oColBPName.data({ fieldName: "BusinessPartnerName" });
+                                oTable.addColumn(oColBPName);
+
                                 oTable.bindAggregation("items", {
-                                    path: '/ZFI_BUSINESS_PARTNER',
+                                    path: "/ZFI_BUSINESS_PARTNER",
                                     template: new sap.m.ColumnListItem({
                                         cells: [
-                                            new sap.m.Label({ text: "{BusinessPartner}" }),
-                                            new sap.m.Label({ text: "{BusinessPartnerName}" })
+                                            new sap.m.Text({ text: "{BusinessPartner}" }),
+                                            new sap.m.Text({ text: "{BusinessPartnerName}" })
                                         ]
                                     }),
                                     events: {
@@ -2766,6 +2668,7 @@ sap.ui.define([
                                     }
                                 });
                             }
+
                             oDialogSuggestions.update();
                         }.bind(this));
 
@@ -2872,8 +2775,6 @@ sap.ui.define([
                     oValueHelp.update();
                 });
             },
-
-
 
             /* ************************************************************************************** */
             /* *                                        Crop                                        * */

@@ -1,8 +1,7 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
-    "sap/m/MessageBox",
-    "sap/ui/core/Fragment"
-], function (Controller, MessageBox, Fragment) {
+    "sap/m/MessageBox"
+], function (Controller, MessageBox) {
     "use strict";
 
     var CAModel;
@@ -13,7 +12,6 @@ sap.ui.define([
      * @namespace zfiexpensesmanage.controller
      * @extends sap.ui.core.mvc.Controller
      */
-
     return Controller.extend("zfiexpensesmanage.controller.BaseController", {
 
         /**
@@ -293,6 +291,9 @@ sap.ui.define([
             this.getRouter().navTo("RouteMain");
         },
 
+        /**
+         * Open PDF document.
+         */
         openPDF: function (sDocument) {
             try {
                 if (sap.ui.Device.system.phone || sap.ui.Device.system.tablet) {
@@ -336,6 +337,9 @@ sap.ui.define([
             }
         },
 
+        /**
+         * Open PDF document on mobile.
+         */
         openPDFMobile: function (sDocument) {
             try {
                 var base64PDF = sDocument.split(",")[1];
@@ -357,6 +361,9 @@ sap.ui.define([
             }
         },
 
+        /**
+         * Convert base64 to array buffer.
+         */
         base64ToArrayBuffer: function (base64) {
             var binaryString = atob(base64);
             var len = binaryString.length;
@@ -367,6 +374,9 @@ sap.ui.define([
             return bytes.buffer;
         },
 
+        /**
+         * Convert image to PDF.
+         */
         onConvertToPDF: async function (base64Image) {
             sap.ui.core.BusyIndicator.show(0);
             try {
@@ -386,7 +396,7 @@ sap.ui.define([
                     orientation,
                     unit: "mm",
                     format: "a4",
-                    compress: true 
+                    compress: true
                 });
 
                 const pageWidth = doc.internal.pageSize.getWidth();
@@ -400,6 +410,9 @@ sap.ui.define([
             }
         },
 
+        /**
+         * Prepare image for PDF.
+         */
         _prepareImageForPdf: function (base64Str) {
             return new Promise((resolve) => {
                 const img = new Image();
@@ -414,13 +427,13 @@ sap.ui.define([
                     const displayWidthPx = width * ratio;
                     const displayHeightPx = height * ratio;
                     const canvas = document.createElement("canvas");
-                    
+
                     canvas.width = displayWidthPx;
                     canvas.height = displayHeightPx;
 
                     const ctx = canvas.getContext("2d");
                     ctx.imageSmoothingEnabled = true;
-                    ctx.imageSmoothingQuality = "medium"; 
+                    ctx.imageSmoothingQuality = "medium";
                     ctx.filter = "contrast(103%) brightness(101%)";
                     ctx.drawImage(img, 0, 0, displayWidthPx, displayHeightPx);
 
