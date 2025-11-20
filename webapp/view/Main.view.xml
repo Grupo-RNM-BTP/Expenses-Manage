@@ -212,7 +212,10 @@
                                 <smartTable:customToolbar>
                                     <OverflowToolbar design="Transparent">
                                         <ToolbarSpacer/>
-                                        <Button text="{i18n>Synchronize}" icon="sap-icon://synchronize" enabled="true" type="Emphasized" press="handleSynchronize" />
+                                        <!-- <Button text="{i18n>Synchronize}" icon="sap-icon://synchronize" enabled="true" type="Emphasized" press="handleSynchronize" /> -->
+                                        
+                                        <Button text="{i18n>Synchronize}" icon="sap-icon://synchronize" press=".handleSynchronize" type="{= ${Sync>/syncInProgress} ? 'Attention' : 'Accept' }" />
+                                        <Button text="Logs de Sincronização" icon="sap-icon://list" press=".onOpenSyncLogDialog" enabled="{= ${syncLog>/items}.length > 0 }" />
                                     </OverflowToolbar>
                                 </smartTable:customToolbar>
                                 <Table mode="None" growing="true" growingThreshold="50">
@@ -232,7 +235,6 @@
                                     <ToolbarSpacer/>
                                     <Button id="idExpensesWithoutAttach" text="{i18n>ExpensesWithoutAttach}" enabled="false" type="Emphasized" press="handleExpenseWithoutAttach" />
                                     <Button id="idReconcile" text="{i18n>Reconcile}" enabled="false" type="Default" press="handleReconcile" />
-                                    <!-- <Button id="idCompensation" text="{i18n>Compensation}" enabled="false" type="Default" press="handleCompensation" /> -->
                                     <Button id="idCompensation" text="{i18n>CompensationBtn}" enabled="false" type="Default" press="handleOpenDecisionDialog" />
                                 </OverflowToolbar>
                             </smartTable:customToolbar>

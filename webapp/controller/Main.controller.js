@@ -3,9 +3,19 @@ sap.ui.define([
     "../model/formatter",
     "sap/ui/model/json/JSONModel",
     "sap/ui/core/Fragment",
-    "../util/ScanUtil"
+    "../util/ScanUtil",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+    "sap/m/MessageToast",
+    "sap/m/MessageBox",
+    "sap/m/Dialog",
+    "sap/m/Table",
+    "sap/m/Column",
+    "sap/m/ColumnListItem",
+    "sap/m/Text",
+    "sap/m/Button"
 ],
-    function (BaseController, formatter, JSONModel, Fragment, ScanUtil) {
+    function (BaseController, formatter, JSONModel, Fragment, ScanUtil, Filter, FilterOperator, MessageToast, MessageBox, Dialog, Table, Column, ColumnListItem, Text, Button) {
         "use strict";
 
         /**
@@ -36,6 +46,8 @@ sap.ui.define([
                 this._bError = false;
                 this._bSubmit = false;
                 this._cancel = false;
+                this._chknum = "";
+                this._cardnum = "";
 
                 this._bScan = false;
 
@@ -49,6 +61,25 @@ sap.ui.define([
                 this.getView().setModel(new JSONModel({ title: "", description: "" }), "Scanning");
 
                 this.getView().setModel(new JSONModel({ entries: [] }), "Logs");
+
+                this.getView().setModel(new JSONModel({ hasData: false, items: [] }), "Cards");
+
+
+
+                this.getView().setModel(new JSONModel({
+                    syncInProgress: false,
+                    syncText: "",
+                    currentJobId: null
+                }), "Sync");
+
+                var oLogModel = new JSONModel({
+                    items: []
+                });
+                this.getView().setModel(oLogModel, "syncLog");
+
+                this._iPollInterval = 2000;
+                this._sPollTimerId = null;
+
 
                 this.oScanModel = this.getView().getModel("Scan");
                 this.oCameraModel = this.getView().getModel("Camera");
@@ -79,6 +110,8 @@ sap.ui.define([
                 this.getCardValues();
                 this.byId("idTitle1").setText(this.getResourceBundle().getText("ManageMyExpenses"));
                 sessionStorage.setItem("goToLaunchpad", "X");
+
+                this.handleSynchronize();
             },
 
             /**
@@ -463,23 +496,198 @@ sap.ui.define([
             //---------------------------------------------------------------------- Transactions ---------------------------------------------------------------------
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+            // Handler do botão "Synchronize"
             handleSynchronize: function () {
-                var oModel = this.getModel(),
-                    sPath = "/SynchronizeRecon(Key='X')";
+                var oODataModel = this.getView().getModel();
+                var oVM = this.getView().getModel("Sync");
+                var oBundle = this.getResourceBundle();
+                var that = this;
 
-                oModel.read(sPath, {
-                    success: function () {
-                        this.getModel("global").setProperty("/busy", false);
-                        oModel.refresh();
-                    }.bind(this),
+                oVM.setProperty("/syncInProgress", true);
+                oVM.setProperty("/syncText", oBundle ? oBundle.getText("SyncInProgress", "A sincronizar movimentos...") : "A sincronizar movimentos...");
+                oVM.setProperty("/currentJobId", null);
+
+                this._stopPollingLogs();
+                this.getView().getModel("syncLog").setProperty("/items", []);
+
+                oODataModel.callFunction("/StartSync", {
+                    method: "POST",
+                    success: function (oData, oResponse) {
+                        var oResult = oData || (oResponse && oResponse.data);
+                        var sJobId = oResult && oResult.JobId;
+
+                        if (!sJobId) {
+                            oVM.setProperty("/syncInProgress", false);
+                            oVM.setProperty("/syncText", "");
+                            return;
+                        }
+
+                        oVM.setProperty("/currentJobId", sJobId);
+
+                        that._startPollingLogs(sJobId);
+                    },
                     error: function () {
-                        this.getModel("global").setProperty("/busy", false);
-                        this.showErrorMessage({
-                            oText: this.getResourceBundle().getText("errorTitle")
-                        });
-                    }.bind(this)
+                        oVM.setProperty("/syncInProgress", false);
+                        oVM.setProperty("/syncText", "");
+                        // MessageBox.error(
+                        //     oBundle ? oBundle.getText("SyncStartError", "Erro ao iniciar sincronização.")
+                        //         : "Erro ao iniciar sincronização."
+                        // );
+                    }
                 });
             },
+
+            _startPollingLogs: function (sJobId) {
+                var that = this;
+
+                this._stopPollingLogs();
+                this._fetchLogs(sJobId);
+
+                this._sPollTimerId = setInterval(function () {
+                    that._fetchLogs(sJobId);
+                }, this._iPollInterval || 3000);
+            },
+
+            _fetchLogs: function (sJobId) {
+                var oODataModel = this.getView().getModel(),
+                    oVM = this.getView().getModel("Sync"),
+                    oLogModel = this.getView().getModel("syncLog"),
+                    oBundle = this.getResourceBundle(),
+                    that = this;
+
+                var aFilters = [
+                    new Filter("JobId", FilterOperator.EQ, sJobId)
+                ];
+
+                oODataModel.read("/SyncLog", {
+                    filters: aFilters,
+                    success: function (oData) {
+                        var aResults = (oData && oData.results) || [];
+
+                        oLogModel.setProperty("/items", aResults);
+
+                        var bFinished = aResults.some(function (oLog) {
+                            return oLog.Type === "F";
+                        });
+
+                        if (bFinished) {
+                            that._stopPollingLogs();
+
+                            oVM.setProperty("/syncInProgress", false);
+                            oVM.setProperty("/syncText", "");
+
+                            var oSmartTable = that.byId("smartTable");
+                            if (oSmartTable && oSmartTable.rebindTable) {
+                                oSmartTable.rebindTable(true);
+                            }
+                        }
+                    },
+                    error: function () {
+                        that._stopPollingLogs();
+
+                        oVM.setProperty("/syncInProgress", false);
+                        oVM.setProperty("/syncText", "");
+                        // MessageBox.error(
+                        //     oBundle ? oBundle.getText("SyncLogError", "Erro ao obter logs de sincronização.")
+                        //         : "Erro ao obter logs de sincronização."
+                        // );
+                    }
+                });
+            },
+
+            _stopPollingLogs: function () {
+                if (this._sPollTimerId) {
+                    clearInterval(this._sPollTimerId);
+                    this._sPollTimerId = null;
+                }
+            },
+
+            onExit: function () {
+                this._stopPollingLogs();
+            },
+
+            onOpenSyncLogDialog: function () {
+                var oView = this.getView(),
+                    oBundle = this.getResourceBundle(),
+                    that = this;
+
+                if (!this._oSyncLogDialog) {
+                    this._oSyncLogDialog = new Dialog({
+                        title: oBundle ? oBundle.getText("SyncLogTitle", "Detalhe da sincronização")
+                            : "Detalhes da sincronização",
+                        contentWidth: "800px",
+                        contentHeight: "400px",
+                        resizable: true,
+                        draggable: true,
+                        content: [
+                            new Table({
+                                inset: false,
+                                growing: true,
+                                columns: [
+                                    new Column({
+                                        header: new Text({
+                                            text: oBundle ? oBundle.getText("SyncLogColLine", "Linha")
+                                                : "Linha"
+                                        })
+                                    }),
+                                    new Column({
+                                        header: new Text({
+                                            text: oBundle ? oBundle.getText("SyncLogColType", "Tipo")
+                                                : "Tipo"
+                                        })
+                                    }),
+                                    new Column({
+                                        header: new Text({
+                                            text: oBundle ? oBundle.getText("SyncLogColMessage", "Mensagem")
+                                                : "Mensagem"
+                                        })
+                                    })
+                                ],
+                                items: {
+                                    path: "syncLog>/items",
+                                    template: new ColumnListItem({
+                                        cells: [
+                                            new Text({ text: "{syncLog>LineNo}" }),
+                                            new Text({ text: "{syncLog>Type}" }),
+                                            new Text({ text: "{syncLog>Message}" })
+                                        ]
+                                    })
+                                }
+                            })
+                        ],
+                        beginButton: new Button({
+                            text: oBundle ? oBundle.getText("Close", "Fechar") : "Fechar",
+                            press: function () {
+                                that._oSyncLogDialog.close();
+                            }
+                        })
+                    });
+
+                    oView.addDependent(this._oSyncLogDialog);
+                }
+
+                this._oSyncLogDialog.open();
+            },
+
+
+
+            // handleSynchronize: function () {
+            //     var oModel = this.getModel(),
+            //         sPath = "/SynchronizeRecon(Key='X')";
+
+            //     oModel.read(sPath, {
+            //         success: function () {
+            //             this.getModel("global").setProperty("/busy", false);
+            //             oModel.refresh();
+            //         }.bind(this),
+            //         error: function () {
+            //             this.getModel("global").setProperty("/busy", false);
+            //             this.showErrorMessage({
+            //                 oText: this.getResourceBundle().getText("errorTitle")
+            //             });
+            //         }.bind(this)
+            //     });
+            // },
 
             /**
              * Apply initial sorter before table binding.
@@ -537,7 +745,7 @@ sap.ui.define([
                                 var aFiltered = oData.results.filter(o => o.Checknum === "" && o.Pymtmeth === "A" && o.FiStatus !== "1" && o.FiStatus !== "2" && o.FiStatus !== "4" && o.FiStatus !== "7");
                                 that.getView().getModel("Main").setProperty("/ExpensesReconciled", aFiltered);
                             } else if (oAction === 'D') {
-                                var aFiltered = oData.results.filter(o => o.ExpType != "DEV" && o.Pymtmeth === "A" && o.FiStatus !== "1" && o.FiStatus !== "2" && o.FiStatus !== "4" && o.FiStatus !== "7");
+                                var aFiltered = oData.results.filter(o => o.Checknum !== "" && o.ExpType != "DEV" && o.Pymtmeth === "A" && o.FiStatus !== "1" && o.FiStatus !== "2" && o.FiStatus !== "4" && o.FiStatus !== "7");
                                 that.getView().getModel("Main").setProperty("/ExpenseDevolution", aFiltered);
                             }
 
@@ -593,6 +801,9 @@ sap.ui.define([
              * Handle expense without attach.
              */
             handleExpenseWithoutAttach: function () {
+                this._chknum = "";
+                this._cardnum = "";
+
                 var oData = {},
                     oTable = this.byId("smartTableTransRecon").getTable().getSelectedItems();
 
@@ -629,6 +840,8 @@ sap.ui.define([
                 oData.Country = "PT";
                 oData.Fuelqty = "";
                 oData.TableIva = "";
+                this._cardnum = oTable[0].getBindingContext().getObject().Cardnumber;
+                this._chknum = oTable[0].getBindingContext().getObject().Chknum;
 
                 var sFormattedDate = oTable[0].getBindingContext().getObject().sDateFromated,
                     aParts = sFormattedDate.split("."),
@@ -1548,6 +1761,8 @@ sap.ui.define([
                 this._bError = false;
                 this._bSubmit = false;
                 this._cancel = false;
+                this._chknum = "";
+                this._cardnum = "";
 
                 this.handleResetModels();
 
@@ -1624,6 +1839,9 @@ sap.ui.define([
                         that.onAddVatLine();
                         that.oExpensesModel.setProperty("/vatEditMode", true);
                     }
+
+                    if (oAction !== "M") that.handleLoadCreditCards();
+
                     oDialog.open();
 
                     that.handleSetupFieldsLogging();
@@ -1636,6 +1854,25 @@ sap.ui.define([
                             that.handleSetupVatTableLogging("expenseDialog:vatTable");
                         });
                     }
+                });
+            },
+
+            /**
+            * Loads the credit cards from the OData service
+            */
+            handleLoadCreditCards: function () {
+                var oModel = this.getView().getModel();
+
+                oModel.read("/CreditCards", {
+                    success: function (oData) {
+                        var aCards = oData.results || [];
+
+                        var oCardsModel = this.getView().getModel("Cards");
+                        oCardsModel.setProperty("/items", aCards);
+                        oCardsModel.setProperty("/hasData", aCards.length > 0);
+
+                    }.bind(this),
+                    error: function () { }
                 });
             },
 
@@ -1831,6 +2068,11 @@ sap.ui.define([
                     oEntry.Expsubtype = String(sValue);
                 }
 
+                var sCardnumber = this.byId("expenseDialog:selectCreditCard").getSelectedKey();
+
+                oEntry.Cardnumber = sCardnumber || this._cardnum;
+                oEntry.Chknum = this._chknum;
+
                 this.handleCheckTaxID(oEntry.Nif).then(function (canProceed) {
                     if (!canProceed) {
                         return;
@@ -1964,6 +2206,8 @@ sap.ui.define([
                     description: "",
                     illustrationType: ""
                 });
+
+                this.getView().getModel("Cards")?.setData({ hasData: false, items: [] });
 
                 this.getView().getModel("Logs")?.setData({ entries: [] });
             },

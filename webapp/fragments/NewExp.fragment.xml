@@ -88,6 +88,13 @@
                             </items>
                         </Select>
 
+                        <Label text="{i18n>xexp.expCreditCard}"/>
+                        <Select id="expenseDialog:selectCreditCard" visible="{Cards>/hasData}" items="{Cards>/items}" required="true">
+                            <items>
+                                <core:Item key="{Cards>Cardnumber}" text="{Cards>Cardnumber}" />
+                            </items>
+                        </Select>
+
                         <Label id="expenseDialog:labelAmt" text="{i18n>xexp.expValue}"/>
                         <Input id="expenseDialog:inputAmt" type="Number" required="true"/>
 
