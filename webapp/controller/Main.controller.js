@@ -64,18 +64,9 @@ sap.ui.define([
 
                 this.getView().setModel(new JSONModel({ hasData: false, items: [] }), "Cards");
 
+                this.getView().setModel(new JSONModel({ syncInProgress: false, syncText: "", currentJobId: null }), "Sync");
 
-
-                this.getView().setModel(new JSONModel({
-                    syncInProgress: false,
-                    syncText: "",
-                    currentJobId: null
-                }), "Sync");
-
-                var oLogModel = new JSONModel({
-                    items: []
-                });
-                this.getView().setModel(oLogModel, "syncLog");
+                this.getView().setModel(new JSONModel({ items: [] }), "SyncLogs");
 
                 this._iPollInterval = 2000;
                 this._sPollTimerId = null;
@@ -496,43 +487,80 @@ sap.ui.define([
             //---------------------------------------------------------------------- Transactions ---------------------------------------------------------------------
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-            // Handler do botão "Synchronize"
             handleSynchronize: function () {
-                var oODataModel = this.getView().getModel();
-                var oVM = this.getView().getModel("Sync");
-                var oBundle = this.getResourceBundle();
-                var that = this;
+                var oModel = this.getView().getModel(),
+                    oSync = this.getView().getModel("Sync"),
+                    oBundle = this.getResourceBundle(),
+                    that = this;
 
-                oVM.setProperty("/syncInProgress", true);
-                oVM.setProperty("/syncText", oBundle ? oBundle.getText("SyncInProgress", "A sincronizar movimentos...") : "A sincronizar movimentos...");
-                oVM.setProperty("/currentJobId", null);
+                oSync.setProperty("/syncInProgress", true);
+                oSync.setProperty("/syncText", oBundle ? oBundle.getText("SyncInProgress", "A sincronizar movimentos...") : "A sincronizar movimentos...");
+                oSync.setProperty("/currentJobId", null);
 
                 this._stopPollingLogs();
-                this.getView().getModel("syncLog").setProperty("/items", []);
+                this.getView().getModel("SyncLogs").setProperty("/items", []);
 
-                oODataModel.callFunction("/StartSync", {
+                oModel.callFunction("/StartSync", {
                     method: "POST",
                     success: function (oData, oResponse) {
                         var oResult = oData || (oResponse && oResponse.data);
                         var sJobId = oResult && oResult.JobId;
 
                         if (!sJobId) {
-                            oVM.setProperty("/syncInProgress", false);
-                            oVM.setProperty("/syncText", "");
+                            oSync.setProperty("/syncInProgress", false);
+                            oSync.setProperty("/syncText", "");
                             return;
                         }
 
-                        oVM.setProperty("/currentJobId", sJobId);
+                        oSync.setProperty("/currentJobId", sJobId);
 
                         that._startPollingLogs(sJobId);
                     },
                     error: function () {
-                        oVM.setProperty("/syncInProgress", false);
-                        oVM.setProperty("/syncText", "");
-                        // MessageBox.error(
-                        //     oBundle ? oBundle.getText("SyncStartError", "Erro ao iniciar sincronização.")
-                        //         : "Erro ao iniciar sincronização."
-                        // );
+                        oSync.setProperty("/syncInProgress", false);
+                        oSync.setProperty("/syncText", "");
+                    }
+                });
+            },
+
+            _fetchLogs: function (sJobId) {
+                var oModel = this.getView().getModel(),
+                    oSync = this.getView().getModel("Sync"),
+                    oLog = this.getView().getModel("SyncLogs"),
+                    that = this;
+
+                var aFilters = [
+                    new Filter("JobId", FilterOperator.EQ, sJobId)
+                ];
+
+                oModel.read("/SyncLog", {
+                    filters: aFilters,
+                    success: function (oData) {
+                        var aResults = (oData && oData.results) || [];
+
+                        oLog.setProperty("/items", aResults);
+
+                        var bFinished = aResults.some(function (oLog) {
+                            return oLog.Type === "F";
+                        });
+
+                        if (bFinished) {
+                            that._stopPollingLogs();
+
+                            oSync.setProperty("/syncInProgress", false);
+                            oSync.setProperty("/syncText", "");
+
+                            var oSmartTable = that.byId("smartTable");
+                            if (oSmartTable && oSmartTable.rebindTable) {
+                                oSmartTable.rebindTable(true);
+                            }
+                        }
+                    },
+                    error: function () {
+                        that._stopPollingLogs();
+
+                        oSync.setProperty("/syncInProgress", false);
+                        oSync.setProperty("/syncText", "");
                     }
                 });
             },
@@ -548,53 +576,6 @@ sap.ui.define([
                 }, this._iPollInterval || 3000);
             },
 
-            _fetchLogs: function (sJobId) {
-                var oODataModel = this.getView().getModel(),
-                    oVM = this.getView().getModel("Sync"),
-                    oLogModel = this.getView().getModel("syncLog"),
-                    oBundle = this.getResourceBundle(),
-                    that = this;
-
-                var aFilters = [
-                    new Filter("JobId", FilterOperator.EQ, sJobId)
-                ];
-
-                oODataModel.read("/SyncLog", {
-                    filters: aFilters,
-                    success: function (oData) {
-                        var aResults = (oData && oData.results) || [];
-
-                        oLogModel.setProperty("/items", aResults);
-
-                        var bFinished = aResults.some(function (oLog) {
-                            return oLog.Type === "F";
-                        });
-
-                        if (bFinished) {
-                            that._stopPollingLogs();
-
-                            oVM.setProperty("/syncInProgress", false);
-                            oVM.setProperty("/syncText", "");
-
-                            var oSmartTable = that.byId("smartTable");
-                            if (oSmartTable && oSmartTable.rebindTable) {
-                                oSmartTable.rebindTable(true);
-                            }
-                        }
-                    },
-                    error: function () {
-                        that._stopPollingLogs();
-
-                        oVM.setProperty("/syncInProgress", false);
-                        oVM.setProperty("/syncText", "");
-                        // MessageBox.error(
-                        //     oBundle ? oBundle.getText("SyncLogError", "Erro ao obter logs de sincronização.")
-                        //         : "Erro ao obter logs de sincronização."
-                        // );
-                    }
-                });
-            },
-
             _stopPollingLogs: function () {
                 if (this._sPollTimerId) {
                     clearInterval(this._sPollTimerId);
@@ -607,66 +588,41 @@ sap.ui.define([
             },
 
             onOpenSyncLogDialog: function () {
-                var oView = this.getView(),
-                    oBundle = this.getResourceBundle(),
-                    that = this;
+                var that = this;
 
-                if (!this._oSyncLogDialog) {
-                    this._oSyncLogDialog = new Dialog({
-                        title: oBundle ? oBundle.getText("SyncLogTitle", "Detalhe da sincronização")
-                            : "Detalhes da sincronização",
-                        contentWidth: "800px",
-                        contentHeight: "400px",
-                        resizable: true,
-                        draggable: true,
-                        content: [
-                            new Table({
-                                inset: false,
-                                growing: true,
-                                columns: [
-                                    new Column({
-                                        header: new Text({
-                                            text: oBundle ? oBundle.getText("SyncLogColLine", "Linha")
-                                                : "Linha"
-                                        })
-                                    }),
-                                    new Column({
-                                        header: new Text({
-                                            text: oBundle ? oBundle.getText("SyncLogColType", "Tipo")
-                                                : "Tipo"
-                                        })
-                                    }),
-                                    new Column({
-                                        header: new Text({
-                                            text: oBundle ? oBundle.getText("SyncLogColMessage", "Mensagem")
-                                                : "Mensagem"
-                                        })
-                                    })
-                                ],
-                                items: {
-                                    path: "syncLog>/items",
-                                    template: new ColumnListItem({
-                                        cells: [
-                                            new Text({ text: "{syncLog>LineNo}" }),
-                                            new Text({ text: "{syncLog>Type}" }),
-                                            new Text({ text: "{syncLog>Message}" })
-                                        ]
-                                    })
-                                }
-                            })
-                        ],
-                        beginButton: new Button({
-                            text: oBundle ? oBundle.getText("Close", "Fechar") : "Fechar",
-                            press: function () {
-                                that._oSyncLogDialog.close();
-                            }
-                        })
+                if (!this._pSyncLogDialog) {
+                    this._pSyncLogDialog = Fragment.load({
+                        id: this.getView().getId(),
+                        name: "zfiexpensesmanage.view.SyncLogDialog",
+                        controller: this
+                    }).then(function (oDialog) {
+                        that.getView().addDependent(oDialog);
+                        return oDialog;
                     });
-
-                    oView.addDependent(this._oSyncLogDialog);
                 }
 
-                this._oSyncLogDialog.open();
+                this._pSyncLogDialog.then(function (oDialog) {
+                    oDialog.open();
+                });
+            },
+
+            onCloseSyncLogDialog: function () {
+                if (this._pSyncLogDialog) {
+                    this._pSyncLogDialog.then(function (oDialog) {
+                        oDialog.close();
+                    });
+                }
+            },
+
+            onExit: function () {
+                this._stopPollingLogs();
+
+                if (this._pSyncLogDialog) {
+                    this._pSyncLogDialog.then(function (oDialog) {
+                        oDialog.destroy();
+                    });
+                    this._pSyncLogDialog = null;
+                }
             },
 
 
