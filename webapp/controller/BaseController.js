@@ -156,7 +156,7 @@ sap.ui.define([
         /**
        * Fetch card values from backend and update view.
        */
-        getCardValues: function () {
+        getCardValues: async function () {
             try {
                 var oModel = this.getView().getModel();
 
@@ -166,10 +166,18 @@ sap.ui.define([
                             this.getView().byId("idNoTheExpensesNonReconciled").setText(oData.results[0].NdocV);
                             this.getView().byId("idSumOfApprovedExpenses").setText(oData.results[0].ApprvdV + " EUR");
                             this.getView().byId("idSumOfExpensesLast30Days").setText(oData.results[0].Last30V + " EUR");
+
+                            this.getView().byId("idReceible").setText(oData.results[0].Receivablev + " EUR");
+                            this.getView().byId("idSettled").setText(oData.results[0].Settledv + " EUR");
+                            this.getView().byId("idPayable").setText(oData.results[0].Payablev + " EUR");
                         } else {
                             this.getView().byId("idNoTheExpensesNonReconciled").setText("0");
                             this.getView().byId("idSumOfApprovedExpenses").setText("0 EUR");
                             this.getView().byId("idSumOfExpensesLast30Days").setText("0 EUR");
+
+                            this.getView().byId("idReceible").setText("0 EUR");
+                            this.getView().byId("idSettled").setText("0 EUR");
+                            this.getView().byId("idPayable").setText("0 EUR");
                         }
                     }.bind(this),
                     error: function (oError) {

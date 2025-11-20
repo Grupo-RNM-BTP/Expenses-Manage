@@ -88,7 +88,7 @@ sap.ui.define([
             /**
              * Handle after rendering, get card values, and set theme.
              */
-            onAfterRendering: function () {
+            onAfterRendering: async function () {
                 var oCard = this.byId("idNewCard");
                 if (oCard) {
                     oCard.addEventDelegate({
@@ -97,8 +97,9 @@ sap.ui.define([
                         }.bind(this)
                     });
                 }
-                this.onCheckLeader();
-                this.getCardValues();
+                this._addVideoContent();
+                await this.onCheckLeader();
+                await this.getCardValues();
                 this.byId("idTitle1").setText(this.getResourceBundle().getText("ManageMyExpenses"));
                 sessionStorage.setItem("goToLaunchpad", "X");
 
@@ -161,8 +162,43 @@ sap.ui.define([
                         oNavContainer.to(this.byId("pageApprovals"));
                         oToolPage.setSideExpanded(false);
                         break;
+
+                    case "VideoTutorial":
+                        this.onPressCloseDetail();
+                        this.byId("idTitle1").setText(this.getResourceBundle().getText("TextVideo"));
+                        oNavContainer.to(this.byId("pageVideo"));
+                        oToolPage.setSideExpanded(false);
+                        break;
                 }
             },
+
+            _addVideoContent: function () {
+                const sHtml = `
+                                <div style="
+                                    width: 100%;
+                                    display: flex;
+                                    justify-content: center;
+                                    align-items: center;
+                                    padding-top: 40px;
+                                    padding-bottom: 40px;
+                                ">
+                                    <video 
+                                        style="width: 90%; max-width: 1200px; border-radius: 10px; box-shadow: 0 6px 16px rgba(0,0,0,0.18);" 
+                                        controls
+                                    >
+                                        <source src="https://49s.80b.mytemp.website/tutorial/tutorial_despesas.mp4" type="video/mp4">
+                                    </video>
+                                </div>
+                            `;
+
+                const oHTML = new sap.ui.core.HTML({ content: sHtml });
+                this.byId("pageVideo").removeAllContent();
+                this.byId("pageVideo").addContent(oHTML);
+            },
+
+
+
+
 
             /**
              * Handle side navigation toggle.
@@ -1232,10 +1268,9 @@ sap.ui.define([
             /**
              * Check if the user is a leader.
              */
-            onCheckLeader: function () {
+            onCheckLeader: async function () {
                 var oModel = this.getModel(),
                     sPath = "/CheckLeader";
-
                 oModel.read(sPath, {
                     success: function (oData) {
                         if (oData.results.length > 0) {

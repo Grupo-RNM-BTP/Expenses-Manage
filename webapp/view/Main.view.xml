@@ -31,6 +31,7 @@
                     <tnt:NavigationListItem text="{i18n>TransactionReconciliation}" key="TransRecon" icon="sap-icon://unpaid-leave"/>
                     <tnt:NavigationListItem text="{i18n>CurrentAccount}" key="CurrentAccount" icon="sap-icon://order-status"/>
                     <tnt:NavigationListItem id="idApproveExpenses" text="{i18n>ApproveExpenses}" visible="false" key="ApproveExpenses" icon="sap-icon://accept"/>
+                    <tnt:NavigationListItem id="idVideo" text="{i18n>TextVideo}" visible="true" key="VideoTutorial" icon="sap-icon://video"/>
                 </tnt:NavigationList>
             </tnt:SideNavigation>
         </tnt:sideContent>
@@ -213,7 +214,7 @@
                                     <OverflowToolbar design="Transparent">
                                         <ToolbarSpacer/>
                                         <!-- <Button text="{i18n>Synchronize}" icon="sap-icon://synchronize" enabled="true" type="Emphasized" press="handleSynchronize" /> -->
-                                        
+
                                         <Button text="{i18n>Synchronize}" icon="sap-icon://synchronize" press=".handleSynchronize" type="{= ${Sync>/syncInProgress} ? 'Attention' : 'Accept' }" />
                                         <Button text="Logs de Sincronização" icon="sap-icon://list" press=".onOpenSyncLogDialog" enabled="{= ${syncLog>/items}.length > 0 }" />
                                     </OverflowToolbar>
@@ -246,24 +247,67 @@
                     </ScrollContainer>
 
                     <ScrollContainer id="pageCurrentAccount" horizontal="false" vertical="true" height="100%">
-                        <layout:Grid defaultSpan="L6 M12 S12" width="100%" vSpacing="1" hSpacing="1">
-                            <layout:content>
-                                <smartTable:SmartTable id="smartTableCurrentAccount_1" entitySet="ZFI_EXPENSES_CURRENTE_ACC_1" tableType="ResponsiveTable" demandPopin="true" useExportToExcel="false" useVariantManagement="false" useTablePersonalisation="true" header="{i18n>CurrentAccount_1}" showRowCount="true" persistencyKey="123" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
-                                    <Table class="sapUiResponsiveContentPadding" growing="true" growingThreshold="50">
-                                        <ColumnListItem vAlign="Middle">
-                                        </ColumnListItem>
-                                    </Table>
-                                </smartTable:SmartTable>
-                            </layout:content>
-                            <layout:content>
-                                <smartTable:SmartTable id="smartTableCurrentAccount_2" entitySet="ZFI_EXPENSES_CURRENTE_ACC_2" tableType="ResponsiveTable" demandPopin="true" useExportToExcel="false" useVariantManagement="false" useTablePersonalisation="true" header="{i18n>CurrentAccount_2}" showRowCount="true" persistencyKey="1234" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
-                                    <Table class="sapUiResponsiveContentPadding" growing="true" growingThreshold="50">
-                                        <ColumnListItem vAlign="Middle">
-                                        </ColumnListItem>
-                                    </Table>
-                                </smartTable:SmartTable>
-                            </layout:content>
-                        </layout:Grid>
+                        <VBox class="sapUiMediumMarginBeginEnd">
+
+                            <FlexBox justifyContent="SpaceBetween" class="sapUiMediumMarginTop" wrap="Wrap" alignItems="Center">
+                                <Title text="{i18n>TitelCurrent}" titleStyle="H4" />
+                            </FlexBox>
+
+                            <Toolbar style="Standard" design="Transparent" height="0.1rem" />
+                            <l:Grid defaultSpan="XL4 L6 M12 S12" position="Center" hSpacing="1" vSpacing="1">
+                                <f:Card class="sapUiSmallMargin">
+                                    <f:header>
+                                        <card:Header title="{i18n>TitleReceible}" />
+                                    </f:header>
+                                    <f:content>
+                                        <VBox class="sapUiSmallMargin">
+                                            <Title id="idReceible" level="H2" titleStyle="H3" />
+                                        </VBox>
+                                    </f:content>
+                                </f:Card>
+
+                                <f:Card class="sapUiSmallMargin">
+                                    <f:header>
+                                        <card:Header title="{i18n>TitlePayable}" />
+                                    </f:header>
+                                    <f:content>
+                                        <VBox class="sapUiSmallMargin">
+                                            <Title id="idPayable" level="H2" titleStyle="H3" />
+                                        </VBox>
+                                    </f:content>
+                                </f:Card>
+
+                                <f:Card class="sapUiSmallMargin">
+                                    <f:header>
+                                        <card:Header title="{i18n>TitleSettled}" />
+                                    </f:header>
+                                    <f:content>
+                                        <VBox class="sapUiSmallMargin">
+                                            <Title id="idSettled" level="H2" titleStyle="H3" />
+                                        </VBox>
+                                    </f:content>
+                                </f:Card>
+                            </l:Grid>
+
+                            <layout:Grid defaultSpan="L6 M12 S12" width="100%" vSpacing="1" hSpacing="1">
+                                <layout:content>
+                                    <smartTable:SmartTable id="smartTableCurrentAccount_1" entitySet="ZFI_EXPENSES_CURRENTE_ACC_1" tableType="ResponsiveTable" demandPopin="true" useExportToExcel="false" useVariantManagement="false" useTablePersonalisation="true" header="{i18n>CurrentAccount_1}" showRowCount="true" persistencyKey="123" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
+                                        <Table class="sapUiResponsiveContentPadding" growing="true" growingThreshold="50">
+                                            <ColumnListItem vAlign="Middle">
+                                            </ColumnListItem>
+                                        </Table>
+                                    </smartTable:SmartTable>
+                                </layout:content>
+                                <layout:content>
+                                    <smartTable:SmartTable id="smartTableCurrentAccount_2" entitySet="ZFI_EXPENSES_CURRENTE_ACC_2" tableType="ResponsiveTable" demandPopin="true" useExportToExcel="false" useVariantManagement="false" useTablePersonalisation="true" header="{i18n>CurrentAccount_2}" showRowCount="true" persistencyKey="1234" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
+                                        <Table class="sapUiResponsiveContentPadding" growing="true" growingThreshold="50">
+                                            <ColumnListItem vAlign="Middle">
+                                            </ColumnListItem>
+                                        </Table>
+                                    </smartTable:SmartTable>
+                                </layout:content>
+                            </layout:Grid>
+                        </VBox>
                     </ScrollContainer>
 
                     <ScrollContainer id="pageApprovals" horizontal="false" vertical="true" height="100%">
@@ -352,6 +396,10 @@
                                 </items>
                             </Table>
                         </smartTable:SmartTable>
+                    </ScrollContainer>
+
+                    <ScrollContainer id="pageVideo" visible="true" horizontal="false" vertical="true" height="100%">
+
                     </ScrollContainer>
                 </pages>
             </NavContainer>
