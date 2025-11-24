@@ -1321,6 +1321,75 @@ sap.ui.define([
                 })
             },
 
+            onOpenDialogReason: function () {
+                var oView = this.getView();
+                var that = this;
+
+                if (this.byId("idTableApprovals").getSelectedItems().length === 0) {
+                    sap.m.MessageBox.error(this.getResourceBundle().getText("noSelection"));
+                    return;
+                }
+
+                if (!this._oReasonDialog) {
+                    this._oReasonDialog = new sap.m.Dialog({
+                        title: this.getResourceBundle().getText("reason"),
+                        type: "Message",
+                        contentWidth: "400px",
+                        content: [
+                            new sap.m.Text({
+                                text: this.getResourceBundle().getText("TextReason")
+                            }),
+                            new sap.m.TextArea(oView.createId("reasonTextArea"), {
+                                width: "100%",
+                                rows: 4,
+                                growing: true,
+                                maxLength: 500,
+                                placeholder: this.getResourceBundle().getText("placeholderReason")
+                            })
+                        ],
+                        beginButton: new sap.m.Button({
+                            text: "OK",
+                            type: "Emphasized",
+                            press: function () {
+                                that.ReasonRejection = oView.byId("reasonTextArea").getValue();
+
+                                if (!that.ReasonRejection) {
+                                    sap.m.MessageToast.show(that.getResourceBundle().getText("messageReason"));
+                                    return;
+                                }
+
+                                that.onGetItemsTable("R");
+                                oView.byId("reasonTextArea").setValue('');
+                                that._oReasonDialog.close();
+                            }
+                        }),
+                        endButton: new sap.m.Button({
+                            text: this.getResourceBundle().getText("cancelReason"),
+                            press: function () {
+                                that.ReasonRejection = '';
+                                oView.byId("reasonTextArea").setValue("");
+                                this.byId("idTableApprovals").removeSelections();
+
+                                that._oReasonDialog.close();
+                                that._oReasonDialog.destroy();
+                                that._oReasonDialog = null;
+                            }
+                        }),
+                        afterClose: function () {
+                            var oTextArea = oView.byId("reasonTextArea");
+                            if (oTextArea) {
+                                oTextArea.setValue("");
+                            }
+                        }
+                    });
+
+                    oView.addDependent(this._oReasonDialog);
+                }
+
+                this._oReasonDialog.open();
+
+            },
+
             /**
              * Get selected items from table.
              * @param {string} oAction
@@ -1328,7 +1397,9 @@ sap.ui.define([
             onGetItemsTable: function (oAction) {
                 var oSelectedItems = this.byId("idTableApprovals").getSelectedItems(),
                     aSelectedData = [],
-                    oEntry = {};
+                    oEntry = {},
+                    sReason = this.ReasonRejection;
+
 
                 if (oSelectedItems.length === 0) {
                     sap.m.MessageBox.error(this.getResourceBundle().getText("noSelection"));
@@ -1340,7 +1411,8 @@ sap.ui.define([
                     aSelectedData.push({
                         pernr: oData.Pernr,
                         exp: oData.ExpNo,
-                        FI_STATUS: oData.FiStatus
+                        FI_STATUS: oData.FiStatus,
+                        REASON_REJECTION: sReason
                     });
                 });
 
@@ -1366,6 +1438,7 @@ sap.ui.define([
                 oModel.create(sPath, oEntry, {
                     success: function () {
                         this.getModel("global").setProperty("/busy", false);
+                        this.ReasonRejection = '';
                         this.handleButtonsState(false);
                     }.bind(this),
                     error: function (oError) {

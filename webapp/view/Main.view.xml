@@ -313,13 +313,13 @@
                     <ScrollContainer id="pageApprovals" horizontal="false" vertical="true" height="100%">
                         <smartFilterBar:SmartFilterBar id="idSmartFilterBarApprovals" entitySet="ZFI_EXPENSES_LAPPRVD" />
 
-                        <smartTable:SmartTable id="smartTableApprovals" entitySet="ZFI_EXPENSES_LAPPRVD" beforeRebindTable="onBeforeRebindTableApprovals" demandPopin="true" smartFilterId="idSmartFilterBarApprovals" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="true" useTablePersonalisation="true" useVariantManagement="false" requestAtLeastFields="Pernr,CompanyCode,CompanyDsc,Doc,Reason,ExpNo,Belnr,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus,FirstName,LastName,FiscalYear,Nif" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="true">
+                        <smartTable:SmartTable id="smartTableApprovals" entitySet="ZFI_EXPENSES_LAPPRVD" beforeRebindTable="onBeforeRebindTableApprovals" demandPopin="true" smartFilterId="idSmartFilterBarApprovals" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="false" useTablePersonalisation="true" useVariantManagement="false" requestAtLeastFields="Pernr,CompanyCode,CompanyDsc,Doc,Reason,ExpNo,Belnr,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus,FirstName,LastName,FiscalYear,Nif" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="true">
                             <smartTable:customToolbar>
                                 <OverflowToolbar design="Transparent">
                                     <ToolbarSpacer/>
-                                    <Button id="partialApprovalButton" enabled="false" text="{i18n>PartialApproval}" type="Default" press="handleOpenDialog" />
-                                    <Button id="approveButton" enabled="false" icon="sap-icon://accept" text="{i18n>Approve}" type="Emphasized" press="onGetItemsTable('A')" />
-                                    <Button id="rejectButton" enabled="false" icon="sap-icon://decline" text="{i18n>Reject}" type="Emphasized" press="onGetItemsTable('R')" />
+                                    <Button id="approveButton" enabled="false" text="{i18n>Approve}" type="Emphasized" press="onGetItemsTable('A')" />
+                                    <Button id="partialApprovalButton" enabled="false" text="{i18n>PartialApproval}" type="Emphasized" press="handleOpenDialog" />
+                                    <Button id="rejectButton" enabled="false" text="{i18n>InvalidExpense}" type="Emphasized" press="onOpenDialogReason" />
                                 </OverflowToolbar>
 
                             </smartTable:customToolbar>
