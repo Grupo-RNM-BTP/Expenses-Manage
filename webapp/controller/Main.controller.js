@@ -103,7 +103,7 @@ sap.ui.define([
                 this.byId("idTitle1").setText(this.getResourceBundle().getText("ManageMyExpenses"));
                 sessionStorage.setItem("goToLaunchpad", "X");
 
-                this.handleSynchronize();
+                // this.handleSynchronize();
             },
 
             /**
@@ -195,10 +195,6 @@ sap.ui.define([
                 this.byId("pageVideo").removeAllContent();
                 this.byId("pageVideo").addContent(oHTML);
             },
-
-
-
-
 
             /**
              * Handle side navigation toggle.
@@ -523,41 +519,41 @@ sap.ui.define([
             //---------------------------------------------------------------------- Transactions ---------------------------------------------------------------------
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-            handleSynchronize: function () {
-                var oModel = this.getView().getModel(),
-                    oSync = this.getView().getModel("Sync"),
-                    oBundle = this.getResourceBundle(),
-                    that = this;
+            // handleSynchronize: function () {
+            //     var oModel = this.getView().getModel(),
+            //         oSync = this.getView().getModel("Sync"),
+            //         oBundle = this.getResourceBundle(),
+            //         that = this;
 
-                oSync.setProperty("/syncInProgress", true);
-                oSync.setProperty("/syncText", oBundle ? oBundle.getText("SyncInProgress", "A sincronizar movimentos...") : "A sincronizar movimentos...");
-                oSync.setProperty("/currentJobId", null);
+            //     oSync.setProperty("/syncInProgress", true);
+            //     oSync.setProperty("/syncText", oBundle ? oBundle.getText("SyncInProgress", "A sincronizar movimentos...") : "A sincronizar movimentos...");
+            //     oSync.setProperty("/currentJobId", null);
 
-                this._stopPollingLogs();
-                this.getView().getModel("SyncLogs").setProperty("/items", []);
+            //     this._stopPollingLogs();
+            //     this.getView().getModel("SyncLogs").setProperty("/items", []);
 
-                oModel.callFunction("/StartSync", {
-                    method: "POST",
-                    success: function (oData, oResponse) {
-                        var oResult = oData || (oResponse && oResponse.data);
-                        var sJobId = oResult && oResult.JobId;
+            //     oModel.callFunction("/StartSync", {
+            //         method: "POST",
+            //         success: function (oData, oResponse) {
+            //             var oResult = oData || (oResponse && oResponse.data);
+            //             var sJobId = oResult && oResult.JobId;
 
-                        if (!sJobId) {
-                            oSync.setProperty("/syncInProgress", false);
-                            oSync.setProperty("/syncText", "");
-                            return;
-                        }
+            //             if (!sJobId) {
+            //                 oSync.setProperty("/syncInProgress", false);
+            //                 oSync.setProperty("/syncText", "");
+            //                 return;
+            //             }
 
-                        oSync.setProperty("/currentJobId", sJobId);
+            //             oSync.setProperty("/currentJobId", sJobId);
 
-                        that._startPollingLogs(sJobId);
-                    },
-                    error: function () {
-                        oSync.setProperty("/syncInProgress", false);
-                        oSync.setProperty("/syncText", "");
-                    }
-                });
-            },
+            //             that._startPollingLogs(sJobId);
+            //         },
+            //         error: function () {
+            //             oSync.setProperty("/syncInProgress", false);
+            //             oSync.setProperty("/syncText", "");
+            //         }
+            //     });
+            // },
 
             _fetchLogs: function (sJobId) {
                 var oModel = this.getView().getModel(),
@@ -661,25 +657,23 @@ sap.ui.define([
                 }
             },
 
+            handleSynchronize: function () {
+                var oModel = this.getModel(),
+                    sPath = "/SynchronizeRecon(Key='X')";
 
-
-            // handleSynchronize: function () {
-            //     var oModel = this.getModel(),
-            //         sPath = "/SynchronizeRecon(Key='X')";
-
-            //     oModel.read(sPath, {
-            //         success: function () {
-            //             this.getModel("global").setProperty("/busy", false);
-            //             oModel.refresh();
-            //         }.bind(this),
-            //         error: function () {
-            //             this.getModel("global").setProperty("/busy", false);
-            //             this.showErrorMessage({
-            //                 oText: this.getResourceBundle().getText("errorTitle")
-            //             });
-            //         }.bind(this)
-            //     });
-            // },
+                oModel.read(sPath, {
+                    success: function () {
+                        this.getModel("global").setProperty("/busy", false);
+                        oModel.refresh();
+                    }.bind(this),
+                    error: function () {
+                        this.getModel("global").setProperty("/busy", false);
+                        this.showErrorMessage({
+                            oText: this.getResourceBundle().getText("errorTitle")
+                        });
+                    }.bind(this)
+                });
+            },
 
             /**
              * Apply initial sorter before table binding.
@@ -705,13 +699,46 @@ sap.ui.define([
              * Apply initial sorter before table binding.
              * @param {sap.ui.base.Event} oEvent
              */
+            // onBeforeRebindTableRecon: function (oEvent) {
+            //     var oBindingParams = oEvent.getParameter("bindingParams");
+
+            //     if (!this._bInitialSorterApplied3) {
+            //         oBindingParams.sorter.push(
+            //             new sap.ui.model.Sorter("Posteddt", true)
+            //         );
+            //         this._bInitialSorterApplied3 = true;
+            //     }
+            // },
+
             onBeforeRebindTableRecon: function (oEvent) {
                 var oBindingParams = oEvent.getParameter("bindingParams");
 
+                oBindingParams.sorter = oBindingParams.sorter || [];
+
                 if (!this._bInitialSorterApplied3) {
-                    oBindingParams.sorter.push(
-                        new sap.ui.model.Sorter("Posteddt", true)
+                    var oDateSorter = new sap.ui.model.Sorter("Posteddt", true);
+                    var oGroupSorter = new sap.ui.model.Sorter(
+                        "Chknum",
+                        false,
+                        function (oContext) {
+                            var sChknum = oContext.getProperty("Chknum");
+                            sChknum = sChknum ? String(sChknum) : "";
+
+                            var bProcessed = sChknum.length > 0 && sChknum.length < 10;
+
+                            return {
+                                key: bProcessed ? "PROC" : "NOPROC",
+                                text: bProcessed
+                                    ? "Movimento processado"
+                                    : "Movimento não processado"
+                            };
+                        }
                     );
+                    oGroupSorter.group = true;
+
+                    oBindingParams.sorter.push(oGroupSorter);
+                    oBindingParams.sorter.push(oDateSorter);
+
                     this._bInitialSorterApplied3 = true;
                 }
             },
