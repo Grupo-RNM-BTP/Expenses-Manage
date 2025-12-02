@@ -1,7 +1,7 @@
 <core:FragmentDefinition xmlns="sap.m"
     xmlns:core="sap.ui.core">
 
-    <Dialog id="syncLogDialog" title="{i18n>SyncLogTitle}" contentWidth="70%" contentHeight="60%" resizable="true" draggable="true">
+    <Dialog id="syncLogDialog" title="{i18n>SyncLogTitle}" contentWidth="40rem" contentHeight="22rem" resizable="true" draggable="true">
 
         <content>
             <Table id="syncLogTable" inset="false" growing="true" growingScrollToLoad="true" items="{
@@ -46,12 +46,23 @@
                             <Text text="{SyncLogs>LineNo}" />
 
                             <!-- Tipo (I / S / E / F) com cor -->
-                            <ObjectStatus text="{SyncLogs>Type}" state="{
+                            <!-- <ObjectStatus text="{SyncLogs>Type}" state="{
                                     = ${SyncLogs>Type} === 'E' ? 'Error'
                                       : ${SyncLogs>Type} === 'S' ? 'Success'
                                       : ${SyncLogs>Type} === 'F' ? 'Information'
                                       : 'None'
-                                }" />
+                                }" /> -->
+
+                            <ObjectStatus text="{SyncLogs>Type}" state="{= ${SyncLogs>Type} === 'E' ? 'Error'
+                                                                    : ${SyncLogs>Type} === 'W' ? 'Warning'
+                                                                    : ${SyncLogs>Type} === 'S' ? 'Success'
+                                                                    : ${SyncLogs>Type} === 'I' ? 'Information'
+                                                                    : 'None' }" icon="{= ${SyncLogs>Type} === 'E' ? 'sap-icon://error'
+                                                                    : ${SyncLogs>Type} === 'W' ? 'sap-icon://alert'
+                                                                    : ${SyncLogs>Type} === 'S' ? 'sap-icon://accept'
+                                                                    : ${SyncLogs>Type} === 'I' ? 'sap-icon://information'
+                                                                    : '' }" />
+
 
                             <!-- Timestamp, se tiveres na entidade -->
                             <Text text="{SyncLogs>Timestamp}" />

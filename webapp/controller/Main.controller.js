@@ -519,41 +519,41 @@ sap.ui.define([
             //---------------------------------------------------------------------- Transactions ---------------------------------------------------------------------
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
-            // handleSynchronize: function () {
-            //     var oModel = this.getView().getModel(),
-            //         oSync = this.getView().getModel("Sync"),
-            //         oBundle = this.getResourceBundle(),
-            //         that = this;
+            handleSynchronize: function () {
+                var oModel = this.getView().getModel(),
+                    oSync = this.getView().getModel("Sync"),
+                    oBundle = this.getResourceBundle(),
+                    that = this;
 
-            //     oSync.setProperty("/syncInProgress", true);
-            //     oSync.setProperty("/syncText", oBundle ? oBundle.getText("SyncInProgress", "A sincronizar movimentos...") : "A sincronizar movimentos...");
-            //     oSync.setProperty("/currentJobId", null);
+                oSync.setProperty("/syncInProgress", true);
+                oSync.setProperty("/syncText", oBundle ? oBundle.getText("SyncInProgress", "A sincronizar movimentos...") : "A sincronizar movimentos...");
+                oSync.setProperty("/currentJobId", null);
 
-            //     this._stopPollingLogs();
-            //     this.getView().getModel("SyncLogs").setProperty("/items", []);
+                this._stopPollingLogs();
+                this.getView().getModel("SyncLogs").setProperty("/items", []);
 
-            //     oModel.callFunction("/StartSync", {
-            //         method: "POST",
-            //         success: function (oData, oResponse) {
-            //             var oResult = oData || (oResponse && oResponse.data);
-            //             var sJobId = oResult && oResult.JobId;
+                oModel.callFunction("/StartSync", {
+                    method: "POST",
+                    success: function (oData, oResponse) {
+                        var oResult = oData || (oResponse && oResponse.data);
+                        var sJobId = oResult && oResult.JobId;
 
-            //             if (!sJobId) {
-            //                 oSync.setProperty("/syncInProgress", false);
-            //                 oSync.setProperty("/syncText", "");
-            //                 return;
-            //             }
+                        if (!sJobId) {
+                            oSync.setProperty("/syncInProgress", false);
+                            oSync.setProperty("/syncText", "");
+                            return;
+                        }
 
-            //             oSync.setProperty("/currentJobId", sJobId);
+                        oSync.setProperty("/currentJobId", sJobId);
 
-            //             that._startPollingLogs(sJobId);
-            //         },
-            //         error: function () {
-            //             oSync.setProperty("/syncInProgress", false);
-            //             oSync.setProperty("/syncText", "");
-            //         }
-            //     });
-            // },
+                        that._startPollingLogs(sJobId);
+                    },
+                    error: function () {
+                        oSync.setProperty("/syncInProgress", false);
+                        oSync.setProperty("/syncText", "");
+                    }
+                });
+            },
 
             _fetchLogs: function (sJobId) {
                 var oModel = this.getView().getModel(),
@@ -573,7 +573,7 @@ sap.ui.define([
                         oLog.setProperty("/items", aResults);
 
                         var bFinished = aResults.some(function (oLog) {
-                            return oLog.Type === "F";
+                            return oLog.Type === "S" || oLog.Type === "E";
                         });
 
                         if (bFinished) {
@@ -605,7 +605,7 @@ sap.ui.define([
 
                 this._sPollTimerId = setInterval(function () {
                     that._fetchLogs(sJobId);
-                }, this._iPollInterval || 3000);
+                }, this._iPollInterval || 2000);
             },
 
             _stopPollingLogs: function () {
@@ -625,7 +625,7 @@ sap.ui.define([
                 if (!this._pSyncLogDialog) {
                     this._pSyncLogDialog = Fragment.load({
                         id: this.getView().getId(),
-                        name: "zfiexpensesmanage.view.SyncLogDialog",
+                        name: "zfiexpensesmanage.fragments.SyncLog",
                         controller: this
                     }).then(function (oDialog) {
                         that.getView().addDependent(oDialog);
@@ -657,23 +657,23 @@ sap.ui.define([
                 }
             },
 
-            handleSynchronize: function () {
-                var oModel = this.getModel(),
-                    sPath = "/SynchronizeRecon(Key='X')";
+            // handleSynchronize: function () {
+            //     var oModel = this.getModel(),
+            //         sPath = "/SynchronizeRecon(Key='X')";
 
-                oModel.read(sPath, {
-                    success: function () {
-                        this.getModel("global").setProperty("/busy", false);
-                        oModel.refresh();
-                    }.bind(this),
-                    error: function () {
-                        this.getModel("global").setProperty("/busy", false);
-                        this.showErrorMessage({
-                            oText: this.getResourceBundle().getText("errorTitle")
-                        });
-                    }.bind(this)
-                });
-            },
+            //     oModel.read(sPath, {
+            //         success: function () {
+            //             this.getModel("global").setProperty("/busy", false);
+            //             oModel.refresh();
+            //         }.bind(this),
+            //         error: function () {
+            //             this.getModel("global").setProperty("/busy", false);
+            //             this.showErrorMessage({
+            //                 oText: this.getResourceBundle().getText("errorTitle")
+            //             });
+            //         }.bind(this)
+            //     });
+            // },
 
             /**
              * Apply initial sorter before table binding.

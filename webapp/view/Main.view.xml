@@ -213,10 +213,10 @@
                                 <smartTable:customToolbar>
                                     <OverflowToolbar design="Transparent">
                                         <ToolbarSpacer/>
-                                        <Button text="{i18n>Synchronize}" icon="sap-icon://synchronize" enabled="true" type="Emphasized" press="handleSynchronize" />
+                                        <!-- <Button text="{i18n>Synchronize}" icon="sap-icon://synchronize" enabled="true" type="Emphasized" press="handleSynchronize" /> -->
 
-                                        <!-- <Button text="{i18n>Synchronize}" icon="sap-icon://synchronize" press=".handleSynchronize" type="{= ${Sync>/syncInProgress} ? 'Attention' : 'Accept' }" />
-                                        <Button text="Logs de Sincronização" icon="sap-icon://list" press=".onOpenSyncLogDialog" enabled="{= ${syncLog>/items}.length > 0 }" /> -->
+                                        <Button text="{i18n>Synchronize}" icon="sap-icon://synchronize" press=".handleSynchronize" type="{= ${Sync>/syncInProgress} ? 'Attention' : 'Accept' }" />
+                                        <Button text="Logs de Sincronização" icon="sap-icon://list" press=".onOpenSyncLogDialog" enabled="{= ${syncLog>/items}.length > 0 }" />
                                     </OverflowToolbar>
                                 </smartTable:customToolbar>
                                 <Table mode="None" growing="true" growingThreshold="50">
