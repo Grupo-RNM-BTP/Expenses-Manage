@@ -16,7 +16,9 @@
                 </snappedTitleOnMobile>
 
                 <actions>
-                    <m:Button icon="sap-icon://edit" type="Transparent" visible="false" press="onPressEditDetail"/>
+                    <m:Button id="saveButton" icon="sap-icon://save" type="Emphasized" visible="false" press="onPressActionButtons('S')"/>
+                    <m:Button id="cancelButton" icon="sap-icon://decline" type="Emphasized" visible="false" press="onPressActionButtons('C')"/>
+                    <m:Button id="editButton" icon="sap-icon://edit" type="Emphasized" visible="true" press="onPressActionButtons('E')"/>
                     <m:Button icon="sap-icon://nav-back" type="Emphasized" press="onPressCloseDetail"/>
                 </actions>
             </ObjectPageDynamicHeaderTitle>
@@ -32,7 +34,7 @@
                     <m:Text text="{DocumentHeader}"/>
 
                     <m:Label text="{i18n>Reference}"/>
-                    <m:Text text="{ExpNo}"/>
+                    <m:Text id="TextReference" text="{ExpNo}"/>
 
                     <m:Label text="{i18n>IssueDate}"/>
                     <m:Text text="{ path: 'Sdate', formatter: '.formatter.formatDateToDDMMYYYY' }"/>
@@ -40,8 +42,11 @@
                     <m:Label text="{i18n>CreatedBy}"/>
                     <m:Text text="{Ernam}"/>
 
-                    <!-- <m:Label text="{i18n>ReasonRejection}"/>
-                    <m:Text text="{ReasonRejection}"/> -->
+                    <m:Label text="{i18n>ReasonRejection}" visible="{= ${FiStatus} === '9' }"/>
+                    <m:Text text="{ReasonRejection}" visible="{= ${FiStatus} === '9' }"/>
+
+                    <m:Label text="{i18n>Comments}"/>
+                    <m:TextArea id="textArea" enabled="false" value="{Comments}" />
 
                     <!-- Empresa / Entidade -->
                     <core:Title text="{i18n>invoiceForm.Document}"/>

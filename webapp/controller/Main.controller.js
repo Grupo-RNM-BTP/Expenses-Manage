@@ -125,48 +125,41 @@ sap.ui.define([
 
                 switch (sKey) {
                     case "Manage":
+                        this.onPressCloseDetail();
                         this.byId("MyExpensesTable").getTable().removeSelections();
                         this.getCardValues();
-                        this.onPressCloseDetail();
                         this.byId("idTitle1").setText(this.getResourceBundle().getText("ManageMyExpenses"));
                         oNavContainer.to(this.byId("pageManage"));
                         oToolPage.setSideExpanded(false);
                         break;
 
                     case "CardMovements":
-                        this.getSumMonth();
                         this.onPressCloseDetail();
+                        this.getSumMonth();
                         this.byId("idTitle1").setText(this.getResourceBundle().getText("OverviewExpenses"));
                         oNavContainer.to(this.byId("pageCardMovements"));
                         oToolPage.setSideExpanded(false);
                         break;
 
                     case "TransRecon":
-                        oNavContainer.to(this.byId("pageTransRecon"));
                         this.onPressCloseDetail();
+                        oNavContainer.to(this.byId("pageTransRecon"));
                         this.byId("idTitle1").setText(this.getResourceBundle().getText("TransactionReconciliation"));
                         oToolPage.setSideExpanded(false);
                         break;
 
                     case "CurrentAccount":
-                        oNavContainer.to(this.byId("pageCurrentAccount"));
                         this.onPressCloseDetail();
+                        oNavContainer.to(this.byId("pageCurrentAccount"));
                         this.byId("idTitle1").setText(this.getResourceBundle().getText("CurrentAccount"));
                         oToolPage.setSideExpanded(false);
                         break;
 
                     case "ApproveExpenses":
-                        this.byId("smartTableApprovals").getTable().removeSelections();
                         this.onPressCloseDetail();
+                        this.byId("smartTableApprovals").getTable().removeSelections();
                         this.byId("idTitle1").setText(this.getResourceBundle().getText("ApproveExpenses"));
                         oNavContainer.to(this.byId("pageApprovals"));
-                        oToolPage.setSideExpanded(false);
-                        break;
-
-                    case "VideoTutorial":
-                        this.onPressCloseDetail();
-                        this.byId("idTitle1").setText(this.getResourceBundle().getText("TextVideo"));
-                        oNavContainer.to(this.byId("pageVideo"));
                         oToolPage.setSideExpanded(false);
                         break;
                 }

@@ -295,8 +295,23 @@ sap.ui.define([
        * Handle close detail.
        */
         onPressCloseDetail: function () {
+            this.onButtonsState(false, true);
             this.getModel("global").setProperty("/layout", "OneColumn");
             this.getRouter().navTo("RouteMain");
+        },
+
+        onButtonsState: function (sState1, sState2) {
+            var sEdit = this.byId("editButton"),
+                sSave = this.byId("saveButton"),
+                sCancel = this.byId("cancelButton"),
+                sTextArea = this.byId("textArea");
+
+            if (sEdit || sSave || sCancel || sTextArea) {
+                sEdit.setVisible(sState2);
+                sSave.setVisible(sState1);
+                sCancel.setVisible(sState1);
+                sTextArea.setEnabled(sState1);
+            }
         },
 
         /**

@@ -70,6 +70,13 @@ sap.ui.define([
             setVisibleSection: function (sObjectPath) {
                 var sFiStatus = sObjectPath.match(/FiStatus='(\d+)'/)[1];
 
+                if (sFiStatus === "0" || sFiStatus === "2") {
+                    this.byId("editButton").setVisible(false);
+                } else {
+                    this.byId("editButton").setVisible(true);
+                }
+
+
                 if (sFiStatus === "0") {
                     this.byId("Section1").setVisible(true);
                     this.byId("Section2").setVisible(false);
@@ -284,7 +291,42 @@ sap.ui.define([
                 }
                 this.getModel("global").setProperty("/busy", false);
 
-            }
+            },
+
+            onPressActionButtons: function (oAction) {
+                if (oAction === "S") {
+                    this.onButtonsState(false, true);
+                    this.onSaveEdit();
+                } else if (oAction === "C") {
+                    this.onButtonsState(false, true);
+
+                } else if (oAction === "E") {
+                    this.onButtonsState(true, false);
+
+                }
+            },
+
+            onSaveEdit: function () {
+                var oModel = this.getModel(),
+                    sReference = this.byId("TextReference"),
+                    sPath = '/EditExpense(Exp=' + sReference + ')',
+                    oData = {},
+                    oEntry = {};
+
+                oData.exp = sReference
+                oData.comments = this.byId("TextComments").getValue();
+
+                oEntry.Data = JSON.stringify(oData);
+
+                oModel.update(sPath, oEntry, {
+                    success: function () {
+                        debugger;
+                    }.bind(this),
+                    error: function () {
+                        debugger;
+                    }.bind(this)
+                })
+            },
 
         });
     });

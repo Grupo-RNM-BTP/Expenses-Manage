@@ -31,7 +31,6 @@
                     <tnt:NavigationListItem text="{i18n>TransactionReconciliation}" key="TransRecon" icon="sap-icon://unpaid-leave"/>
                     <tnt:NavigationListItem text="{i18n>CurrentAccount}" key="CurrentAccount" icon="sap-icon://order-status"/>
                     <tnt:NavigationListItem id="idApproveExpenses" text="{i18n>ApproveExpenses}" visible="false" key="ApproveExpenses" icon="sap-icon://accept"/>
-                    <tnt:NavigationListItem id="idVideo" text="{i18n>TextVideo}" visible="true" key="VideoTutorial" icon="sap-icon://video"/>
                 </tnt:NavigationList>
             </tnt:SideNavigation>
         </tnt:sideContent>
