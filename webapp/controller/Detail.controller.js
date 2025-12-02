@@ -201,26 +201,26 @@ sap.ui.define([
             /**
              * Handle delete expense.
              */
-            // handleDeleteExpense: function () {
-            //     try {
-            //         sap.m.MessageBox.confirm(this.getResourceBundle().getText("confirmDeleteExpense"), {
-            //             title: this.getResourceBundle().getText("deleteTitle"),
-            //             icon: sap.m.MessageBox.Icon.WARNING,
-            //             actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO],
-            //             emphasizedAction: sap.m.MessageBox.Action.YES,
-            //             onClose: function (oAction) {
-            //                 if (oAction === sap.m.MessageBox.Action.YES) {
-            //                     this.onDeleteSelected();
-            //                 }
-            //             }.bind(this)
-            //         });
-            //     } catch (error) {
-            //         this.showErrorMessage({
-            //             oText: error.message,
-            //             oTitle: this.getResourceBundle().getText("errorTitle")
-            //         });
-            //     }
-            // },
+            handleDeleteExpense: function () {
+                try {
+                    sap.m.MessageBox.confirm(this.getResourceBundle().getText("confirmDeleteExpense"), {
+                        title: this.getResourceBundle().getText("deleteTitle"),
+                        icon: sap.m.MessageBox.Icon.WARNING,
+                        actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO],
+                        emphasizedAction: sap.m.MessageBox.Action.YES,
+                        onClose: function (oAction) {
+                            if (oAction === sap.m.MessageBox.Action.YES) {
+                                this.onDeleteSelected();
+                            }
+                        }.bind(this)
+                    });
+                } catch (error) {
+                    this.showErrorMessage({
+                        oText: error.message,
+                        oTitle: this.getResourceBundle().getText("errorTitle")
+                    });
+                }
+            },
 
             /**
              * Handle delete expense backend.

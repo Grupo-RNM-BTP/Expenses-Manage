@@ -40,6 +40,9 @@
                     <m:Label text="{i18n>CreatedBy}"/>
                     <m:Text text="{Ernam}"/>
 
+                    <!-- <m:Label text="{i18n>ReasonRejection}"/>
+                    <m:Text text="{ReasonRejection}"/> -->
+
                     <!-- Empresa / Entidade -->
                     <core:Title text="{i18n>invoiceForm.Document}"/>
                     <m:Label text="{i18n>DocumentName}"/>
@@ -199,7 +202,7 @@
                                                 </m:detailBox>
                                             </m:Avatar>
                                         </m:HBox>
-                                        <!-- <m:Button icon="sap-icon://delete" type="Reject" class="sapUiMediumMarginEnd" press="handleDeleteExpense"/> -->
+                                        <m:Button icon="sap-icon://delete" type="Reject" class="sapUiMediumMarginEnd" press="handleDeleteExpense"/>
                                     </m:HBox>
                                 </m:CustomListItem>
                             </m:List>
