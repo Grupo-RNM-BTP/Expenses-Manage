@@ -97,7 +97,6 @@ sap.ui.define([
                         }.bind(this)
                     });
                 }
-                this._addVideoContent();
                 await this.onCheckLeader();
                 await this.getCardValues();
                 this.byId("idTitle1").setText(this.getResourceBundle().getText("ManageMyExpenses"));
@@ -163,30 +162,6 @@ sap.ui.define([
                         oToolPage.setSideExpanded(false);
                         break;
                 }
-            },
-
-            _addVideoContent: function () {
-                const sHtml = `
-                                <div style="
-                                    width: 100%;
-                                    display: flex;
-                                    justify-content: center;
-                                    align-items: center;
-                                    padding-top: 40px;
-                                    padding-bottom: 40px;
-                                ">
-                                    <video 
-                                        style="width: 90%; max-width: 1200px; border-radius: 10px; box-shadow: 0 6px 16px rgba(0,0,0,0.18);" 
-                                        controls
-                                    >
-                                        <source src="https://49s.80b.mytemp.website/tutorial/tutorial_despesas.mp4" type="video/mp4">
-                                    </video>
-                                </div>
-                            `;
-
-                const oHTML = new sap.ui.core.HTML({ content: sHtml });
-                this.byId("pageVideo").removeAllContent();
-                this.byId("pageVideo").addContent(oHTML);
             },
 
             /**
@@ -692,17 +667,6 @@ sap.ui.define([
              * Apply initial sorter before table binding.
              * @param {sap.ui.base.Event} oEvent
              */
-            // onBeforeRebindTableRecon: function (oEvent) {
-            //     var oBindingParams = oEvent.getParameter("bindingParams");
-
-            //     if (!this._bInitialSorterApplied3) {
-            //         oBindingParams.sorter.push(
-            //             new sap.ui.model.Sorter("Posteddt", true)
-            //         );
-            //         this._bInitialSorterApplied3 = true;
-            //     }
-            // },
-
             onBeforeRebindTableRecon: function (oEvent) {
                 var oBindingParams = oEvent.getParameter("bindingParams");
 
@@ -754,10 +718,10 @@ sap.ui.define([
                     oModel.read(sPath, {
                         success: function (oData) {
                             if (oAction === 'R') {
-                                var aFiltered = oData.results.filter(o => o.Checknum === "" && o.Pymtmeth === "A" && o.FiStatus !== "1" && o.FiStatus !== "2" && o.FiStatus !== "4" && o.FiStatus !== "7");
+                                var aFiltered = oData.results.filter(o => o.Checknum === "" && o.Pymtmeth === "A" && o.FiStatus !== "9" && o.FiStatus !== "1" && o.FiStatus !== "2" && o.FiStatus !== "4" && o.FiStatus !== "7");
                                 that.getView().getModel("Main").setProperty("/ExpensesReconciled", aFiltered);
                             } else if (oAction === 'D') {
-                                var aFiltered = oData.results.filter(o => o.Checknum !== "" && o.ExpType != "DEV" && o.Pymtmeth === "A" && o.FiStatus !== "1" && o.FiStatus !== "2" && o.FiStatus !== "4" && o.FiStatus !== "7");
+                                var aFiltered = oData.results.filter(o => o.Checknum !== "" && o.ExpType != "DEV" && o.Pymtmeth === "A" && o.FiStatus !== "9" && o.FiStatus !== "1" && o.FiStatus !== "2" && o.FiStatus !== "4" && o.FiStatus !== "7");
                                 that.getView().getModel("Main").setProperty("/ExpenseDevolution", aFiltered);
                             }
 
@@ -1432,12 +1396,12 @@ sap.ui.define([
                     success: function () {
                         this.getModel("global").setProperty("/busy", false);
                         this.ReasonRejection = '';
-                        this.handleButtonsState(false);
+                        this.handleButtonsState(false, false);
                     }.bind(this),
                     error: function (oError) {
                         this.getModel("global").setProperty("/busy", false);
                         this.byId("idTableApprovals").removeSelections();
-                        this.handleButtonsState(false);
+                        this.handleButtonsState(false, false);
                         var sError = JSON.parse(oError.responseText).error.message.value;
                         sap.m.MessageBox.alert(sError, {
                             icon: "ERROR",
@@ -1458,10 +1422,23 @@ sap.ui.define([
             onSelectionChangeApprovals: function (oEvent) {
                 var oSelectedItems = oEvent.getSource().getSelectedItems();
                 if (oSelectedItems.length === 0) {
-                    this.handleButtonsState(false);
-                } else {
-                    this.handleButtonsState(true);
+                    this.handleButtonsState(false, false);
+                } else if (oSelectedItems.length === 1) {
+                    this.handleButtonsState(true, true);
                 }
+                else if (oSelectedItems.length > 1) {
+                    this.handleButtonsState(false, true);
+                }
+            },
+
+            /**
+            * Handle buttons state.
+            * @param {boolean} sState
+            */
+            handleButtonsState: function (sState1, sState2) {
+                this.byId("partialApprovalButton").setEnabled(sState1);
+                this.byId("approveButton").setEnabled(sState2);
+                this.byId("rejectButton").setEnabled(sState1);
             },
 
             /**
@@ -1512,16 +1489,6 @@ sap.ui.define([
                     });
                     this._pPartialApprovalDialog = null;
                 }
-            },
-
-            /**
-             * Handle buttons state.
-             * @param {boolean} sState
-             */
-            handleButtonsState: function (sState) {
-                this.byId("partialApprovalButton").setEnabled(sState);
-                this.byId("approveButton").setEnabled(sState);
-                this.byId("rejectButton").setEnabled(sState);
             },
 
             /**
@@ -1591,13 +1558,13 @@ sap.ui.define([
                 oModel.create(sPath, oEntry, {
                     success: function () {
                         this.getModel("global").setProperty("/busy", false);
-                        this.handleButtonsState(false);
+                        this.handleButtonsState(false, false);
                         this.onCancelPartial();
                     }.bind(this),
                     error: function (oError) {
                         this.getModel("global").setProperty("/busy", false);
                         this.byId("idTableApprovals").removeSelections();
-                        this.handleButtonsState(false);
+                        this.handleButtonsState(false, false);
                         var sError = JSON.parse(oError.responseText).error.message.value;
                         sap.m.MessageBox.alert(sError, {
                             icon: "ERROR",

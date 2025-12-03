@@ -68,22 +68,25 @@ sap.ui.define([
              * @param {string} sObjectPath
              */
             setVisibleSection: function (sObjectPath) {
-                var sFiStatus = sObjectPath.match(/FiStatus='(\d+)'/)[1];
+                var oModel = this.getModel();
 
-                if (sFiStatus === "0" || sFiStatus === "2") {
-                    this.byId("editButton").setVisible(false);
-                } else {
-                    this.byId("editButton").setVisible(true);
-                }
+                oModel.read(sObjectPath, {
+                    success: function (oData) {
+                        if (oData.FiStatus === "0" || oData.FiStatus === "2" || oData.FiStatus === "7") {
+                            this.byId("editButton").setVisible(false);
+                        } else {
+                            this.byId("editButton").setVisible(true);
+                        }
 
-
-                if (sFiStatus === "0") {
-                    this.byId("Section1").setVisible(true);
-                    this.byId("Section2").setVisible(false);
-                } else {
-                    this.byId("Section1").setVisible(false);
-                    this.byId("Section2").setVisible(true);
-                }
+                        if (oData.FiStatus === "0") {
+                            this.byId("Section1").setVisible(true);
+                            this.byId("Section2").setVisible(false);
+                        } else {
+                            this.byId("Section1").setVisible(false);
+                            this.byId("Section2").setVisible(true);
+                        }
+                    }.bind(this)
+                })
             },
 
             /**
@@ -295,35 +298,44 @@ sap.ui.define([
 
             onPressActionButtons: function (oAction) {
                 if (oAction === "S") {
-                    this.onButtonsState(false, true);
                     this.onSaveEdit();
                 } else if (oAction === "C") {
                     this.onButtonsState(false, true);
-
+                    this.byId("textComments").setValue(this.Comment);
+                    this.Comment = "";
                 } else if (oAction === "E") {
                     this.onButtonsState(true, false);
-
+                    this.Comment = this.byId("textComments").getValue()
                 }
             },
 
             onSaveEdit: function () {
                 var oModel = this.getModel(),
-                    sReference = this.byId("TextReference"),
-                    sPath = '/EditExpense(Exp=' + sReference + ')',
+                    sReference = this.byId("TextReference").getText(),
+                    sPath = "/EditExpense(Exp='" + sReference + "')",
                     oData = {},
                     oEntry = {};
 
-                oData.exp = sReference
-                oData.comments = this.byId("TextComments").getValue();
+                oData.exp = sReference;
+                oData.comments = this.byId("textComments").getValue();
 
                 oEntry.Data = JSON.stringify(oData);
 
                 oModel.update(sPath, oEntry, {
                     success: function () {
-                        debugger;
+                        this.onButtonsState(false, true);
+                        this.getView().getModel().refresh();
+                        this.Comment = "";
                     }.bind(this),
-                    error: function () {
-                        debugger;
+                    error: function (oError) {
+                        var sError = JSON.parse(oError.responseText).error.message.value;
+                        sap.m.MessageBox.alert(sError, {
+                            icon: "ERROR",
+                            onClose: null,
+                            styleClass: '',
+                            initialFocus: null,
+                            textDirection: sap.ui.core.TextDirection.Inherit
+                        });
                     }.bind(this)
                 })
             },

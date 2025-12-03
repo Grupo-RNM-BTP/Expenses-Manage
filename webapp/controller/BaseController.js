@@ -163,33 +163,27 @@ sap.ui.define([
                 oModel.read("/GetCardValues", {
                     success: function (oData) {
                         if (oData.results.length > 0) {
-                            this.getView().byId("idNoTheExpensesNonReconciled").setText(oData.results[0].NdocV);
-                            this.getView().byId("idSumOfApprovedExpenses").setText(oData.results[0].ApprvdV + " EUR");
-                            this.getView().byId("idSumOfExpensesLast30Days").setText(oData.results[0].Last30V + " EUR");
+                            var o = oData.results[0];
 
-                            this.getView().byId("idReceible").setText(oData.results[0].Receivablev + " EUR");
-                            this.getView().byId("idSettled").setText(oData.results[0].Settledv + " EUR");
-                            this.getView().byId("idPayable").setText(oData.results[0].Payablev + " EUR");
+                            this.byId("idNoTheExpensesNonReconciled").setText(o.NdocV);
+                            this.byId("idSumOfApprovedExpenses").setText(this.formatter.formatCurrencyEUR(o.ApprvdV));
+                            this.byId("idSumOfExpensesLast30Days").setText(this.formatter.formatCurrencyEUR(o.Last30V));
+                            this.byId("idReceible").setText(this.formatter.formatCurrencyEUR(o.Receivablev));
+                            this.byId("idSettled").setText(this.formatter.formatCurrencyEUR(o.Settledv));
+                            this.byId("idPayable").setText(this.formatter.formatCurrencyEUR(o.Payablev));
                         } else {
-                            this.getView().byId("idNoTheExpensesNonReconciled").setText("0");
-                            this.getView().byId("idSumOfApprovedExpenses").setText("0 EUR");
-                            this.getView().byId("idSumOfExpensesLast30Days").setText("0 EUR");
-
-                            this.getView().byId("idReceible").setText("0 EUR");
-                            this.getView().byId("idSettled").setText("0 EUR");
-                            this.getView().byId("idPayable").setText("0 EUR");
+                            this.byId("idNoTheExpensesNonReconciled").setText("0");
+                            this.byId("idSumOfApprovedExpenses").setText(this.formatter.formatCurrencyEUR(0));
+                            this.byId("idSumOfExpensesLast30Days").setText(this.formatter.formatCurrencyEUR(0));
+                            this.byId("idReceible").setText(this.formatter.formatCurrencyEUR(0));
+                            this.byId("idSettled").setText(this.formatter.formatCurrencyEUR(0));
+                            this.byId("idPayable").setText(this.formatter.formatCurrencyEUR(0));
                         }
                     }.bind(this),
+
                     error: function (oError) {
                         var sError = JSON.parse(oError.responseText).error.message.value;
-
-                        sap.m.MessageBox.alert(sError, {
-                            icon: "ERROR",
-                            onClose: null,
-                            styleClass: '',
-                            initialFocus: null,
-                            textDirection: sap.ui.core.TextDirection.Inherit
-                        });
+                        sap.m.MessageBox.alert(sError, { icon: "ERROR" });
                     }.bind(this)
                 });
             } catch (error) {
@@ -304,7 +298,7 @@ sap.ui.define([
             var sEdit = this.byId("editButton"),
                 sSave = this.byId("saveButton"),
                 sCancel = this.byId("cancelButton"),
-                sTextArea = this.byId("textArea");
+                sTextArea = this.byId("textComments");
 
             if (sEdit || sSave || sCancel || sTextArea) {
                 sEdit.setVisible(sState2);

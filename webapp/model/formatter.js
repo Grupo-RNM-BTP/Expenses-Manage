@@ -57,6 +57,7 @@ sap.ui.define([], function () {
                 case 6: return this.getResourceBundle().getText("statusPending");
                 case 7: return this.getResourceBundle().getText("statusMarkedDeletion");
                 case 8: return this.getResourceBundle().getText("statusPartiallyApprove");
+                case 9: return this.getResourceBundle().getText("statusInvalidExpenses");
                 default: return this.getResourceBundle().getText("statusUnknown");
             }
         },
@@ -79,6 +80,7 @@ sap.ui.define([], function () {
                 case 3: return "Warning";
                 case 7: return "Error";
                 case 8: return "Warning";
+                case 9: return "Error";
                 default: return "None";
             }
         },
@@ -206,14 +208,29 @@ sap.ui.define([], function () {
                 return "";
             }
 
-            // Garante número float
             var nValue = parseFloat(fValue);
 
-            // Arredonda e força duas casas decimais
             var sFormatted = nValue.toFixed(2);
 
-            // Retorna com ou sem moeda
             return sCurrency ? sFormatted + " " + sCurrency : sFormatted;
+        },
+
+        formatCurrencyEUR: function (value) {
+            if (value === null || value === undefined || value === "") {
+                return "";
+            }
+
+            var number = parseFloat(value);
+            if (isNaN(number)) {
+                return value;
+            }
+
+            var formatted = number
+                .toFixed(2)                     
+                .replace(".", ",")              
+                .replace(/\B(?=(\d{3})+(?!\d))/g, "."); 
+
+            return formatted + " EUR";
         }
     };
 });
