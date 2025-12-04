@@ -767,7 +767,7 @@ sap.ui.define([
              */
             onChangeStateReconButtons: function (sState, CompState) {
                 this.byId("idExpensesWithoutAttach").setEnabled(sState);
-                this.byId("idReconcile").setEnabled(sState);
+                this.byId("idReconcile").setEnabled(CompState);
                 this.byId("idCompensation").setEnabled(CompState);
             },
 
@@ -851,17 +851,6 @@ sap.ui.define([
                         }
                     );
                     return;
-                } else if (oTableItems.length > 1) {
-                    sap.m.MessageBox.error(this.getResourceBundle().getText("multipleSelection"),
-                        {
-                            icon: "ERROR",
-                            onClose: null,
-                            styleClass: '',
-                            initialFocus: null,
-                            textDirection: sap.ui.core.TextDirection.Inherit
-                        }
-                    );
-                    return;
                 }
 
                 if (!this._pReconcileDialog) {
@@ -878,11 +867,16 @@ sap.ui.define([
                 this.onGetExpenses('R').then(function (aFiltered) {
                     if (aFiltered && aFiltered.length) {
                         that._pReconcileDialog.then(function (oDialog) {
+                            if (that.byId("smartTableTransRecon").getTable().getSelectedItems().length === 1) {
+                                that.byId("reconcileTable").setMode("MultiSelect");
+                            } else {
+                                that.byId("reconcileTable").setMode("SingleSelectLeft");
+                            }
                             oDialog.open();
                         });
                     } else {
-                        this.showErrorMessage({
-                            oText: this.getResourceBundle().getText("noRECON")
+                        that.showErrorMessage({
+                            oText: that.getResourceBundle().getText("noRECON")
                         });
                     }
                 }).catch(function (oError) {
@@ -898,8 +892,9 @@ sap.ui.define([
                     oGlobalModel = this.getModel("global"),
                     oTableSmart = this.byId("smartTableTransRecon").getTable(),
                     oTable = this.byId("reconcileTable"),
-                    aSelectedReconItems = oTable.getSelectedItems(),
-                    aSelectedSmartItems = oTableSmart.getSelectedItems();
+                    aSelectedExpenses = oTable.getSelectedItems(),
+                    aSelectedMovements = oTableSmart.getSelectedItems(),
+                    sPath = "/ReconcileExpense";
 
                 if (!aSelectedReconItems.length) {
                     sap.m.MessageBox.error(this.getResourceBundle().getText("noSelection"),
@@ -914,33 +909,27 @@ sap.ui.define([
                     return;
                 }
 
-                var oSmartCtx = aSelectedSmartItems[0].getBindingContext(),
-                    oSmartData = oSmartCtx.getObject(),
-                    sAmt = oSmartData.Amt,
-                    sCardNumber = oSmartData.Cardnumber,
-                    sChckNum = oSmartData.Chknum,
-                    sFormattedDate = oSmartData.sDateFromated,
-                    aParts = sFormattedDate.split("."),
-                    sDateForPicker = aParts[0] + aParts[1] + aParts[2];
-
-                var aReconcileData = aSelectedReconItems.map(oItem => {
-                    var oCtx = oItem.getBindingContext("Main");
-                    var oObj = oCtx.getObject();
-
+                var aExpenses = aSelectedExpenses.map(oItem => {
+                    var oObjExpenses = oItem.getBindingContext("Main").getObject();
                     return {
-                        Amt: sAmt,
-                        Posteddt: sDateForPicker,
-                        Chknum: sChckNum,
-                        Cardnumber: sCardNumber,
-                        ExpNo: oObj.ExpNo,
+                        ExpNo: oObjExpenses.ExpNo,
+                    };
+                });
+
+                var aMovements = aSelectedMovements.map(oItem => {
+                    var oObjMovements = oItem.getBindingContext().getObject();
+                    return {
+                        Amt: oObjMovements.Amt,
+                        Posteddt: this.onFormatedateYYYYMMDD(oObjMovements.sDateFromated),
+                        Chknum: oObjMovements.Chknum,
+                        Cardnumber: oObjMovements.Cardnumber,
                     };
                 });
 
                 var oEntry = {
-                    Data: JSON.stringify(aReconcileData)
+                    Expenses: JSON.stringify(aExpenses),
+                    Movements: JSON.stringify(aMovements)
                 };
-
-                var sPath = "/ReconcileExpense";
 
                 oGlobalModel.setProperty("/busy", true);
                 oModel.create(sPath, oEntry, {
@@ -967,6 +956,88 @@ sap.ui.define([
                     }.bind(this)
                 });
             },
+
+            onFormatedateYYYYMMDD: function (sDateFormated) {
+                var aParts = sDateFormated.split("."),
+                    sDateForPicker = aParts[0] + aParts[1] + aParts[2];
+
+                return sDateForPicker;
+            },
+
+            // onReconcile: function () {
+            //     var oModel = this.getModel(),
+            //         oGlobalModel = this.getModel("global"),
+            //         oTableSmart = this.byId("smartTableTransRecon").getTable(),
+            //         oTable = this.byId("reconcileTable"),
+            //         aSelectedReconItems = oTable.getSelectedItems(),
+            //         aSelectedSmartItems = oTableSmart.getSelectedItems();
+
+            //     if (!aSelectedReconItems.length) {
+            //         sap.m.MessageBox.error(this.getResourceBundle().getText("noSelection"),
+            //             {
+            //                 icon: "ERROR",
+            //                 onClose: null,
+            //                 styleClass: '',
+            //                 initialFocus: null,
+            //                 textDirection: sap.ui.core.TextDirection.Inherit
+            //             }
+            //         );
+            //         return;
+            //     }
+
+            //     var oSmartCtx = aSelectedSmartItems[0].getBindingContext(),
+            //         oSmartData = oSmartCtx.getObject(),
+            //         sAmt = oSmartData.Amt,
+            //         sCardNumber = oSmartData.Cardnumber,
+            //         sChckNum = oSmartData.Chknum,
+            //         sFormattedDate = oSmartData.sDateFromated,
+            //         aParts = sFormattedDate.split("."),
+            //         sDateForPicker = aParts[0] + aParts[1] + aParts[2];
+
+            //     var aReconcileData = aSelectedReconItems.map(oItem => {
+            //         var oCtx = oItem.getBindingContext("Main");
+            //         var oObj = oCtx.getObject();
+
+            //         return {
+            //             Amt: sAmt,
+            //             Posteddt: sDateForPicker,
+            //             Chknum: sChckNum,
+            //             Cardnumber: sCardNumber,
+            //             ExpNo: oObj.ExpNo,
+            //         };
+            //     });
+
+            //     var oEntry = {
+            //         Data: JSON.stringify(aReconcileData)
+            //     };
+
+            //     var sPath = "/ReconcileExpense";
+
+            //     oGlobalModel.setProperty("/busy", true);
+            //     oModel.create(sPath, oEntry, {
+            //         success: function () {
+            //             this.getView().getModel("Main").setProperty("/ExpensesReconciled", []);
+            //             this.onCancelReconcile();
+            //             oTableSmart.removeSelections();
+            //             sap.m.MessageBox.success(this.getResourceBundle().getText("reconciledSucess"));
+            //             oGlobalModel.setProperty("/busy", false);
+            //             oModel.refresh(true);
+            //             this.onChangeStateReconButtons(false, false);
+            //         }.bind(this),
+            //         error: function (oError) {
+            //             this.onChangeStateReconButtons(false, false);
+            //             oGlobalModel.setProperty("/busy", false);
+            //             var sError = JSON.parse(oError.responseText).error.message.value;
+            //             sap.m.MessageBox.alert(sError, {
+            //                 icon: "ERROR",
+            //                 onClose: null,
+            //                 styleClass: '',
+            //                 initialFocus: null,
+            //                 textDirection: sap.ui.core.TextDirection.Inherit
+            //             });
+            //         }.bind(this)
+            //     });
+            // },
 
             /**
              * Cancel reconcile.

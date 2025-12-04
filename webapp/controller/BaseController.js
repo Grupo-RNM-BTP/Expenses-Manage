@@ -245,10 +245,10 @@ sap.ui.define([
                         var fGastoMesAtual = oMesAtual ? oMesAtual.Amount : 0;
                         var sMoeda = oMesAtual ? oMesAtual.Currency : (aAgrupado[0] ? aAgrupado[0].Currency : "");
 
-                        oGraficoModel.setProperty("/gastosPorMes", aAgrupado);
-                        oGraficoModel.setProperty("/totalAno", fTotalAno);
-                        oGraficoModel.setProperty("/gastoMesAtual", fGastoMesAtual);
-                        oGraficoModel.setProperty("/moeda", sMoeda);
+                        oGraficoModel.setProperty("/gastosPorMes", this.formatter.formatCurrencyEUR(aAgrupado));
+                        oGraficoModel.setProperty("/totalAno", this.formatter.formatCurrencyEUR(fTotalAno));
+                        oGraficoModel.setProperty("/gastoMesAtual", this.formatter.formatCurrencyEUR(fGastoMesAtual));
+                        oGraficoModel.setProperty("/moeda", this.formatter.formatCurrencyEUR(sMoeda));
 
                         this.getView().byId("barChart").setVizProperties({
                             title: {

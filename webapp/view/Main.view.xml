@@ -191,11 +191,11 @@
                                                 <FlexBox class="sapUiMediumMarginTop" wrap="Wrap" justifyContent="SpaceAround" alignItems="Stretch">
                                                     <VBox class="sapUiSmallMargin" width="30%">
                                                         <Title text="{i18n>TotalYear}" wrapping="true" titleStyle="H5" />
-                                                        <Title level="H2" wrapping="true" titleStyle="H3" text="{= ${graficoModel>/totalAno} + ' €'}" />
+                                                        <Title level="H2" wrapping="true" titleStyle="H3" text="{= ${graficoModel>/totalAno}}" />
                                                     </VBox>
                                                     <VBox class="sapUiSmallMargin" width="30%">
                                                         <Title text="{i18n>ExpensesMonth}" wrapping="true" titleStyle="H5" />
-                                                        <Title level="H2" wrapping="true" titleStyle="H3" text="{= ${graficoModel>/gastoMesAtual} + ' €'}" />
+                                                        <Title level="H2" wrapping="true" titleStyle="H3" text="{= ${graficoModel>/gastoMesAtual}}" />
                                                     </VBox>
                                                 </FlexBox>
                                             </VBox>
@@ -229,7 +229,7 @@
                     <ScrollContainer id="pageTransRecon" horizontal="false" vertical="true" height="100%">
                         <smartFilterBar:SmartFilterBar id="sfbReconCC" entitySet="ZFI_EXPENSES_RECON" />
 
-                        <smartTable:SmartTable id="smartTableTransRecon" entitySet="ZFI_EXPENSES_RECON" smartFilterId="sfbReconCC" beforeRebindTable="onBeforeRebindTableRecon" tableType="ResponsiveTable" demandPopin="true" useVariantManagement="false" useExportToExcel="false" useTablePersonalisation="true" persistencyKey="SmartTable" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
+                        <smartTable:SmartTable initiallyVisibleFields="sDateFromated,Namekey,Amt,Chknum,Cardnumber" id="smartTableTransRecon" entitySet="ZFI_EXPENSES_RECON" smartFilterId="sfbReconCC" beforeRebindTable="onBeforeRebindTableRecon" tableType="ResponsiveTable" demandPopin="true" useVariantManagement="false" useExportToExcel="false" useTablePersonalisation="true" persistencyKey="SmartTable" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
                             <smartTable:customToolbar>
                                 <OverflowToolbar design="Transparent">
                                     <ToolbarSpacer/>
