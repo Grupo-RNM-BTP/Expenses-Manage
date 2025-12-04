@@ -1,73 +1,58 @@
 <core:FragmentDefinition xmlns="sap.m"
     xmlns:core="sap.ui.core">
 
-    <Dialog id="syncLogDialog" title="{i18n>SyncLogTitle}" contentWidth="40rem" contentHeight="22rem" resizable="true" draggable="true">
+    <Dialog id="syncLogDialog" title="{i18n>SyncLogTitle}" icon="sap-icon://log" contentWidth="60rem" contentHeight="30rem" resizable="true" draggable="true">
 
         <content>
-            <Table id="syncLogTable" inset="false" growing="true" growingScrollToLoad="true" items="{
+            <Table id="syncLogTable" inset="false" growing="true" growingScrollToLoad="true" width="100%" items="{
                     path: 'SyncLogs>/items',
                     sorter: [
                         {
                             path: 'LineNo',
-                            descending: 'false'
+                            descending: 'true'
                         }
                     ]
                 }">
 
-                <!-- Cabeçalhos das colunas -->
                 <columns>
-                    <Column width="4rem">
+                    <Column width="10%" hAlign="Center">
                         <header>
-                            <Label text="{i18n>SyncLogColLine}" />
+                            <Label text="{i18n>SyncLogColLine}" textAlign="Center"/>
                         </header>
                     </Column>
-                    <Column width="6rem">
+                    <Column minScreenWidth="Tablet" width="10%" hAlign="Center">
                         <header>
-                            <Label text="{i18n>SyncLogColType}" />
+                            <Label text="{i18n>SyncLogColType}" textAlign="Center"/>
                         </header>
                     </Column>
-                    <Column minScreenWidth="Tablet" demandPopin="true" width="10rem">
+                    <Column minScreenWidth="Tablet" demandPopin="true" width="30%" hAlign="Center">
                         <header>
-                            <Label text="{i18n>SyncLogColTimestamp}" />
+                            <Label text="{i18n>SyncLogColTimestamp}" textAlign="Center"/>
                         </header>
                     </Column>
-                    <Column>
+                    <Column width="50%" hAlign="Begin">
                         <header>
-                            <Label text="{i18n>SyncLogColMessage}" />
+                            <Label text="{i18n>SyncLogColDescription}" />
                         </header>
                     </Column>
                 </columns>
-
-                <!-- Linhas -->
                 <items>
                     <ColumnListItem>
                         <cells>
-                            <!-- Linha -->
-                            <Text text="{SyncLogs>LineNo}" />
-
-                            <!-- Tipo (I / S / E / F) com cor -->
-                            <!-- <ObjectStatus text="{SyncLogs>Type}" state="{
-                                    = ${SyncLogs>Type} === 'E' ? 'Error'
-                                      : ${SyncLogs>Type} === 'S' ? 'Success'
-                                      : ${SyncLogs>Type} === 'F' ? 'Information'
-                                      : 'None'
-                                }" /> -->
+                            <Text text="{SyncLogs>LineNo}" textAlign="Center"/>
 
                             <ObjectStatus text="{SyncLogs>Type}" state="{= ${SyncLogs>Type} === 'E' ? 'Error'
-                                                                    : ${SyncLogs>Type} === 'W' ? 'Warning'
-                                                                    : ${SyncLogs>Type} === 'S' ? 'Success'
-                                                                    : ${SyncLogs>Type} === 'I' ? 'Information'
-                                                                    : 'None' }" icon="{= ${SyncLogs>Type} === 'E' ? 'sap-icon://error'
-                                                                    : ${SyncLogs>Type} === 'W' ? 'sap-icon://alert'
-                                                                    : ${SyncLogs>Type} === 'S' ? 'sap-icon://accept'
-                                                                    : ${SyncLogs>Type} === 'I' ? 'sap-icon://information'
-                                                                    : '' }" />
+                                        : ${SyncLogs>Type} === 'W' ? 'Warning'
+                                        : ${SyncLogs>Type} === 'S' ? 'Success'
+                                        : ${SyncLogs>Type} === 'I' ? 'Information'
+                                        : 'None' }" icon="{= ${SyncLogs>Type} === 'E' ? 'sap-icon://error'
+                                        : ${SyncLogs>Type} === 'W' ? 'sap-icon://alert'
+                                        : ${SyncLogs>Type} === 'S' ? 'sap-icon://accept'
+                                        : ${SyncLogs>Type} === 'I' ? 'sap-icon://information'
+                                        : '' }" />
 
+                            <Text text="{SyncLogs>Timestamp}" textAlign="Center"/>
 
-                            <!-- Timestamp, se tiveres na entidade -->
-                            <Text text="{SyncLogs>Timestamp}" />
-
-                            <!-- Mensagem -->
                             <Text text="{SyncLogs>Message}" />
                         </cells>
                     </ColumnListItem>
@@ -76,8 +61,7 @@
         </content>
 
         <beginButton>
-            <Button text="{i18n>Close}" press=".onCloseSyncLogDialog" />
+            <Button text="{i18n>btnClose}" type="Emphasized" press=".onSyncLogDialogClose" />
         </beginButton>
-
     </Dialog>
 </core:FragmentDefinition>
