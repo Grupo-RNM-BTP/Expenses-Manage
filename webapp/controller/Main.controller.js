@@ -487,6 +487,10 @@ sap.ui.define([
             //---------------------------------------------------------------------- Transactions ---------------------------------------------------------------------
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+            /**
+             * Handles the synchronize action triggered from the UI.
+             * Starts the backend sync job and begins polling for synchronization logs.
+             */
             handleSynchronize: function () {
                 var oModel = this.getView().getModel(),
                     oSync = this.getView().getModel("Sync"),
@@ -494,10 +498,15 @@ sap.ui.define([
                     that = this;
 
                 oSync.setProperty("/syncInProgress", true);
-                oSync.setProperty("/syncText", oBundle ? oBundle.getText("SyncInProgress", "A sincronizar movimentos...") : "A sincronizar movimentos...");
+                oSync.setProperty(
+                    "/syncText",
+                    oBundle
+                        ? oBundle.getText("SyncInProgress", this.getResourceBundle().getText("SyncingTransactions"))
+                        : this.getResourceBundle().getText("SyncingTransactions")
+                );
                 oSync.setProperty("/currentJobId", null);
 
-                this._stopPollingLogs();
+                this.handleStopPollingLogs();
                 this.getView().getModel("SyncLogs").setProperty("/items", []);
 
                 oModel.callFunction("/StartSync", {
@@ -514,7 +523,7 @@ sap.ui.define([
 
                         oSync.setProperty("/currentJobId", sJobId);
 
-                        that._startPollingLogs(sJobId);
+                        that.handleStartPollingLogs(sJobId);
                     },
                     error: function () {
                         oSync.setProperty("/syncInProgress", false);
@@ -523,7 +532,14 @@ sap.ui.define([
                 });
             },
 
-            _fetchLogs: function (sJobId) {
+            /**
+             * Fetches synchronization logs for a given job from the backend
+             * and updates the SyncLogs model.
+             *
+             * @param {string} sJobId Identifier of the backend synchronization job.
+             * @private
+             */
+            handleFetchLogs: function (sJobId) {
                 var oModel = this.getView().getModel(),
                     oSync = this.getView().getModel("Sync"),
                     oLog = this.getView().getModel("SyncLogs"),
@@ -540,12 +556,12 @@ sap.ui.define([
 
                         oLog.setProperty("/items", aResults);
 
-                        var bFinished = aResults.some(function (oLog) {
-                            return oLog.Type === "S" || oLog.Type === "E";
+                        var bFinished = aResults.some(function (oLogItem) {
+                            return oLogItem.Type === "S" || oLogItem.Type === "E";
                         });
 
                         if (bFinished) {
-                            that._stopPollingLogs();
+                            that.handleStopPollingLogs();
 
                             oSync.setProperty("/syncInProgress", false);
                             oSync.setProperty("/syncText", "");
@@ -557,7 +573,7 @@ sap.ui.define([
                         }
                     },
                     error: function () {
-                        that._stopPollingLogs();
+                        that.handleStopPollingLogs();
 
                         oSync.setProperty("/syncInProgress", false);
                         oSync.setProperty("/syncText", "");
@@ -565,29 +581,41 @@ sap.ui.define([
                 });
             },
 
-            _startPollingLogs: function (sJobId) {
+            /**
+             * Starts periodic polling of synchronization logs
+             * for the given job identifier.
+             *
+             * @param {string} sJobId Identifier of the backend synchronization job.
+             * @private
+             */
+            handleStartPollingLogs: function (sJobId) {
                 var that = this;
 
-                this._stopPollingLogs();
-                this._fetchLogs(sJobId);
+                this.handleStopPollingLogs();
+                this.handleFetchLogs(sJobId);
 
                 this._sPollTimerId = setInterval(function () {
-                    that._fetchLogs(sJobId);
+                    that.handleFetchLogs(sJobId);
                 }, this._iPollInterval || 2000);
             },
 
-            _stopPollingLogs: function () {
+            /**
+             * Stops the periodic polling of synchronization logs.
+             *
+             * @private
+             */
+            handleStopPollingLogs: function () {
                 if (this._sPollTimerId) {
                     clearInterval(this._sPollTimerId);
                     this._sPollTimerId = null;
                 }
             },
 
-            onExit: function () {
-                this._stopPollingLogs();
-            },
-
-            onOpenSyncLogDialog: function () {
+            /**
+             * Opens the synchronization log dialog.
+             * Lazy-loads the fragment on first use.
+             */
+            onSyncLogDialogOpen: function () {
                 var that = this;
 
                 if (!this._pSyncLogDialog) {
@@ -606,7 +634,10 @@ sap.ui.define([
                 });
             },
 
-            onCloseSyncLogDialog: function () {
+            /**
+             * Closes the synchronization log dialog if it has been created.
+             */
+            onSyncLogDialogClose: function () {
                 if (this._pSyncLogDialog) {
                     this._pSyncLogDialog.then(function (oDialog) {
                         oDialog.close();
@@ -614,8 +645,12 @@ sap.ui.define([
                 }
             },
 
+            /**
+             * Lifecycle hook called when the controller is destroyed.
+             * Stops log polling and destroys the sync log dialog if needed.
+             */
             onExit: function () {
-                this._stopPollingLogs();
+                this.handleStopPollingLogs();
 
                 if (this._pSyncLogDialog) {
                     this._pSyncLogDialog.then(function (oDialog) {
@@ -624,6 +659,7 @@ sap.ui.define([
                     this._pSyncLogDialog = null;
                 }
             },
+
 
             // handleSynchronize: function () {
             //     var oModel = this.getModel(),
@@ -664,40 +700,52 @@ sap.ui.define([
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
 
             /**
-             * Apply initial sorter before table binding.
-             * @param {sap.ui.base.Event} oEvent
+             * Apply initial sorter and grouping before table binding (Reconciliation table).
+             * Ensures that grouping by Chknum is always applied, even after user
+             * changes sorting or table personalization.
+             *
+             * @param {sap.ui.base.Event} oEvent SmartTable beforeRebindTable event.
              */
             onBeforeRebindTableRecon: function (oEvent) {
-                var oBindingParams = oEvent.getParameter("bindingParams");
+                var oBindingParams = oEvent.getParameter("bindingParams"),
+                    oBundle = this.getResourceBundle(),
+                    aSorters = oBindingParams.sorter || [];
 
-                oBindingParams.sorter = oBindingParams.sorter || [];
+                aSorters = aSorters.filter(function (oSorter) {
+                    return !(oSorter.sPath === "Chknum" && oSorter.group);
+                });
 
-                if (!this._bInitialSorterApplied3) {
+                var oGroupSorter = new sap.ui.model.Sorter(
+                    "Chknum",
+                    false,
+                    function (oContext) {
+                        var sChknum = oContext.getProperty("Chknum");
+                        sChknum = sChknum ? String(sChknum) : "";
+
+                        var bProcessed = sChknum.length > 10;
+
+                        return {
+                            key: bProcessed ? "PROC" : "NOPROC",
+                            text: bProcessed
+                                ? oBundle.getText("ReconGroupProcessed")
+                                : oBundle.getText("ReconGroupNotProcessed")
+                        };
+                    }
+                );
+                oGroupSorter.group = true;
+
+                aSorters.unshift(oGroupSorter);
+
+                var bHasDateSorter = aSorters.some(function (oSorter) {
+                    return oSorter.sPath === "Posteddt";
+                });
+
+                if (!bHasDateSorter) {
                     var oDateSorter = new sap.ui.model.Sorter("Posteddt", true);
-                    var oGroupSorter = new sap.ui.model.Sorter(
-                        "Chknum",
-                        false,
-                        function (oContext) {
-                            var sChknum = oContext.getProperty("Chknum");
-                            sChknum = sChknum ? String(sChknum) : "";
-
-                            var bProcessed = sChknum.length > 0 && sChknum.length < 10;
-
-                            return {
-                                key: bProcessed ? "PROC" : "NOPROC",
-                                text: bProcessed
-                                    ? "Movimento processado"
-                                    : "Movimento não processado"
-                            };
-                        }
-                    );
-                    oGroupSorter.group = true;
-
-                    oBindingParams.sorter.push(oGroupSorter);
-                    oBindingParams.sorter.push(oDateSorter);
-
-                    this._bInitialSorterApplied3 = true;
+                    aSorters.push(oDateSorter);
                 }
+
+                oBindingParams.sorter = aSorters;
             },
 
             /**
