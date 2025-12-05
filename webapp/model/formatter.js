@@ -119,20 +119,37 @@ sap.ui.define([], function () {
 
             let oDate;
 
-            if (typeof sValue === "string" && sValue.length === 14) {
-                var year = sValue.substring(0, 4),
-                    month = sValue.substring(4, 6) - 1,
-                    day = sValue.substring(6, 8),
-                    hour = sValue.substring(8, 10),
-                    minute = sValue.substring(10, 12),
-                    second = sValue.substring(12, 14);
-
-                oDate = new Date(year, month, day, hour, minute, second);
-            }
-            else if (sValue instanceof Date) {
+            if (sValue instanceof Date) {
                 oDate = sValue;
             }
+            else if (typeof sValue === "string") {
+                let sDigits = sValue.replace(/[^0-9]/g, "");
+
+                if (sDigits.length >= 14) {
+                    const base14 = sDigits.substring(0, 14);
+
+                    const year = base14.substring(0, 4);
+                    const month = base14.substring(4, 6) - 1;
+                    const day = base14.substring(6, 8);
+                    const hour = base14.substring(8, 10);
+                    const minute = base14.substring(10, 12);
+                    const second = base14.substring(12, 14);
+
+                    oDate = new Date(year, month, day, hour, minute, second);
+                }
+                else if (sValue.indexOf("/Date(") === 0) {
+                    const iMillis = parseInt(sValue.replace(/[^0-9]/g, ""), 10);
+                    oDate = new Date(iMillis);
+                }
+                else {
+                    oDate = new Date(sValue);
+                }
+            }
             else {
+                return sValue;
+            }
+
+            if (isNaN(oDate.getTime())) {
                 return sValue;
             }
 
@@ -142,6 +159,7 @@ sap.ui.define([], function () {
 
             return oDateFormat.format(oDate);
         },
+
 
         /**
          * Format year month.
@@ -226,9 +244,9 @@ sap.ui.define([], function () {
             }
 
             var formatted = number
-                .toFixed(2)                     
-                .replace(".", ",")              
-                .replace(/\B(?=(\d{3})+(?!\d))/g, "."); 
+                .toFixed(2)
+                .replace(".", ",")
+                .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
             return formatted + " EUR";
         }

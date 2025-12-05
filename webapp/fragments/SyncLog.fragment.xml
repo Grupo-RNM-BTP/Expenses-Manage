@@ -41,7 +41,7 @@
                         <cells>
                             <Text text="{SyncLogs>LineNo}" textAlign="Center"/>
 
-                            <ObjectStatus text="{SyncLogs>Type}" state="{= ${SyncLogs>Type} === 'E' ? 'Error'
+                            <ObjectStatus text="" state="{= ${SyncLogs>Type} === 'E' ? 'Error'
                                         : ${SyncLogs>Type} === 'W' ? 'Warning'
                                         : ${SyncLogs>Type} === 'S' ? 'Success'
                                         : ${SyncLogs>Type} === 'I' ? 'Information'
@@ -51,7 +51,8 @@
                                         : ${SyncLogs>Type} === 'I' ? 'sap-icon://information'
                                         : '' }" />
 
-                            <Text text="{SyncLogs>Timestamp}" textAlign="Center"/>
+                            <Text text="{ path: 'SyncLogs>Timestamp', formatter: '.formatter.formatDateTime'}" textAlign="Center" />
+
 
                             <Text text="{SyncLogs>Message}" />
                         </cells>

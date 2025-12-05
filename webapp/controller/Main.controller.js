@@ -102,7 +102,7 @@ sap.ui.define([
                 this.byId("idTitle1").setText(this.getResourceBundle().getText("ManageMyExpenses"));
                 sessionStorage.setItem("goToLaunchpad", "X");
 
-                // this.handleSynchronize();
+                this.handleSynchronize();
             },
 
             /**
