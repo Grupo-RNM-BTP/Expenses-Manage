@@ -668,20 +668,20 @@ sap.ui.define([
 
             onBeforeRebindTableCards: function (oEvent) {
                 var oBindingParams = oEvent.getParameter("bindingParams"),
-                    oBundle = this.getResourceBundle(),
-                    aSorters = oBindingParams.sorter || [];
+                    oBundle = this.getResourceBundle();
+                var userHasCustomSorting = oBindingParams.sorter && oBindingParams.sorter.length > 0;
+                var userHasCustomFiltering = oBindingParams.filters && oBindingParams.filters.length > 0;
 
-                aSorters = aSorters.filter(function (oSorter) {
-                    return !(oSorter.sPath === "Chknum" && oSorter.group);
-                });
+                if (userHasCustomSorting || userHasCustomFiltering) {
+                    return;
+                }
 
+                var aSorters = [];
                 var oGroupSorter = new sap.ui.model.Sorter(
                     "Chknum",
                     false,
                     function (oContext) {
-                        var sChknum = oContext.getProperty("Chknum");
-                        sChknum = sChknum ? String(sChknum) : "";
-
+                        var sChknum = oContext.getProperty("Chknum") || "";
                         var bProcessed = sChknum.length > 10;
 
                         return {
@@ -694,16 +694,10 @@ sap.ui.define([
                 );
                 oGroupSorter.group = true;
 
-                aSorters.unshift(oGroupSorter);
+                aSorters.push(oGroupSorter);
 
-                var bHasDateSorter = aSorters.some(function (oSorter) {
-                    return oSorter.sPath === "VYearMonthDay";
-                });
-
-                if (!bHasDateSorter) {
-                    var oDateSorter = new sap.ui.model.Sorter("VYearMonthDay", true);
-                    aSorters.push(oDateSorter);
-                }
+                var oDateSorter = new sap.ui.model.Sorter("VYearMonthDay", true);
+                aSorters.push(oDateSorter);
 
                 oBindingParams.sorter = aSorters;
             },
@@ -721,20 +715,21 @@ sap.ui.define([
              */
             onBeforeRebindTableRecon: function (oEvent) {
                 var oBindingParams = oEvent.getParameter("bindingParams"),
-                    oBundle = this.getResourceBundle(),
-                    aSorters = oBindingParams.sorter || [];
+                    oBundle = this.getResourceBundle();
+                var userHasCustomSorting = oBindingParams.sorter && oBindingParams.sorter.length > 0;
+                var userHasCustomFiltering = oBindingParams.filters && oBindingParams.filters.length > 0;
 
-                aSorters = aSorters.filter(function (oSorter) {
-                    return !(oSorter.sPath === "Chknum" && oSorter.group);
-                });
+                if (userHasCustomSorting || userHasCustomFiltering) {
+                    return;
+                }
+
+                var aSorters = [];
 
                 var oGroupSorter = new sap.ui.model.Sorter(
                     "Chknum",
                     false,
                     function (oContext) {
-                        var sChknum = oContext.getProperty("Chknum");
-                        sChknum = sChknum ? String(sChknum) : "";
-
+                        var sChknum = oContext.getProperty("Chknum") || "";
                         var bProcessed = sChknum.length > 10;
 
                         return {
@@ -747,16 +742,10 @@ sap.ui.define([
                 );
                 oGroupSorter.group = true;
 
-                aSorters.unshift(oGroupSorter);
+                aSorters.push(oGroupSorter);
 
-                var bHasDateSorter = aSorters.some(function (oSorter) {
-                    return oSorter.sPath === "Posteddt";
-                });
-
-                if (!bHasDateSorter) {
-                    var oDateSorter = new sap.ui.model.Sorter("Posteddt", true);
-                    aSorters.push(oDateSorter);
-                }
+                var oDateSorter = new sap.ui.model.Sorter("Posteddt", true);
+                aSorters.push(oDateSorter);
 
                 oBindingParams.sorter = aSorters;
             },
