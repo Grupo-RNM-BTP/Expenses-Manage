@@ -262,6 +262,8 @@ sap.ui.define([
                             }
                         });
 
+                        this.getCreditCardInfo();
+
                     }.bind(this),
 
                     error: function (oError) {
