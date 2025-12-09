@@ -102,7 +102,7 @@ sap.ui.define([
                 this.byId("idTitle1").setText(this.getResourceBundle().getText("ManageMyExpenses"));
                 sessionStorage.setItem("goToLaunchpad", "X");
 
-                this.handleSynchronize();
+                // this.handleSynchronize();
             },
 
             /**
@@ -553,6 +553,10 @@ sap.ui.define([
                     filters: aFilters,
                     success: function (oData) {
                         var aResults = (oData && oData.results) || [];
+
+                        aResults.sort(function (a, b) {
+                            return Number(a.LineNo) - Number(b.LineNo);
+                        });
 
                         oLog.setProperty("/items", aResults);
 
