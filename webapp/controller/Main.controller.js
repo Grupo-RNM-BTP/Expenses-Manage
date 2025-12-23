@@ -31,13 +31,13 @@ sap.ui.define([
             /**
              * Initialize the controller, set model, and attach route matched.
              */
-            onInit: function () {
+            onInit: function () {   
                 var oModel = new JSONModel({
                     ExpNo: "",
                     ExpensesReconciled: [],
                     ExpenseDevolution: [],
                     inputValue: "",
-                    sliderMax: ""
+                    sliderMax: "",
                 });
                 this.getView().setModel(oModel, "Main");
                 this.getView().setModel(new JSONModel({}), "graficoModel");

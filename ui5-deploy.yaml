@@ -20,6 +20,10 @@ builder:
           name: ZFI_EXP_MNG
           description: ""
           package: ZFI_EXPENSES
+<<<<<<< HEAD
           transport: DD2K906848
+=======
+          transport: DD2K906761
+>>>>>>> f66f0af198fea009bce8da1da6ebe004aa9192b5
         exclude:
           - /test/

@@ -31,7 +31,7 @@
                     <tnt:NavigationListItem text="{i18n>TransactionReconciliation}" key="TransRecon" icon="sap-icon://unpaid-leave"/>
                     <tnt:NavigationListItem text="{i18n>CurrentAccount}" key="CurrentAccount" icon="sap-icon://order-status"/>
                     <tnt:NavigationListItem id="idApproveExpenses" text="{i18n>ApproveExpenses}" visible="false" key="ApproveExpenses" icon="sap-icon://accept"/>
-                    </tnt:NavigationList>
+                </tnt:NavigationList>
             </tnt:SideNavigation>
         </tnt:sideContent>
 
@@ -166,7 +166,7 @@
 
                             <Toolbar style="Standard" design="Transparent" height="0.1rem" />
 
-                            <layout:Grid defaultSpan="XL12 L12 M12 S12" hSpacing="4" vSpacing="4" class="sapUiResponsiveMargin sapUiSmallMarginTopBottom">
+                             <layout:Grid defaultSpan="XL12 L12 M12 S12" hSpacing="4" vSpacing="4" class="sapUiResponsiveMargin sapUiSmallMarginTopBottom">
                                 <layout:content>
                                     <f:Card class="sapUiSmallMargin" width="100%">
                                         <f:content>
