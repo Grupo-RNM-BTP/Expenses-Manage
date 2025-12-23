@@ -1,0 +1,38 @@
+<core:FragmentDefinition xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:u="sap.ui.unified">
+
+    <Dialog id="desktopChoiceDialog" title="{i18n>New}" stretchOnPhone="true" contentWidth="34rem" class="sapUiContentPadding" draggable="true" resizable="false" horizontalScrolling="false" verticalScrolling="false">
+
+        <content>
+            <FlexBox width="100%" direction="Row" justifyContent="Center" alignItems="Center" wrap="NoWrap" renderType="Bare">
+                <GenericTile id="tileCamera" header="{i18n>xexp.takePhoto}" frameType="OneByOne" mode="ActionMode" class="sapUiSmallMargin">
+                    <tileContent>
+                        <TileContent>
+                            <content>
+                                <ImageContent src="sap-icon://camera" />
+                            </content>
+                        </TileContent>
+                    </tileContent>
+                </GenericTile>
+
+                <GenericTile id="tileUpload" header="Upload" subheader="Imagem/PDF" frameType="OneByOne" mode="ActionMode" class="sapUiSmallMargin">
+
+                    <tileContent>
+                        <TileContent>
+                            <content>
+                                <ImageContent src="sap-icon://upload" />
+                            </content>
+                        </TileContent>
+                    </tileContent>
+                </GenericTile>
+            </FlexBox>
+
+            <u:FileUploader id="desktopChoiceFileUploader" visible="true" buttonOnly="true" sameFilenameAllowed="true" fileType="jpg,jpeg,png,pdf" mimeType="image/jpeg,image/png,application/pdf" change="onSelectFile" class="desktopHiddenUploader" />
+        </content>
+
+        <endButton>
+            <Button text="Cancelar" type="Emphasized" press="onCloseDesktopChoice" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

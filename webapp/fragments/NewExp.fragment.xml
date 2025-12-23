@@ -26,7 +26,7 @@
                         <DatePicker id="expenseDialog:datePicker" valueFormat="yyyyMMdd" displayFormat="dd/MM/yyyy" required="true"/>
 
                         <Label text="{i18n>xexp.expNif}"/>
-                        <Input id="expenseDialog:inputNif" required="true"/>
+                        <Input id="expenseDialog:inputNif" liveChange=".onStripSpaces" required="true"/>
 
                         <Label text="{i18n>xexp.expCountry}"/>
                         <Select id="expenseDialog:selectCountry" items="{ path: '/ZFI_EXPENSES_COUNTRIES', length:500 }" required="true" change=".onCountryChange">
@@ -76,7 +76,7 @@
                                                                       || ((${Expenses>/exptype} || '').indexOf('PORTA')  > -1)
                                                                       || ((${Expenses>/exptype} || '').indexOf('ESTACI')  > -1)  
                                                                       || ((${Expenses>/exptype} || '').indexOf('UE')  > -1)  
-                                                                      || ((${Expenses>/exptype} || '').indexOf('ADR')  > -1) }" required="true"/>
+                                                                      || ((${Expenses>/exptype} || '').indexOf('ADR')  > -1) }" liveChange=".onStripSpaces" required="true"/>
 
                         <Label text="{i18n>xexp.expFuelQuantity}"/>
                         <Input id="expenseDialog:inputFuelQuantity" type="Number" visible="{= (${Expenses>/exptype} || '').indexOf('COMBST') > -1 || (${Expenses>/exptype} || '').indexOf('UE') > -1 }" required="true"/>
@@ -95,8 +95,15 @@
                             </items>
                         </Select>
 
-                        <Label id="expenseDialog:labelAmt" text="{i18n>xexp.expValue}"/>
+                        <Label id="expenseDialog:labelAmt" text="{i18n>xexp.expValue2}"/>
                         <Input id="expenseDialog:inputAmt" type="Number" required="true"/>
+
+                        <Label id="expenseDialog:labelCurrency" text="{i18n>xexp.expCurrency}"/>
+                        <Select id="expenseDialog:selectCurrency" items="{ path: '/ZFI_CURRENCY2', length:500 }" required="true">
+                            <items>
+                                <core:Item key="{Currency}" text="{CurrencyText}" />
+                            </items>
+                        </Select>
 
                         <Label id="expenseDialog:labelComments" text="{i18n>xexp.expComments}"/>
                         <TextArea id="expenseDialog:textAreaComments" />

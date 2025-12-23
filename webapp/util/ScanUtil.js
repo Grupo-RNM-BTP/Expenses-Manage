@@ -183,6 +183,28 @@ sap.ui.define([
         },
 
         /**
+         * Clears (and optionally hides) the camera overlay canvas.
+         * @param {HTMLElement} oRootOrVideo - Root container or the video element.
+         * @param {boolean} bHide - If true, hides the overlay after clearing.
+         */
+        handleClearOverlay: function (oRootOrVideo, bHide = true) {
+            try {
+                const oRoot = oRootOrVideo?.querySelector ? oRootOrVideo : oRootOrVideo?.parentElement;
+                if (!oRoot) return;
+
+                const oOverlay = oRoot.querySelector("#cameraOverlay");
+                if (!oOverlay) return;
+
+                const oCtx = oOverlay.getContext?.("2d");
+                oCtx && oCtx.clearRect(0, 0, oOverlay.width, oOverlay.height);
+
+                if (bHide) {
+                    oOverlay.style.display = "none";
+                }
+            } catch (e) { }
+        },
+
+        /**
          * Starts live document detection on the given DOM reference.
          * @param {HTMLElement} oDomRef - The DOM reference to start detection on.
          * @returns {Promise<boolean>} A promise that resolves to true if detection started successfully, false otherwise.
@@ -215,7 +237,7 @@ sap.ui.define([
 
             let iLastTimestamp = 0;
 
-            // ----- parâmetros de filtro (ajustáveis) -----
+            // ----- parâmetros de filtro -----
             const MIN_AREA_RATIO = 0.035;  // >= 3.5% do frame processado
             const MAX_AREA_RATIO = 0.98;   // <= 98% (evita “mesa inteira”)
             const MIN_RECT_DOC = 0.65;     // retangularidade p/ docs “quadrados”
@@ -607,479 +629,6 @@ sap.ui.define([
             return true;
         },
 
-
-        // /**
-        //  * Starts live document detection on the given DOM reference.
-        //  * @param {HTMLElement} oDomRef - The DOM reference to start detection on.
-        //  * @returns {Promise<boolean>} A promise that resolves to true if detection started successfully, false otherwise.
-        //  */
-        // onLiveDetect: async function (oDomRef) {
-        //     this.handleStopLiveDetect();
-
-        //     const oRoot = oDomRef || (this.getView() && this.getView().getDomRef());
-        //     if (!oRoot) return;
-
-        //     const oVideo = oRoot.querySelector("#cameraVideo");
-        //     if (!oVideo) return;
-
-        //     const oOverlayCanvas = this.handleCreateOverlayCanvas(oVideo);
-
-        //     try {
-        //         await this.handleEnsureOpenCVReady();
-        //     } catch (oError) {
-        //         this._oLiveDetectCtrl = { stop: true };
-        //         return false;
-        //     }
-
-        //     this._oScanFx = this._oScanFx || { pos: 0, last: performance.now() };
-        //     this._oLiveDetectCtrl = { stop: false };
-
-        //     const oCv = window.cv;
-        //     const MAX_FPS = 15;
-        //     const TARGET_SHORT = 720;
-
-        //     let iLastTimestamp = 0;
-
-        //     // ----- parâmetros de filtro (ajustáveis) -----
-        //     const MIN_AREA_RATIO_BASE = 0.018; // base (dinâmico abaixo)
-        //     const MAX_AREA_RATIO = 0.985;
-        //     const MIN_RECT_DOC = 0.65;
-        //     const MIN_RECT_RECE = 0.50;
-        //     const ASPECT_CORE_MIN = 0.60;
-        //     const ASPECT_CORE_MAX = 2.00;
-        //     const ASPECT_EXT_MIN = 0.40;
-        //     const ASPECT_EXT_MAX = 5.00;
-        //     const BORDER_TOL = 8;
-        //     const EPS_FACTOR = 0.020;
-
-        //     const fnSignedArea = (aPts) => {
-        //         let nArea = 0;
-        //         for (let i = 0; i < 4; i++) {
-        //             const oP = aPts[i], oQ = aPts[(i + 1) % 4];
-        //             nArea += oP.x * oQ.y - oQ.x * oP.y;
-        //         }
-        //         return nArea / 2;
-        //     };
-
-        //     const fnIntersectLines = (oP, oV, oQ, oW) => {
-        //         const fnCross = (oA, oB) => oA.x * oB.y - oA.y * oB.x;
-        //         const oR = { x: oQ.x - oP.x, y: oQ.y - oP.y };
-        //         const nDen = fnCross(oV, oW);
-        //         if (Math.abs(nDen) < 1e-6) {
-        //             return { x: (oP.x + oQ.x) * 0.5, y: (oP.y + oQ.y) * 0.5 };
-        //         }
-        //         const nT = fnCross(oR, oW) / nDen;
-        //         return { x: oP.x + nT * oV.x, y: oP.y + nT * oV.y };
-        //     };
-
-        //     const fnOutwardNormal = (oE, bIsCCW) => {
-        //         let nx, ny;
-        //         if (bIsCCW) { nx = oE.y; ny = -oE.x; } else { nx = -oE.y; ny = oE.x; }
-        //         const nLen = Math.hypot(nx, ny) || 1;
-        //         return { x: nx / nLen, y: ny / nLen };
-        //     };
-
-        //     const fnOffsetQuadOutward = (aPts, nPad) => {
-        //         const bIsCCW = fnSignedArea(aPts) > 0;
-        //         const aEdges = [];
-        //         const aOut = [];
-        //         for (let i = 0; i < 4; i++) {
-        //             const oA = aPts[i], oB = aPts[(i + 1) % 4];
-        //             const oE = { x: oB.x - oA.x, y: oB.y - oA.y };
-        //             const oN = fnOutwardNormal(oE, bIsCCW);
-        //             const oP = { x: oA.x + oN.x * nPad, y: oA.y + oN.y * nPad };
-        //             const oV = { x: oE.x, y: oE.y };
-        //             aEdges.push({ p: oP, v: oV });
-        //         }
-        //         for (let i = 0; i < 4; i++) {
-        //             const oPrev = aEdges[(i + 3) % 4];
-        //             const oCurr = aEdges[i];
-        //             aOut.push(fnIntersectLines(oPrev.p, oPrev.v, oCurr.p, oCurr.v));
-        //         }
-        //         return aOut;
-        //     };
-
-        //     const fnClampQuadToBounds = (aPts, nW, nH) => aPts.map(oP => ({
-        //         x: Math.max(0, Math.min(nW - 1, oP.x)),
-        //         y: Math.max(0, Math.min(nH - 1, oP.y))
-        //     }));
-
-        //     const sColorBorder = "rgba(255, 185, 100, 0.28)";
-        //     const sColorFill = "rgba(255, 185, 100, 0.28)";
-        //     const sColorGlow = "rgba(255, 200, 120, 0.55)";
-
-        //     const fnDrawQuad = (aQuad) => {
-        //         const nW = oOverlayCanvas.width, nH = oOverlayCanvas.height;
-        //         const oCtx = oOverlayCanvas.getContext("2d");
-        //         oCtx.clearRect(0, 0, nW, nH);
-        //         if (!aQuad) return;
-
-        //         oCtx.beginPath();
-        //         oCtx.moveTo(aQuad[0].x, aQuad[0].y);
-        //         for (let i = 1; i < 4; i++) oCtx.lineTo(aQuad[i].x, aQuad[i].y);
-        //         oCtx.closePath();
-
-        //         const nCx = (aQuad[0].x + aQuad[1].x + aQuad[2].x + aQuad[3].x) / 4;
-        //         const nCy = (aQuad[0].y + aQuad[1].y + aQuad[2].y + aQuad[3].y) / 4;
-        //         const nR = Math.hypot(nW, nH) * 0.35;
-        //         const oGrad = oCtx.createRadialGradient(nCx, nCy, 0, nCx, nCy, nR);
-        //         oGrad.addColorStop(0.0, "rgba(255, 200, 140, 0.35)");
-        //         oGrad.addColorStop(1.0, sColorFill);
-
-        //         oCtx.fillStyle = oGrad; oCtx.fill();
-        //         oCtx.lineWidth = 3; oCtx.strokeStyle = sColorBorder;
-        //         oCtx.shadowColor = sColorGlow; oCtx.shadowBlur = 8; oCtx.stroke();
-        //         oCtx.shadowBlur = 0;
-
-        //         oCtx.fillStyle = "rgba(255, 210, 150, 0.9)";
-        //         for (let i = 0; i < 4; i++) { oCtx.beginPath(); oCtx.arc(aQuad[i].x, aQuad[i].y, 4, 0, Math.PI * 2); oCtx.fill(); }
-
-        //         // efeito scan
-        //         oCtx.save();
-        //         oCtx.beginPath(); oCtx.moveTo(aQuad[0].x, aQuad[0].y);
-        //         for (let i = 1; i < 4; i++) oCtx.lineTo(aQuad[i].x, aQuad[i].y);
-        //         oCtx.closePath(); oCtx.clip();
-
-        //         const nNow = performance.now();
-        //         const nLast = this._oScanFx.last || nNow;
-        //         const nDt = (nNow - nLast) / 1000;
-        //         this._oScanFx.last = nNow;
-
-        //         const nSpeed = 0.55, nBand = 0.22;
-        //         this._oScanFx.pos = (this._oScanFx.pos + nDt * nSpeed) % 1;
-
-        //         const nCellFrac = 0.095;
-        //         const nCell = Math.max(18, Math.round(Math.min(nW, nH) * nCellFrac));
-        //         const nGapFactor = 0.10;
-        //         const nSize = Math.round(nCell * (1 - nGapFactor));
-        //         const nOffsetAlt = 0.18;
-
-        //         const sColorSquare = "rgba(255, 230, 170, 1)";
-        //         const sBorderSquare = "rgba(255, 210, 140, 0.9)";
-        //         const nBaseAlpha = 0.40, nPeakAlpha = 0.92;
-
-        //         const sPrevComp = oCtx.globalCompositeOperation;
-        //         oCtx.globalCompositeOperation = "screen";
-
-        //         const nBandTop = (this._oScanFx.pos - nBand / 2) * nH;
-        //         const nBandBot = (this._oScanFx.pos + nBand / 2) * nH;
-        //         const nBandMid = (nBandTop + nBandBot) / 2;
-        //         const nBandHalf = (nBand * nH) / 2;
-
-        //         for (let y = -nCell; y < nH + nCell; y += nCell) {
-        //             if (y + nCell < nBandTop || y - nCell > nBandBot) continue;
-        //             const nDist = Math.abs((y + nCell / 2) - nBandMid) / nBandHalf;
-        //             let nAlpha = Math.max(nBaseAlpha, nPeakAlpha * (1 - nDist));
-        //             const nTwinkle = 0.90 + 0.10 * Math.sin((y * 0.03) + nNow * 0.004);
-        //             nAlpha *= nTwinkle;
-        //             const nRowOffset = ((Math.floor(y / nCell) % 2) ? 0 : nCell * nOffsetAlt);
-
-        //             for (let x = -nCell; x < nW + nCell; x += nCell) {
-        //                 oCtx.globalAlpha = nAlpha;
-        //                 const nPx = x + nRowOffset + (nCell - nSize) / 2;
-        //                 const nPy = y + (nCell - nSize) / 2;
-        //                 oCtx.fillStyle = sColorSquare; oCtx.fillRect(nPx, nPy, nSize, nSize);
-        //                 oCtx.globalAlpha = Math.min(1, nAlpha + 0.12);
-        //                 oCtx.strokeStyle = sBorderSquare; oCtx.lineWidth = Math.max(1, Math.round(nSize * 0.04));
-        //                 oCtx.strokeRect(nPx, nPy, nSize, nSize);
-        //             }
-        //         }
-        //         oCtx.globalAlpha = 1; oCtx.globalCompositeOperation = sPrevComp; oCtx.restore();
-        //     };
-
-        //     const fnLoop = () => {
-        //         if (this._oLiveDetectCtrl?.stop) return;
-
-        //         const nNow = performance.now();
-        //         if (nNow - iLastTimestamp < 1000 / MAX_FPS) {
-        //             return requestAnimationFrame(fnLoop);
-        //         }
-        //         iLastTimestamp = nNow;
-
-        //         const nVW = oVideo.videoWidth, nVH = oVideo.videoHeight;
-        //         if (!nVW || !nVH) return requestAnimationFrame(fnLoop);
-
-        //         const nScale = (nVH > nVW ? TARGET_SHORT / nVW : TARGET_SHORT / nVH);
-        //         const nProcW = Math.max(1, Math.round(nVW * nScale));
-        //         const nProcH = Math.max(1, Math.round(nVH * nScale));
-
-        //         if (!this._oOffCanvas) this._oOffCanvas = document.createElement("canvas");
-        //         const oOff = this._oOffCanvas;
-        //         oOff.width = nProcW; oOff.height = nProcH;
-
-        //         const oOffCtx = oOff.getContext("2d");
-        //         oOffCtx.drawImage(oVideo, 0, 0, nProcW, nProcH);
-
-        //         let aQuadOverlayCss = null;
-
-        //         try {
-        //             const oSrc = oCv.imread(oOff);
-        //             const oGray = new oCv.Mat();
-        //             oCv.cvtColor(oSrc, oGray, oCv.COLOR_RGBA2GRAY);
-
-        //             // blur leve para reduzir ruído
-        //             const oBlur = new oCv.Mat();
-        //             oCv.GaussianBlur(oGray, oBlur, new oCv.Size(5, 5), 0);
-
-        //             // Luma com realce (para fundos claros/escuros)
-        //             let oLuma = new oCv.Mat();
-        //             try {
-        //                 const oLab = new oCv.Mat();
-        //                 oCv.cvtColor(oSrc, oLab, oCv.COLOR_RGBA2Lab);
-        //                 const aLab = new oCv.MatVector(); oCv.split(oLab, aLab);
-        //                 const oL = aLab.get(0);
-        //                 if (oCv.createCLAHE) {
-        //                     const clahe = new oCv.CLAHE(3.0, new oCv.Size(8, 8));
-        //                     clahe.apply(oL, oLuma); clahe.delete();
-        //                 } else {
-        //                     oCv.equalizeHist(oL, oLuma);
-        //                 }
-        //                 oL.delete(); aLab.delete(); oLab.delete();
-        //             } catch (e) {
-        //                 oCv.equalizeHist(oGray, oLuma);
-        //             }
-
-        //             // tamanhos dinâmicos
-        //             const nMinSide = Math.min(nProcW, nProcH);
-        //             const k3 = new oCv.Size(3, 3);
-        //             const k5 = new oCv.Size(5, 5);
-        //             const nKernel = Math.max(3, Math.round(nMinSide * 0.006)) | 1;
-        //             const kDyn = new oCv.Size(nKernel, nKernel);
-
-        //             // ---- construir máscaras diversas (robustas a fundo claro/escuro) ----
-        //             const aMasks = [];
-
-        //             // OTSU em Luma (normal/invertido)
-        //             let m1 = new oCv.Mat(); oCv.threshold(oLuma, m1, 0, 255, oCv.THRESH_BINARY + oCv.THRESH_OTSU); aMasks.push(m1);
-        //             let m2 = new oCv.Mat(); oCv.threshold(oLuma, m2, 0, 255, oCv.THRESH_BINARY_INV + oCv.THRESH_OTSU); aMasks.push(m2);
-
-        //             // OTSU em Gray (normal/invertido) – ajuda em fundos muito escuros
-        //             let m3 = new oCv.Mat(); oCv.threshold(oBlur, m3, 0, 255, oCv.THRESH_BINARY + oCv.THRESH_OTSU); aMasks.push(m3);
-        //             let m4 = new oCv.Mat(); oCv.threshold(oBlur, m4, 0, 255, oCv.THRESH_BINARY_INV + oCv.THRESH_OTSU); aMasks.push(m4);
-
-        //             // Adaptive Threshold (normal/invertido) em Luma
-        //             const nBlock = Math.max(11, (Math.floor(nMinSide * 0.03) | 1));
-        //             let m5 = new oCv.Mat(); oCv.adaptiveThreshold(oLuma, m5, 255, oCv.ADAPTIVE_THRESH_MEAN_C, oCv.THRESH_BINARY, nBlock, 5); aMasks.push(m5);
-        //             let m6 = new oCv.Mat(); oCv.adaptiveThreshold(oLuma, m6, 255, oCv.ADAPTIVE_THRESH_MEAN_C, oCv.THRESH_BINARY_INV, nBlock, 5); aMasks.push(m6);
-
-        //             // Canny (a partir de Luma)
-        //             let tmp = new oCv.Mat(); const nOtsu = oCv.threshold(oLuma, tmp, 0, 255, oCv.THRESH_OTSU); tmp.delete();
-        //             const nLow = Math.max(10, 0.5 * nOtsu);
-        //             const nHigh = Math.max(20, 1.4 * nOtsu);
-        //             let m7 = new oCv.Mat(); oCv.Canny(oLuma, m7, nLow, nHigh);
-        //             let kClose = oCv.getStructuringElement(oCv.MORPH_RECT, kDyn);
-        //             let kOpen = oCv.getStructuringElement(oCv.MORPH_RECT, k3);
-        //             oCv.morphologyEx(m7, m7, oCv.MORPH_CLOSE, kClose);
-        //             oCv.morphologyEx(m7, m7, oCv.MORPH_OPEN, kOpen);
-        //             kClose.delete(); kOpen.delete(); aMasks.push(m7);
-
-        //             // Sobel magnitude (bom em superfícies muito escuras)
-        //             let gx = new oCv.Mat(), gy = new oCv.Mat(), mag = new oCv.Mat();
-        //             oCv.Sobel(oLuma, gx, oCv.CV_16S, 1, 0, 3); oCv.Sobel(oLuma, gy, oCv.CV_16S, 0, 1, 3);
-        //             oCv.convertScaleAbs(gx, gx); oCv.convertScaleAbs(gy, gy);
-        //             oCv.addWeighted(gx, 0.5, gy, 0.5, 0, mag);
-        //             gx.delete(); gy.delete();
-        //             let m8 = new oCv.Mat(); oCv.threshold(mag, m8, 0, 255, oCv.THRESH_OTSU); mag.delete();
-        //             aMasks.push(m8);
-
-        //             // fecha pequenos buracos em todas as máscaras binárias (menos a de bordas já tratada)
-        //             const kFill = oCv.getStructuringElement(oCv.MORPH_RECT, k5);
-        //             for (let i = 0; i < aMasks.length; i++) {
-        //                 if (i === 6) continue; // m7 (canny) já tem morfologia própria
-        //                 oCv.morphologyEx(aMasks[i], aMasks[i], oCv.MORPH_CLOSE, kFill);
-        //             }
-        //             kFill.delete();
-
-        //             // helpers
-        //             const fnTouchesBorder = (oPoly, nW, nH, nTol) => {
-        //                 for (let i = 0; i < oPoly.rows; i++) {
-        //                     const nX = oPoly.intPtr(i, 0)[0], nY = oPoly.intPtr(i, 0)[1];
-        //                     if (nX <= nTol || nY <= nTol || nX >= nW - nTol || nY >= nH - nTol) return true;
-        //                 }
-        //                 return false;
-        //             };
-        //             const fnToPointArray = (oPoly) => {
-        //                 const aPts = [];
-        //                 if (oPoly.type() === oCv.CV_32SC2) {
-        //                     for (let i = 0; i < oPoly.rows; i++) aPts.push({ x: oPoly.intPtr(i, 0)[0], y: oPoly.intPtr(i, 0)[1] });
-        //                 } else {
-        //                     for (let i = 0; i < oPoly.rows; i++) aPts.push({ x: oPoly.floatPtr(i, 0)[0], y: oPoly.floatPtr(i, 0)[1] });
-        //                 }
-        //                 return aPts;
-        //             };
-        //             const fnOrder4 = (aPts) => {
-        //                 const nCx = aPts.reduce((s, p) => s + p.x, 0) / aPts.length;
-        //                 const nCy = aPts.reduce((s, p) => s + p.y, 0) / aPts.length;
-        //                 let oTL, oTR, oBR, oBL;
-        //                 for (const oP of aPts) {
-        //                     if (oP.x < nCx && oP.y < nCy) oTL = oP;
-        //                     else if (oP.x > nCx && oP.y < nCy) oTR = oP;
-        //                     else if (oP.x > nCx && oP.y > nCy) oBR = oP;
-        //                     else oBL = oP;
-        //                 }
-        //                 return [oTL, oTR, oBR, oBL];
-        //             };
-        //             const fnBoxPoints = (oRot) => {
-        //                 if (oCv.RotatedRect && oCv.RotatedRect.points) return oCv.RotatedRect.points(oRot);
-        //                 const nAng = oRot.angle * Math.PI / 180.0;
-        //                 const b = Math.cos(nAng) * 0.5, a = Math.sin(nAng) * 0.5;
-        //                 const nCx = oRot.center.x, nCy = oRot.center.y;
-        //                 const nW = oRot.size.width, nH = oRot.size.height;
-        //                 return [
-        //                     { x: nCx - a * nH - b * nW, y: nCy + b * nH - a * nW },
-        //                     { x: nCx + a * nH - b * nW, y: nCy - b * nH - a * nW },
-        //                     { x: nCx + a * nH + b * nW, y: nCy - b * nH + a * nW },
-        //                     { x: nCx - a * nH + b * nW, y: nCy + b * nH + a * nW }
-        //                 ];
-        //             };
-
-        //             // --- procura de contornos com heurísticas anti-QR e centro ---
-        //             let oBest = null;
-
-        //             const cx = nProcW / 2, cy = nProcH / 2;
-        //             const maxCenterDist = Math.hypot(cx, cy);
-
-        //             const processMask = (oMaskMat) => {
-        //                 const oContours = new oCv.MatVector();
-        //                 const oHierarchy = new oCv.Mat();
-        //                 oCv.findContours(oMaskMat, oContours, oHierarchy, oCv.RETR_EXTERNAL, oCv.CHAIN_APPROX_SIMPLE);
-
-        //                 for (let i = 0; i < oContours.size(); i++) {
-        //                     const oCnt = oContours.get(i);
-        //                     const nArea = oCv.contourArea(oCnt);
-        //                     if (nArea < 1) continue;
-
-        //                     const nAreaRatio = nArea / (nProcW * nProcH);
-        //                     if (nAreaRatio > MAX_AREA_RATIO) continue;
-
-        //                     const nPeri = oCv.arcLength(oCnt, true);
-        //                     const oApprox = new oCv.Mat();
-        //                     oCv.approxPolyDP(oCnt, oApprox, EPS_FACTOR * nPeri, true);
-
-        //                     if (oApprox.rows < 4 || oApprox.rows > 8) { oApprox.delete(); continue; }
-        //                     if (!oCv.isContourConvex(oApprox)) { oApprox.delete(); continue; }
-        //                     if (fnTouchesBorder(oApprox, nProcW, nProcH, BORDER_TOL)) { oApprox.delete(); continue; }
-
-        //                     const aPts = fnToPointArray(oApprox);
-        //                     oApprox.delete();
-
-        //                     const oMatPts = oCv.matFromArray(aPts.length, 1, oCv.CV_32FC2, aPts.flatMap(oP => [oP.x, oP.y]));
-        //                     const oRRect = oCv.minAreaRect(oMatPts);
-        //                     oMatPts.delete();
-
-        //                     const aRectPts = fnBoxPoints(oRRect);
-        //                     const [oTL, oTR, oBR, oBL] = fnOrder4(aRectPts);
-
-        //                     const aXs = aRectPts.map(oP => oP.x), aYs = aRectPts.map(oP => oP.y);
-        //                     const nMinX = Math.max(0, Math.min(...aXs)), nMaxX = Math.min(nProcW - 1, Math.max(...aXs));
-        //                     const nMinY = Math.max(0, Math.min(...aYs)), nMaxY = Math.min(nProcH - 1, Math.max(...aYs));
-        //                     const nBw = Math.max(1, nMaxX - nMinX), nBh = Math.max(1, nMaxY - nMinY);
-
-        //                     const nRectAreaAxis = nBw * nBh;
-        //                     const nRectangularity = nRectAreaAxis > 0 ? nArea / nRectAreaAxis : 0;
-
-        //                     const nWr = oRRect.size.width, nHr = oRRect.size.height;
-        //                     const nAspect = (Math.max(nWr, nHr) / Math.max(1, Math.min(nWr, nHr)));
-
-        //                     const bCoreAspectOK = (nAspect >= ASPECT_CORE_MIN && nAspect <= ASPECT_CORE_MAX);
-        //                     const bExtAspectOK = (nAspect >= ASPECT_EXT_MIN && nAspect <= ASPECT_EXT_MAX);
-        //                     if (!bExtAspectOK) continue;
-
-        //                     // --- anti-QR: se muito quadrado (<1.12) exige mais área ---
-        //                     const isNearSquare = nAspect < 1.12;
-        //                     const minAreaRatioDynamic = isNearSquare ? Math.max(MIN_AREA_RATIO_BASE, 0.08) : MIN_AREA_RATIO_BASE;
-        //                     if (nAreaRatio < minAreaRatioDynamic) continue;
-
-        //                     const nMinRect = bCoreAspectOK ? MIN_RECT_DOC : MIN_RECT_RECE;
-        //                     if (nRectangularity < nMinRect) continue;
-
-        //                     // center bias (QR costuma estar num canto)
-        //                     const centerDist = Math.hypot(oRRect.center.x - cx, oRRect.center.y - cy) / maxCenterDist;
-        //                     const centerScore = 1 - Math.min(1, centerDist); // 1 no centro, ~0 nos cantos
-
-        //                     // bónus para aspetos próximos de A4 (≈1.41)
-        //                     const a4 = 1.414;
-        //                     const aspectBonus = Math.max(0, 1 - Math.abs(Math.log(nAspect / a4))) * 0.25; // até +0.25
-
-        //                     // penalização leve para “quadrado perfeito” (evita QR pequenos)
-        //                     const squarePenalty = isNearSquare ? 0.25 : 0.0;
-
-        //                     // score com MAIS peso na área
-        //                     const score =
-        //                         (Math.min(1, nAreaRatio / 0.45) * 0.55) +                // área (forte)
-        //                         (nRectangularity * 0.25) +                               // quão retangular
-        //                         (centerScore * 0.12) +                                   // centralidade
-        //                         (aspectBonus) -                                           // perto de A4
-        //                         (squarePenalty);                                         // anti-QR
-
-        //                     if (!oBest || score > oBest.score) {
-        //                         oBest = { score, tl: oTL, tr: oTR, br: oBR, bl: oBL };
-        //                     }
-        //                 }
-
-        //                 oContours.delete(); oHierarchy.delete();
-        //             };
-
-        //             // ordem de tentativa: Otsu Luma normal -> invertido -> Otsu Gray -> Adap Luma -> Canny -> Sobel
-        //             for (const m of aMasks) {
-        //                 processMask(m);
-        //                 if (oBest) break;
-        //             }
-
-        //             // limpeza
-        //             aMasks.forEach(m => m.delete());
-
-        //             // ---------------------- resultado / overlay --------------------
-        //             if (oBest) {
-        //                 const oRectCss = oVideo.getBoundingClientRect();
-        //                 const nSx = oRectCss.width / nProcW;
-        //                 const nSy = oRectCss.height / nProcH;
-
-        //                 aQuadOverlayCss = [
-        //                     { x: oBest.tl.x * nSx, y: oBest.tl.y * nSy },
-        //                     { x: oBest.tr.x * nSx, y: oBest.tr.y * nSy },
-        //                     { x: oBest.br.x * nSx, y: oBest.br.y * nSy },
-        //                     { x: oBest.bl.x * nSx, y: oBest.bl.y * nSy }
-        //                 ];
-
-        //                 const nSvx = oVideo.videoWidth / nProcW;
-        //                 const nSvy = oVideo.videoHeight / nProcH;
-        //                 let aCornersVideo = [
-        //                     { x: oBest.tl.x * nSvx, y: oBest.tl.y * nSvy },
-        //                     { x: oBest.tr.x * nSvx, y: oBest.tr.y * nSvy },
-        //                     { x: oBest.br.x * nSvx, y: oBest.br.y * nSvy },
-        //                     { x: oBest.bl.x * nSvx, y: oBest.bl.y * nSvy }
-        //                 ];
-
-        //                 const nMinDim = Math.min(oVideo.videoWidth, oVideo.videoHeight);
-        //                 const PAD_FRAC = 0.20;
-        //                 const nPadPx = Math.max(8, Math.min(32, PAD_FRAC * nMinDim));
-
-        //                 let aInflated = fnOffsetQuadOutward(aCornersVideo, nPadPx);
-        //                 aInflated = fnClampQuadToBounds(aInflated, oVideo.videoWidth, oVideo.videoHeight);
-
-        //                 this._aLastQuadVideoPx = aInflated;
-        //             } else {
-        //                 this._aLastQuadVideoPx = null;
-        //             }
-
-        //             fnDrawQuad(aQuadOverlayCss);
-
-        //             // cleanup bases
-        //             oSrc.delete(); oGray.delete(); oBlur.delete(); oLuma.delete?.();
-        //         } catch (oErr) {
-        //             // no-op
-        //         }
-
-        //         requestAnimationFrame(fnLoop);
-        //     };
-
-        //     requestAnimationFrame(fnLoop);
-        //     return true;
-        // },
-
-
-
         /**
          * Starts auto-detection of documents in the camera feed.
          */
@@ -1117,14 +666,31 @@ sap.ui.define([
 
                 const oCv = window.cv;
 
-                let aQuad = this._aLastQuadVideoPx;
-                if (!aQuad || aQuad.length !== 4) {
+                const aQuadRaw = this._aLastQuadVideoPx;
+                if (!aQuadRaw || aQuadRaw.length !== 4) {
                     throw new Error("Documento não detetado.");
                 }
+                let aQuad = aQuadRaw.map(p => ({ x: p.x, y: p.y }));
+
+                this.handleStopLiveDetect?.();
+                this.handleClearAutoDetectTimer?.();
+
+                const oRoot =
+                    (this.oCameraDialog && this.oCameraDialog.getDomRef && this.oCameraDialog.getDomRef()) ||
+                    (this.getView && this.getView() && this.getView().getDomRef && this.getView().getDomRef()) ||
+                    null;
+
+                if (oRoot) {
+                    this.handleClearOverlay?.(oRoot, true);
+                } else {
+                    this.handleClearOverlay?.(oVideo, true);
+                }
+
+                await new Promise((r) => requestAnimationFrame(r));
 
                 aQuad = this.handleOrderTLTRBRBL(aQuad);
-                const oWH = fnAvgEdgeWH(aQuad);
 
+                const oWH = fnAvgEdgeWH(aQuad);
                 const nOutW = Math.max(500, Math.min(2400, Math.round(oWH.w)));
                 const nOutH = Math.max(500, Math.min(3400, Math.round(oWH.h)));
 
@@ -1137,6 +703,7 @@ sap.ui.define([
 
                 const oSrc = oCv.imread(oSrcCanvas);
                 const oDst = new oCv.Mat();
+
                 const oSrcPts = oCv.matFromArray(4, 1, oCv.CV_32FC2, [
                     aQuad[0].x, aQuad[0].y,
                     aQuad[1].x, aQuad[1].y,
@@ -1171,6 +738,7 @@ sap.ui.define([
 
                 this._bPhotoTaken = true;
                 this.handleClearCameraAutoClose();
+
                 this.handleStopAllDetect();
                 this.handleScanPhoto();
 
@@ -1491,7 +1059,7 @@ sap.ui.define([
                 const { x, y, w, h } = this._oDrawImg.lastOverlayRect;
                 fnDrawRect(x, y, w, h, true);
             };
-            
+
             try {
                 new ResizeObserver(fnRedrawLast).observe(oOverlay);
             } catch (oErr) { }

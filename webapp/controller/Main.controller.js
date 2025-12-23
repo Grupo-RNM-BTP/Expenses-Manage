@@ -102,7 +102,7 @@ sap.ui.define([
                 this.byId("idTitle1").setText(this.getResourceBundle().getText("ManageMyExpenses"));
                 sessionStorage.setItem("goToLaunchpad", "X");
 
-                // this.handleSynchronize();
+                this.handleSynchronize();
             },
 
             /**
@@ -1677,6 +1677,54 @@ sap.ui.define([
                 const oView = this.getView();
                 let bValid = true;
 
+                const aForbiddenRules = [
+                    { id: "expenseDialog:selectCountry", forbidden: ["0"] },
+                    { id: "expenseDialog:selectCurrency", forbidden: ["0"] }
+                ];
+
+                const getForbiddenRule = (oCtrl) => {
+                    const sCtrlId = oCtrl && oCtrl.getId ? oCtrl.getId() : "";
+
+                    if (!sCtrlId) {
+                        return null;
+                    }
+
+                    return aForbiddenRules.find(r => r.id === sCtrlId || sCtrlId.endsWith(r.id)) || null;
+                };
+
+                const getComparableValue = (oCtrl) => {
+                    if (oCtrl instanceof sap.m.Select || oCtrl instanceof sap.m.ComboBox) {
+                        return ((oCtrl.getSelectedKey && oCtrl.getSelectedKey()) ?? "").toString().trim();
+                    }
+                    if (
+                        oCtrl instanceof sap.m.Input ||
+                        oCtrl instanceof sap.m.TextArea ||
+                        oCtrl instanceof sap.m.MultiInput ||
+                        oCtrl instanceof sap.m.DatePicker ||
+                        oCtrl instanceof sap.m.DateTimePicker
+                    ) {
+                        return ((oCtrl.getValue && oCtrl.getValue()) ?? "").toString().trim();
+                    }
+                    return "";
+                };
+
+                const validateForbidden = (oCtrl) => {
+                    const oRule = getForbiddenRule(oCtrl);
+                    if (!oRule) return true;
+
+                    const sVal = getComparableValue(oCtrl);
+                    if (!sVal) return true;
+
+                    const bForbidden = (oRule.forbidden || []).some(v => (v ?? "").toString().trim() === sVal);
+
+                    if (bForbidden && oCtrl.setValueState) {
+                        oCtrl.setValueState(sap.ui.core.ValueState.Error);
+                        return false;
+                    }
+
+                    return true;
+                };
+
                 const setState = (ctrl, ok) => {
                     if (ctrl.setValueState) {
                         ctrl.setValueState(ok ? sap.ui.core.ValueState.None : sap.ui.core.ValueState.Error);
@@ -1776,6 +1824,11 @@ sap.ui.define([
                     } else {
                         if (ctrl.setValueState) ctrl.setValueState(sap.ui.core.ValueState.None);
                     }
+
+                    const okForbidden = validateForbidden(ctrl);
+                    if (!okForbidden) {
+                        bValid = false;
+                    }
                 });
 
                 return bValid;
@@ -1852,8 +1905,25 @@ sap.ui.define([
             },
 
             /**
+             * Strips spaces from the input value.
+             * @param {Event} oEvent - The event object
+             */
+            onStripSpaces: function (oEvent) {
+                const oInput = oEvent.getSource();
+                const sValue = oInput.getValue() || "";
+
+                const sClean = sValue.replace(/\s+/g, "");
+
+                if (sClean !== sValue) {
+                    oInput.setValue(sClean);
+                }
+            },
+
+
+            /**
              * Starts the expense creation process by opening the camera fragment,
              * initializing the camera, and binding click handlers for capture/upload/close actions.
+             * Desktop: opens a chooser with 2 tiles (Camera / Upload).
              */
             handleStartProcess: function () {
                 var Device = sap.ui.Device;
@@ -1867,9 +1937,70 @@ sap.ui.define([
 
                 this.handleResetModels();
 
+                if (Device && Device.system && Device.system.desktop && !this._skipDesktopChooser) {
+
+                    if (!this.oDesktopChoiceDialog) {
+                        this.oDesktopChoiceDialog = sap.ui.xmlfragment(oView.getId(), "zfiexpensesmanage.fragments.DesktopChoice", this);
+
+                        if (this.oDesktopChoiceDialog) {
+                            oView.addDependent(this.oDesktopChoiceDialog);
+                        }
+                    }
+
+                    if (!this.oDesktopChoiceDialog) {
+                        this._skipDesktopChooser = false;
+                    } else {
+
+                        if (!this._desktopTileCameraPress) {
+                            this._desktopTileCameraPress = function () {
+                                this._skipDesktopChooser = true;
+                                if (this.oDesktopChoiceDialog) {
+                                    this.oDesktopChoiceDialog.close();
+                                }
+
+                                this.handleStartProcess();
+                            };
+                        }
+
+                        if (!this._desktopTileUploadPress) {
+                            this._desktopTileUploadPress = function () {
+                                var oUploader = oView.byId("desktopChoiceFileUploader");
+                                if (!oUploader) return;
+
+                                oUploader.detachChange(this.onSelectFile, this);
+                                oUploader.attachChange(this.onSelectFile, this);
+
+                                var oDom = oUploader.getDomRef();
+                                var oInput = oDom && oDom.querySelector && oDom.querySelector('input[type="file"]');
+
+                                if (oInput && oInput.click) {
+                                    oInput.click();
+                                }
+                            };
+                        }
+
+                        var oTileCamera = oView.byId("tileCamera");
+                        var oTileUpload = oView.byId("tileUpload");
+
+                        if (oTileCamera) {
+                            oTileCamera.detachPress(this._desktopTileCameraPress, this);
+                            oTileCamera.attachPress(this._desktopTileCameraPress, this);
+                        }
+
+                        if (oTileUpload) {
+                            oTileUpload.detachPress(this._desktopTileUploadPress, this);
+                            oTileUpload.attachPress(this._desktopTileUploadPress, this);
+                        }
+
+                        this.oDesktopChoiceDialog.open();
+                        return;
+                    }
+                }
+
+                this._skipDesktopChooser = false;
+
                 if (!this.oCameraDialog) {
                     this.oCameraDialog = sap.ui.xmlfragment("zfiexpensesmanage.fragments.Camara", this);
-
                     oView.addDependent(this.oCameraDialog);
                 }
 
@@ -1883,6 +2014,7 @@ sap.ui.define([
 
                     this.handleDetachCameraListeners(oDomRef);
 
+                    this._handlers = this._handlers || {};
                     this._handlers.capture = this.onTakePhoto.bind(this);
                     this._handlers.close = this.onCloseCamera.bind(this);
                     this._handlers.file = this.onSelectFile.bind(this);
@@ -1936,6 +2068,8 @@ sap.ui.define([
                         that.handleCheckUnit();
                     } else {
                         Fragment.byId(oView.getId(), "expenseDialog:datePicker").setDateValue(new Date());
+                        Fragment.byId(oView.getId(), "expenseDialog:selectCurrency").setSelectedKey("0");
+                        Fragment.byId(oView.getId(), "expenseDialog:selectCountry").setSelectedKey("0");
 
                         that.onAddVatLine();
                         that.oExpensesModel.setProperty("/vatEditMode", true);
@@ -2005,6 +2139,7 @@ sap.ui.define([
                 fnById("expenseDialog:inputFuelQuantity").setRequired(false);
                 fnById("expenseDialog:selectPymtMeth").setEnabled(false);
                 fnById("expenseDialog:inputAmt").setEnabled(false);
+                fnById("expenseDialog:selectCurrency").setEnabled(false);
                 fnById("expenseDialog:titleVatTable").setVisible(false);
                 fnById("expenseDialog:vatTable").setVisible(false);
                 fnById("expenseDialog:labelAttachment").setVisible(false);
@@ -2027,10 +2162,11 @@ sap.ui.define([
                 Fragment.byId(oView.getId(), "expenseDialog:inputExpNo").setValue(oData.ExpNo);
                 Fragment.byId(oView.getId(), "expenseDialog:inputLocal").setValue(oData.Local);
                 Fragment.byId(oView.getId(), "expenseDialog:inputNif").setValue(oData.Nifs);
-                Fragment.byId(oView.getId(), "expenseDialog:selectCountry").setSelectedKey(oData.Country);
+                Fragment.byId(oView.getId(), "expenseDialog:selectCountry").setSelectedKey(oData.Country ? oData.Country : "0");
                 Fragment.byId(oView.getId(), "expenseDialog:selectExpType").setSelectedKey(oData.Exptype);
                 Fragment.byId(oView.getId(), "expenseDialog:inputFuelQuantity").setValue(oData.Fuelqty);
                 Fragment.byId(oView.getId(), "expenseDialog:inputAmt").setValue(oData.Amt);
+                Fragment.byId(oView.getId(), "expenseDialog:selectCurrency").setSelectedKey(oData.Waers ? oData.Waers : "0");
 
                 if (oData.Date) {
                     Fragment.byId(oView.getId(), "expenseDialog:datePicker").setDateValue(oData.Date);
@@ -2084,6 +2220,7 @@ sap.ui.define([
                     "expenseDialog:inputFuelQuantity",
                     "expenseDialog:selectPymtMeth",
                     "expenseDialog:inputAmt",
+                    "expenseDialog:selectCurrency",
                     "expenseDialog:textAreaComments",
                     "expenseDialog:inputUnit",
                     "expenseDialog:vatTable"
@@ -2134,6 +2271,7 @@ sap.ui.define([
                 oEntry.Land1 = Fragment.byId(oView.getId(), "expenseDialog:selectCountry").getSelectedKey();
                 oEntry.Sdate = Fragment.byId(oView.getId(), "expenseDialog:datePicker").getValue();
                 oEntry.Value = Fragment.byId(oView.getId(), "expenseDialog:inputAmt").getValue();
+                oEntry.Waers2 = Fragment.byId(oView.getId(), "expenseDialog:selectCurrency").getSelectedKey();
                 oEntry.Comments = Fragment.byId(oView.getId(), "expenseDialog:textAreaComments").getValue();
                 oEntry.TableIva = JSON.stringify(oView.getModel("Expenses").getProperty("/vatLines"));
 
@@ -2462,6 +2600,18 @@ sap.ui.define([
                 }
             },
 
+            /**
+             * Closes the desktop choice dialog.
+             */
+            onCloseDesktopChoice: function () {
+                if (this.oDesktopChoiceDialog && this.oDesktopChoiceDialog.isOpen && this.oDesktopChoiceDialog.isOpen()) {
+                    this.oDesktopChoiceDialog.close();
+                    this.oDesktopChoiceDialog.destroy();
+                    this.oDesktopChoiceDialog = null;
+                    return;
+                }
+            },
+
 
             /**
              * Handles the scanning of a photo by closing the camera and opening the scanning dialog.
@@ -2680,9 +2830,16 @@ sap.ui.define([
              * @param {Event} oEvent - File input change event
              */
             onSelectFile: function (oEvent) {
+                if (this.oDesktopChoiceDialog && this.oDesktopChoiceDialog.isOpen && this.oDesktopChoiceDialog.isOpen()) {
+                    this.onCloseDesktopChoice();
+                }
+
                 this._photoTaken = true;
 
-                var oFile = oEvent.target.files[0];
+                var oFile =
+                    (oEvent && oEvent.getParameter && oEvent.getParameter("files") && oEvent.getParameter("files")[0]) ||
+                    (oEvent && oEvent.target && oEvent.target.files && oEvent.target.files[0]);
+
                 if (!oFile) return;
 
                 var reader = new FileReader();
@@ -2749,17 +2906,17 @@ sap.ui.define([
                     const oContext = oItem.getBindingContext();
                     const oObject = oContext.getObject();
 
-                    const isEur = oObject.Waers === "EUR";
+                    // const isEur = oObject.Waers === "EUR";
                     const isPartOfEU = oObject.IsPartOfEU === true || oObject.IsPartOfEU === "X";
-                    const text = this.getResourceBundle().getText("xexp.expValueWithCurr", [oObject.WaersDesc, oObject.Waers]);
+                    // const text = this.getResourceBundle().getText("xexp.expValueWithCurr", [oObject.WaersDesc, oObject.Waers]);
 
-                    if (!isEur && oObject.WaersDesc && oObject.Waers) {
-                        Fragment.byId(viewId, "expenseDialog:labelAmt").setText(text);
-                    } else {
-                        Fragment.byId(viewId, "expenseDialog:labelAmt").setText(
-                            this.getResourceBundle().getText("xexp.expValue2")
-                        );
-                    }
+                    // if (!isEur && oObject.WaersDesc && oObject.Waers) {
+                    //     Fragment.byId(viewId, "expenseDialog:labelAmt").setText(text);
+                    // } else {
+                    //     Fragment.byId(viewId, "expenseDialog:labelAmt").setText(
+                    //         this.getResourceBundle().getText("xexp.expValue2")
+                    //     );
+                    // }
 
                     Fragment.byId(viewId, "expenseDialog:inputNif").setVisible(isPartOfEU ? true : false);
                 } catch (sError) {
@@ -2973,6 +3130,7 @@ sap.ui.define([
                     { id: "expenseDialog:inputFuelQuantity", label: "quantidade de combustível" },
                     { id: "expenseDialog:selectPymtMeth", label: "método de pagamento" },
                     { id: "expenseDialog:inputAmt", label: "montante" },
+                    { id: "expenseDialog:selectCurrency", label: "moeda" },
                     { id: "expenseDialog:textAreaComments", label: "observações" },
                     { id: "expenseDialog:inputUnit", label: "unidade" }
                 ];
