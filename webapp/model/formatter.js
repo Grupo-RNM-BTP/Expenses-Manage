@@ -3,46 +3,62 @@ sap.ui.define([], function () {
     return {
 
         /**
-         * Check if there is an expense document.
-         * @param {string} sExpDoc Expense document
-         * @returns {boolean} True if there is an expense document
+         * Removes leading zeros from a value (e.g., "00001234" -> "1234").
+         * @param {string|number} vValue The input value.
+         * @returns {string} The value without leading zeros.
+         */
+        removeLeadingZeros: function (vValue) {
+            if (vValue === null || vValue === undefined || vValue === "") {
+                return "";
+            }
+
+            var s = String(vValue);
+
+            s = s.replace(/^0+/, "");
+
+            return s === "" ? "0" : s;
+        },
+
+        /**
+         * Returns true if an expense document exists (non-empty value).
+         * @param {string} sExpDoc Expense document.
+         * @returns {boolean} True if there is an expense document.
          */
         hasExpDoc: function (sExpDoc) {
-
             return !!sExpDoc;
         },
 
         /**
-         * Check if there is no expense document.
-         * @param {string} sExpDoc Expense document
-         * @returns {boolean} True if there is no expense document
+         * Returns true if there is no expense document (empty value).
+         * @param {string} sExpDoc Expense document.
+         * @returns {boolean} True if there is no expense document.
          */
         noExpDoc: function (sExpDoc) {
             return !sExpDoc;
         },
 
         /**
-         * Check if there is no expense document approved.
-         * @param {string} sExpDoc Expense document
-         * @returns {boolean} True if there is no expense document approved
+         * Returns true if there is no approved expense document (empty value).
+         * @param {string} sExpDoc Expense document.
+         * @returns {boolean} True if there is no approved expense document.
          */
         noExpDocApprvd: function (sExpDoc) {
             return !sExpDoc;
         },
 
         /**
-         * Check if there is a reason.
-         * @param {string} sReason Reason
-         * @returns {boolean} True if there is a reason
+         * Returns true if a reason exists (non-empty value).
+         * @param {string} sReason Reason.
+         * @returns {boolean} True if there is a reason.
          */
         hasReason: function (sReason) {
             return !!sReason;
         },
 
         /**
-         * Get status text.
-         * @param {number} iStatus Status
-         * @returns {string} Status text
+         * Maps a status code to a localized status text.
+         * @param {number} iStatus Status code.
+         * @returns {string} Localized status text.
          */
         statusText: function (iStatus) {
             iStatus = parseInt(iStatus);
@@ -63,9 +79,9 @@ sap.ui.define([], function () {
         },
 
         /**
-         * Get status state.
-         * @param {number} iStatus Status
-         * @returns {string} Status state
+         * Maps a status code to a semantic UI5 ValueState.
+         * @param {number} iStatus Status code.
+         * @returns {string} UI5 ValueState (e.g., "Success", "Error", "Warning", "None").
          */
         statusState: function (iStatus) {
             iStatus = parseInt(iStatus);
@@ -86,9 +102,9 @@ sap.ui.define([], function () {
         },
 
         /**
-         * Get status icon.
-         * @param {number} iStatus Status
-         * @returns {string} Status icon
+         * Maps a status code to an SAP icon URI.
+         * @param {number} iStatus Status code.
+         * @returns {string} Icon URI (e.g., "sap-icon://warning").
          */
         statusIcon: function (iStatus) {
             iStatus = parseInt(iStatus);
@@ -108,9 +124,10 @@ sap.ui.define([], function () {
         },
 
         /**
-         * Format date time.
-         * @param {string} sValue Date time
-         * @returns {string} Formatted date time
+         * Formats a date/time value into "dd/MM/yyyy HH:mm:ss".
+         * Supports Date objects, OData "/Date(...)/" strings, and generic date strings.
+         * @param {string|Date} sValue Date/time value.
+         * @returns {string} Formatted date/time string.
          */
         formatDateTime: function (sValue) {
             if (!sValue) {
@@ -160,11 +177,10 @@ sap.ui.define([], function () {
             return oDateFormat.format(oDate);
         },
 
-
         /**
-         * Format year month.
-         * @param {string} sYearMonth Year month
-         * @returns {string} Formatted year month
+         * Converts a "YYYYMM" string into a localized month label.
+         * @param {string} sYearMonth Year-month string in "YYYYMM" format.
+         * @returns {string} Localized month label or original input when invalid.
          */
         formatYearMonth: function (sYearMonth) {
             if (!sYearMonth || sYearMonth.length !== 6) {
@@ -185,9 +201,9 @@ sap.ui.define([], function () {
         },
 
         /**
-         * Format date to dd/mm/yyyy.
-         * @param {string} sDate Date
-         * @returns {string} Formatted date
+         * Formats a date string into "dd/MM/yyyy".
+         * @param {string} sDate Date string.
+         * @returns {string} Formatted date.
          */
         formatDateToDDMMYYYY: function (sDate) {
             if (!sDate) {
@@ -203,6 +219,11 @@ sap.ui.define([], function () {
             return oDateFormat.format(oDate);
         },
 
+        /**
+         * Formats a date value into "dd.MM.yyyy".
+         * @param {string|Date} sValue Date value.
+         * @returns {string} Formatted date or original input when invalid.
+         */
         formatDate: function (sValue) {
             if (!sValue) {
                 return "";
@@ -221,6 +242,12 @@ sap.ui.define([], function () {
             return `${dd}.${mm}.${yyyy}`;
         },
 
+        /**
+         * Formats a numeric value with 2 decimals and optionally appends a currency.
+         * @param {string|number} fValue Value to format.
+         * @param {string} sCurrency Currency code/symbol.
+         * @returns {string} Formatted value.
+         */
         formatValue: function (fValue, sCurrency) {
             if (fValue === null || fValue === undefined || fValue === "") {
                 return "";
@@ -233,6 +260,12 @@ sap.ui.define([], function () {
             return sCurrency ? sFormatted + " " + sCurrency : sFormatted;
         },
 
+        /**
+         * Formats a numeric value in EUR using PT/ES-style separators:
+         * thousands "." and decimal "," and appends " EUR".
+         * @param {string|number} value Value to format.
+         * @returns {string} Formatted EUR currency string.
+         */
         formatCurrencyEUR: function (value) {
             if (value === null || value === undefined || value === "") {
                 return "";

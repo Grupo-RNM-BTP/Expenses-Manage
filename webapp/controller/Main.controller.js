@@ -31,7 +31,7 @@ sap.ui.define([
             /**
              * Initialize the controller, set model, and attach route matched.
              */
-            onInit: function () {   
+            onInit: function () {
                 var oModel = new JSONModel({
                     ExpNo: "",
                     ExpensesReconciled: [],
@@ -67,6 +67,10 @@ sap.ui.define([
                 this.getView().setModel(new JSONModel({ syncInProgress: false, syncText: "", currentJobId: null }), "Sync");
 
                 this.getView().setModel(new JSONModel({ items: [] }), "SyncLogs");
+
+                this.getView().setModel(new JSONModel({ showCollaborators: false }), "Collaborators");
+
+                this.getView().setModel(new JSONModel({ exp: "", results: [] }), "Collab");
 
                 this._iPollInterval = 2000;
                 this._sPollTimerId = null;
@@ -482,6 +486,105 @@ sap.ui.define([
                     }.bind(this)
                 })
             },
+
+            /**
+             * Handles the press event on the Unit link.
+             * Reads the collaborators EntitySet filtered by the current expense (ExpNo),
+             * and opens the collaborators popover with the returned results.
+             * @param {sap.ui.base.Event} oEvent The press event fired by the Link control.
+             */
+            onUnitPress: function (oEvent) {
+                try {
+                    var oModel = this.getModel();
+                    var oButton = oEvent.getSource();
+
+                    var oCtx = oButton.getBindingContext();
+                    var oRow = oCtx && oCtx.getObject();
+
+                    var sExp = oRow && oRow.ExpNo;
+
+                    if (!sExp) {
+                        return;
+                    }
+
+                    var aFilters = [
+                        new Filter("Exp", FilterOperator.EQ, sExp)
+                    ];
+
+                    oModel.read("/ZFI_EXPENSES_COLLAB", {
+                        filters: aFilters,
+
+                        urlParameters: {
+                            "$select": "Pernr,Name"
+                        },
+
+                        success: function (oData) {
+                            this.onBuildCollaboratorsPopOver(oButton, oData, sExp);
+                        }.bind(this),
+
+                        error: function (oError) {
+                            var sError = JSON.parse(oError.responseText).error.message.value || sError;
+
+                            MessageBox.alert(sError, {
+                                icon: "ERROR",
+                                onClose: null,
+                                styleClass: "",
+                                initialFocus: null,
+                                textDirection: sap.ui.core.TextDirection.Inherit
+                            });
+                        }.bind(this)
+                    });
+
+                } catch (error) {
+                    if (this.showErrorMessage) {
+                        this.showErrorMessage({
+                            oTitle: this.getResourceBundle().getText("error"),
+                            oText: error.message
+                        });
+                    } else {
+                        MessageBox.alert(error.message);
+                    }
+                }
+            },
+
+            /**
+             * Builds (lazy-loads) and opens the collaborators popover.
+             * Populates the "Collab" JSONModel with the expense identifier and the collaborators list.
+             * @param {sap.ui.core.Control} oButton The control used as anchor for the popover (openBy).
+             * @param {object} oData OData response payload containing the collaborators (typically in oData.results).
+             * @param {string} sExp Expense identifier used to fetch collaborators (shown in the popover model).
+             */
+            onBuildCollaboratorsPopOver: function (oButton, oData, sExp) {
+                try {
+                    if (!this._pCollabPopover) {
+                        this._pCollabPopover = this.loadFragment({
+                            name: "zfiexpensesmanage.fragments.CollaboratorsPopover"
+                        });
+                    }
+
+                    this._pCollabPopover.then(function (oPopover) {
+                        var oCollabModel = this.getView().getModel("Collab");
+
+                        oCollabModel.setData({
+                            exp: sExp,
+                            results: (oData && oData.results) ? oData.results : []
+                        });
+
+                        oPopover.openBy(oButton);
+                    }.bind(this));
+
+                } catch (error) {
+                    if (this.showErrorMessage) {
+                        this.showErrorMessage({
+                            oTitle: this.getResourceBundle().getText("error"),
+                            oText: error.message
+                        });
+                    } else {
+                        MessageBox.alert(error.message);
+                    }
+                }
+            },
+
 
             //---------------------------------------------------------------------------------------------------------------------------------------------------------
             //---------------------------------------------------------------------- Transactions ---------------------------------------------------------------------
@@ -1740,7 +1843,13 @@ sap.ui.define([
                         return false;
                     }
 
-                    if (ctrl instanceof sap.m.Input || ctrl instanceof sap.m.TextArea || ctrl instanceof sap.m.MultiInput) {
+                    if (ctrl instanceof sap.m.MultiInput) {
+                        const aTokens = ctrl.getTokens ? (ctrl.getTokens() || []) : [];
+
+                        return aTokens.length === 0;
+                    }
+
+                    if (ctrl instanceof sap.m.Input || ctrl instanceof sap.m.TextArea) {
                         const v = ctrl.getValue ? ctrl.getValue() : "";
                         return (v ?? "").toString().trim() === "";
                     }
@@ -2129,7 +2238,7 @@ sap.ui.define([
                 fnById("expenseDialog:textAreaComments").setRequired(true);
                 fnById("expenseDialog:inputExpNo").setRequired(false);
                 fnById("expenseDialog:inputLocal").setRequired(false);
-                fnById("expenseDialog:datePicker").setEnabled(false);
+                fnById("expenseDialog:datePicker").setEnabled(true);
                 fnById("expenseDialog:inputNif").setRequired(false);
                 fnById("expenseDialog:selectCountry").setRequired(false);
                 fnById("expenseDialog:selectExpType").setEnabled(false);
@@ -2139,7 +2248,7 @@ sap.ui.define([
                 fnById("expenseDialog:inputFuelQuantity").setRequired(false);
                 fnById("expenseDialog:selectPymtMeth").setEnabled(false);
                 fnById("expenseDialog:inputAmt").setEnabled(false);
-                fnById("expenseDialog:selectCurrency").setEnabled(false);
+                fnById("expenseDialog:selectCurrency").setVisible(false);
                 fnById("expenseDialog:titleVatTable").setVisible(false);
                 fnById("expenseDialog:vatTable").setVisible(false);
                 fnById("expenseDialog:labelAttachment").setVisible(false);
@@ -2223,6 +2332,7 @@ sap.ui.define([
                     "expenseDialog:selectCurrency",
                     "expenseDialog:textAreaComments",
                     "expenseDialog:inputUnit",
+                    "expenseDialog:multiCollaborators",
                     "expenseDialog:vatTable"
                 ];
                 var oView = this.getView(),
@@ -2274,6 +2384,7 @@ sap.ui.define([
                 oEntry.Waers2 = Fragment.byId(oView.getId(), "expenseDialog:selectCurrency").getSelectedKey();
                 oEntry.Comments = Fragment.byId(oView.getId(), "expenseDialog:textAreaComments").getValue();
                 oEntry.TableIva = JSON.stringify(oView.getModel("Expenses").getProperty("/vatLines"));
+                oEntry.Collaborators = this.handleFillCollaborators();
 
                 oEntry.Doc = await this.onConvertToPDF(oView.getModel("Expenses").getProperty("/capturedImage"));
                 oEntry.DocType = "PDF";
@@ -2449,6 +2560,8 @@ sap.ui.define([
                 this.getView().getModel("Cards")?.setData({ hasData: false, items: [] });
 
                 this.getView().getModel("Logs")?.setData({ entries: [] });
+
+                this.getView().getModel("Collaborators")?.setData({ showCollaborators: false });
             },
 
             /**
@@ -2892,7 +3005,60 @@ sap.ui.define([
                 const oPlateInput = Fragment.byId(this.getView().getId(), "expenseDialog:inputPlate");
                 oPlateInput.setRequired(sKey !== "ADR");
 
+                this.handleClearCollaborators();
+
                 this.handleCheckUnit();
+            },
+
+            /**
+             * Handles the change of the payment method by updating the "Expenses" model.
+             * @param {Event} oEvent - The event object
+             */
+            onPymtMethChange: function (oEvent) {
+                const oSel = oEvent.getSource();
+                const sKey = oSel.getSelectedKey();
+
+                const bIsCash = sKey.toUpperCase() === "N";
+
+                const oCardLabel = this.byId("expenseDialog:labelCreditCard");
+                const oCardSelect = this.byId("expenseDialog:selectCreditCard");
+
+                if (oCardLabel) { oCardLabel.setVisible(!bIsCash); }
+                if (oCardSelect) {
+                    oCardSelect.setVisible(!bIsCash);
+                    oCardSelect.setRequired(!bIsCash);
+                }
+            },
+
+            /**
+             * Handles the units StepInput change.
+             * Shows the collaborators MultiInput only when units > 1.
+             * If units == 1, clears tokens/value and removes suggestion filters.
+             * @param {sap.ui.base.Event} oEvent - StepInput change event
+             */
+            onUnitChange: function (oEvent) {
+                try {
+                    var iUnits = Number(oEvent.getSource().getValue() || 1);
+                    var oCollaboratorsModel = this.getView().getModel("Collaborators");
+                    var bShow = iUnits > 1;
+
+                    oCollaboratorsModel.setProperty("/showCollaborators", bShow);
+
+                    if (!bShow) {
+                        var oMI = sap.ui.core.Fragment.byId(this.getView().getId(), "expenseDialog:multiCollaborators");
+                        if (oMI) {
+                            oMI.removeAllTokens();
+                            oMI.setValue("");
+
+                            var oBinding = oMI.getBinding("suggestionItems");
+                            if (oBinding) {
+                                oBinding.filter([]);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    this.handleErrorMessage(e.message);
+                }
             },
 
             /**
@@ -2924,6 +3090,29 @@ sap.ui.define([
                 }
 
                 this.handleCheckUnit();
+            },
+
+            /**
+             * Clears collaborators MultiInput and hides the collaborators fields.
+             */
+            handleClearCollaborators: function () {
+                const oMulti = Fragment.byId(this.getView().getId(), "expenseDialog:multiCollaborators");
+                if (oMulti) {
+                    oMulti.removeAllTokens();
+                    oMulti.setValue("");
+                    oMulti.setValueState("None");
+                    oMulti.setValueStateText("");
+                }
+
+                const oUnit = Fragment.byId(this.getView().getId(), "expenseDialog:inputUnit");
+                if (oUnit) {
+                    oUnit.setValue(1);
+                }
+
+                const oCollabModel = this.getView().getModel("Collaborators");
+                if (oCollabModel) {
+                    oCollabModel.setProperty("/showCollaborators", false);
+                }
             },
 
             /**
@@ -2982,6 +3171,281 @@ sap.ui.define([
                     textDirection: sap.ui.core.TextDirection.Inherit
                 });
             },
+
+
+            /* ************************************************************************************** */
+            /* *                                   Collaborators VH                                 * */
+            /* ************************************************************************************** */
+
+            /**
+             * Opens the collaborators value help dialog (multi-select).
+             * Loads the fragment, configures the FilterBar (basic search + fields),
+             * binds the table to /ZFI_MANAGER_VH and pre-loads current tokens from the MultiInput.
+             */
+            handleOpenCollaboratorsVH: function () {
+                try {
+                    this._oBasicSearchFieldCollab = new sap.m.SearchField();
+
+                    this._oCollaboratorsVh = this.loadFragment({
+                        name: "zfiexpensesmanage.fragments.Collaborators"
+                    }).then(function (oDialogSuggestions) {
+                        var oFilterBar = oDialogSuggestions.getFilterBar();
+                        this._oCollaboratorsVh = oDialogSuggestions;
+
+                        this.getView().addDependent(oDialogSuggestions);
+
+                        oDialogSuggestions.setRangeKeyFields([{
+                            label: "pernr",
+                            key: "pernr",
+                            type: "string",
+                            typeInstance: new sap.ui.model.type.String({ maxLength: 8 })
+                        }]);
+
+                        oFilterBar.setFilterBarExpanded(false);
+                        oFilterBar.setBasicSearch(this._oBasicSearchFieldCollab);
+
+                        this._oBasicSearchFieldCollab.attachSearch(function () {
+                            oFilterBar.search();
+                        });
+
+                        oDialogSuggestions.getTableAsync().then(function (oTable) {
+                            oTable.setModel(this.getView().getModel());
+
+                            if (oTable.bindRows) {
+                                oTable.bindAggregation("rows", {
+                                    path: "/ZFI_MANAGER_VH",
+                                    events: {
+                                        dataReceived: function () {
+                                            oDialogSuggestions.update();
+                                        }
+                                    }
+                                });
+
+                                var oPernr = new sap.ui.table.Column({
+                                    label: new sap.m.Label({ text: "Pernr" }),
+                                    template: new sap.m.Text({ wrapping: false, text: "{pernr}" })
+                                });
+                                oPernr.data({ fieldName: "pernr" });
+                                oTable.addColumn(oPernr);
+
+                                var oCname = new sap.ui.table.Column({
+                                    label: new sap.m.Label({ text: "Nome" }),
+                                    template: new sap.m.Text({ wrapping: false, text: "{cname}" })
+                                });
+                                oCname.data({ fieldName: "cname" });
+                                oTable.addColumn(oCname);
+                            }
+
+                            if (oTable.bindItems) {
+                                if (oTable.removeAllColumns) {
+                                    oTable.removeAllColumns();
+                                }
+
+                                var oColP = new sap.m.Column({
+                                    header: new sap.m.Label({ text: "Pernr" })
+                                });
+                                oColP.data({ fieldName: "pernr" });
+                                oTable.addColumn(oColP);
+
+                                var oColN = new sap.m.Column({
+                                    header: new sap.m.Label({ text: "Nome" })
+                                });
+                                oColN.data({ fieldName: "cname" });
+                                oTable.addColumn(oColN);
+
+                                oTable.bindAggregation("items", {
+                                    path: "/ZFI_MANAGER_VH",
+                                    template: new sap.m.ColumnListItem({
+                                        cells: [
+                                            new sap.m.Text({ text: "{pernr}" }),
+                                            new sap.m.Text({ text: "{cname}" })
+                                        ]
+                                    }),
+                                    events: {
+                                        dataReceived: function () {
+                                            oDialogSuggestions.update();
+                                        }
+                                    }
+                                });
+                            }
+
+                            oDialogSuggestions.update();
+                        }.bind(this));
+
+                        // Pre-load existing tokens from the MultiInput (if any)
+                        var oMI = sap.ui.core.Fragment.byId(this.getView().getId(), "expenseDialog:multiCollaborators");
+                        if (oMI) {
+                            oDialogSuggestions.setTokens(oMI.getTokens());
+                        }
+
+                        oDialogSuggestions.open();
+                    }.bind(this));
+                } catch (e) {
+                    this.handleErrorMessage(e.message);
+                }
+            },
+
+            /**
+             * Handles the OK press on the collaborators value help dialog.
+             * Applies the selected tokens to the MultiInput and clears typed value.
+             * @param {sap.ui.base.Event} oEvent - ValueHelpDialog OK event
+             */
+            handleCollaboratorsPress: function (oEvent) {
+                try {
+                    var aTokens = oEvent.getParameter("tokens") || [];
+                    var oMI = sap.ui.core.Fragment.byId(this.getView().getId(), "expenseDialog:multiCollaborators");
+
+                    if (oMI) {
+                        oMI.setTokens(aTokens);
+                        oMI.setValue("");
+                    }
+
+                    this._oCollaboratorsVh.close();
+                } catch (e) {
+                    this.handleErrorMessage(e.message);
+                }
+            },
+
+            /**
+             * Handles the close/cancel of the collaborators value help dialog.
+             * Closes and destroys the dialog instance to avoid duplicates/leaks.
+             */
+            handleCollaboratorsVhClose: function () {
+                try {
+                    this._oCollaboratorsVh.close();
+                    this._oCollaboratorsVh.destroy();
+                    this._oCollaboratorsVh = null;
+                } catch (oError) {
+                    this.handleErrorMessage(oError.message);
+                }
+            },
+
+            /**
+             * Handles the search event on the collaborators value help FilterBar.
+             * Builds filters from the selection set plus the basic search and applies them to the table binding.
+             * @param {sap.ui.base.Event} oEvent - FilterBar search event
+             */
+            handleCollaboratorsVhSearch: function (oEvent) {
+                try {
+                    var sSearchQuery = this._oBasicSearchFieldCollab.getValue();
+                    var aSelectionSet = oEvent.getParameter("selectionSet");
+
+                    var aFilters = aSelectionSet.reduce(function (aResult, oControl) {
+                        if (oControl.getValue()) {
+                            aResult.push(new sap.ui.model.Filter({
+                                path: oControl.getName(),
+                                operator: sap.ui.model.FilterOperator.Contains,
+                                value1: oControl.getValue()
+                            }));
+                        }
+                        return aResult;
+                    }, []);
+
+                    if (sSearchQuery) {
+                        aFilters.push(new sap.ui.model.Filter({
+                            filters: [
+                                new sap.ui.model.Filter({ path: "pernr", operator: sap.ui.model.FilterOperator.Contains, value1: sSearchQuery }),
+                                new sap.ui.model.Filter({ path: "cname", operator: sap.ui.model.FilterOperator.Contains, value1: sSearchQuery })
+                            ],
+                            and: false
+                        }));
+                    }
+
+                    this.handleFilterVhTable(
+                        new sap.ui.model.Filter({ filters: aFilters, and: true }),
+                        this._oCollaboratorsVh
+                    );
+                } catch (e) {
+                    this.handleErrorMessage(e.message);
+                }
+            },
+
+            /**
+             * Provides suggestion (type-ahead) for the collaborators MultiInput.
+             * Filters the suggestionItems binding (OData) by pernr or cname.
+             * @param {sap.ui.base.Event} oEvent - suggest event from MultiInput
+             */
+            onSuggestCollaborators: function (oEvent) {
+                try {
+                    var sValue = (oEvent.getParameter("suggestValue") || "").trim();
+                    var oMI = oEvent.getSource();
+                    var oBinding = oMI.getBinding("suggestionItems");
+
+                    if (!oBinding) {
+                        return;
+                    }
+
+                    if (sValue.length < 2) {
+                        oBinding.filter([]);
+                        return;
+                    }
+
+                    var oFilter = new sap.ui.model.Filter({
+                        filters: [
+                            new sap.ui.model.Filter({ path: "pernr", operator: sap.ui.model.FilterOperator.Contains, value1: sValue }),
+                            new sap.ui.model.Filter({ path: "cname", operator: sap.ui.model.FilterOperator.Contains, value1: sValue })
+                        ],
+                        and: false
+                    });
+
+                    oBinding.filter([oFilter]);
+                } catch (e) {
+                    this.handleErrorMessage(e.message);
+                }
+            },
+
+            /**
+             * Handles selecting a suggestion item in the collaborators MultiInput.
+             * Converts the chosen item into a Token (avoids duplicates) and clears the typed value.
+             * @param {sap.ui.base.Event} oEvent - suggestionItemSelected event from MultiInput
+             */
+            onCollaboratorSuggestionItemSelected: function (oEvent) {
+                try {
+                    var oItem = oEvent.getParameter("selectedItem");
+                    if (!oItem) return;
+
+                    var oMI = oEvent.getSource();
+                    var sKey = oItem.getKey();
+                    var sText = oItem.getText();
+
+                    var bExists = oMI.getTokens().some(function (t) { return t.getKey() === sKey; });
+                    if (!bExists) {
+                        oMI.addToken(new sap.m.Token({ key: sKey, text: sText }));
+                    }
+
+                    oMI.setValue("");
+                } catch (e) {
+                    this.handleErrorMessage(e.message);
+                }
+            },
+
+            /**
+             * Builds the Collaborators payload from the selected tokens (MultiInput) and returns it as a JSON string.
+             * Maps tokens to { pernr }. If field is not visible or empty, returns "[]".
+             * @returns {string} JSON string representing selected collaborators
+             */
+            handleFillCollaborators: function () {
+                try {
+                    var oMI = sap.ui.core.Fragment.byId(this.getView().getId(), "expenseDialog:multiCollaborators");
+
+                    if (!oMI || !oMI.getVisible()) {
+                        return "[]";
+                    }
+
+                    var aTokens = oMI.getTokens() || [];
+                    var aCollaborators = aTokens.map(function (oToken) {
+                        return {
+                            pernr: oToken.getKey()
+                        };
+                    });
+
+                    return JSON.stringify(aCollaborators);
+                } catch (e) {
+                    this.handleErrorMessage(e.message);
+                    return "[]";
+                }
+            },
+
 
             /* ************************************************************************************** */
             /* *                                        Logs                                        * */
@@ -3132,7 +3596,8 @@ sap.ui.define([
                     { id: "expenseDialog:inputAmt", label: "montante" },
                     { id: "expenseDialog:selectCurrency", label: "moeda" },
                     { id: "expenseDialog:textAreaComments", label: "observações" },
-                    { id: "expenseDialog:inputUnit", label: "unidade" }
+                    { id: "expenseDialog:inputUnit", label: "unidade" },
+                    { id: "expenseDialog:multiCollaborators", label: "colaboradores" },
                 ];
             },
 
@@ -3150,6 +3615,11 @@ sap.ui.define([
 
                 if (ctrl.attachBrowserEvent) {
                     ctrl.attachBrowserEvent("focusin", this.handleRememberPrev.bind(this, ctrl));
+                }
+
+                if (ctrl instanceof sap.m.MultiInput) {
+                    ctrl.attachTokenUpdate(this.onMultiInputTokenUpdate.bind(this, meta));
+                    return;
                 }
 
                 if (ctrl.attachChange) {
@@ -3175,6 +3645,29 @@ sap.ui.define([
                 this.handleLogChange(sLabel, sOldValue, sNewValue);
                 oSource.data("__prev", sNewValue);
             },
+
+            /**
+             * Logs token add/remove events for MultiInput (tokens are the real value).
+             * @param {{id:string, label:string}} meta
+             * @param {sap.ui.base.Event} oEvent
+             */
+            onMultiInputTokenUpdate: function (meta, oEvent) {
+                try {
+                    var oMI = oEvent.getSource();
+
+                    var sOldValue = oMI.data("__prev");
+                    var sNewValue = this.handleGetFieldValue(oMI, oEvent);
+
+                    var bHasOld = sOldValue !== undefined && sOldValue !== null && String(sOldValue).trim() !== "";
+                    var sLabel = bHasOld ? ("Alteração de valor no campo " + meta.label) : ("Novo valor para o campo " + meta.label);
+
+                    this.handleLogChange(sLabel, sOldValue, sNewValue);
+                    oMI.data("__prev", sNewValue);
+                } catch (e) {
+                    this.handleErrorMessage(e.message);
+                }
+            },
+
 
             /* ************************************** Geral ************************************* */
 
@@ -3268,6 +3761,16 @@ sap.ui.define([
                 }
                 if (ctrl instanceof sap.m.DatePicker || ctrl instanceof sap.m.DateTimePicker) {
                     return ctrl.getValue();
+                }
+                if (ctrl instanceof sap.m.MultiInput) {
+                    var aTokens = ctrl.getTokens ? (ctrl.getTokens() || []) : [];
+                    return aTokens
+                        .map(function (t) {
+                            var sText = t.getText() || "";
+                            var sKey = t.getKey() || "";
+                            return sKey ? (sText + " (" + sKey + ")") : sText;
+                        })
+                        .join("; ");
                 }
                 if (ctrl.getValue) {
                     return ctrl.getValue();

@@ -1,0 +1,26 @@
+<core:FragmentDefinition xmlns="sap.ui.comp.valuehelpdialog"
+    xmlns:m="sap.m"
+    xmlns:fb="sap.ui.comp.filterbar"
+    xmlns:core="sap.ui.core">
+    <ValueHelpDialog title="{i18n>xexp.expCollaborators}" ok=".handleCollaboratorsPress" cancel=".handleCollaboratorsVhClose" afterClose=".handleCollaboratorsVhClose" supportRanges="true" key="pernr" descriptionKey="cname" supportMultiselect="true">
+        <filterBar>
+            <fb:FilterBar advancedMode="true" search=".handleCollaboratorsVhSearch" isRunningInValueHelpDialog="true">
+                <fb:filterGroupItems>
+
+                    <fb:FilterGroupItem groupName="__$INTERNAL$" name="pernr" label="Pernr" visibleInFilterBar="true">
+                        <fb:control>
+                            <m:Input name="pernr" />
+                        </fb:control>
+                    </fb:FilterGroupItem>
+
+                    <fb:FilterGroupItem groupName="__$INTERNAL$" name="cname" label="Nome" visibleInFilterBar="true">
+                        <fb:control>
+                            <m:Input name="cname" />
+                        </fb:control>
+                    </fb:FilterGroupItem>
+
+                </fb:filterGroupItems>
+            </fb:FilterBar>
+        </filterBar>
+    </ValueHelpDialog>
+</core:FragmentDefinition>

@@ -1,0 +1,28 @@
+<core:FragmentDefinition xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <ResponsivePopover id="collaboratorsPopover" title="{i18n>xexp.expCollaborators}" class="sapUiContentPadding" placement="Auto" contentWidth="28rem">
+        <Table id="collaboratorsTable" inset="false" fixedLayout="false" growing="true" growingThreshold="10" items="{Collab>/results}">
+            <columns>
+                <Column width="8rem">
+                    <header>
+                        <Text text="{i18n>xexp.expCollaborator}"/>
+                    </header>
+                </Column>
+
+                <Column>
+                    <header>
+                        <Text text="{i18n>xexp.expCollaboratorName}"/>
+                    </header>
+                </Column>
+            </columns>
+            <items>
+                <ColumnListItem>
+                    <cells>
+                        <Text text="{ path: 'Collab>Pernr', formatter: '.formatter.removeLeadingZeros' }" />
+                        <Text text="{Collab>Name}" />
+                    </cells>
+                </ColumnListItem>
+            </items>
+        </Table>
+    </ResponsivePopover>
+</core:FragmentDefinition>

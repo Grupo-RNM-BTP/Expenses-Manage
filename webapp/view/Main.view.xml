@@ -85,7 +85,7 @@
                             </l:Grid>
 
                             <smartFilterBar:SmartFilterBar id="idSmartFilterBar" entitySet="ZFI_EXPENSES_MNG" />
-                            <smartTable:SmartTable id="MyExpensesTable" demandPopin="true" showRowCount="false" enableAutoBinding="true" entitySet="ZFI_EXPENSES_MNG" persistencyKey='pKeyOperationsTable' useVariantManagement="false" smartFilterId="idSmartFilterBar" tableType="ResponsiveTable" beforeRebindTable="onBeforeRebindTable" useExportToExcel="false" width="100%" useTablePersonalisation="true" requestAtLeastFields="Doc,Reason,ExpNo,ApprvdValue,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus">
+                            <smartTable:SmartTable id="MyExpensesTable" demandPopin="true" showRowCount="false" enableAutoBinding="true" entitySet="ZFI_EXPENSES_MNG" persistencyKey='pKeyOperationsTable' useVariantManagement="false" smartFilterId="idSmartFilterBar" tableType="ResponsiveTable" beforeRebindTable="onBeforeRebindTable" useExportToExcel="false" width="100%" useTablePersonalisation="true" requestAtLeastFields="Doc,Unit,Reason,ExpNo,ApprvdValue,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus">
                                 <smartTable:customToolbar>
                                     <OverflowToolbar design="Transparent">
                                         <ToolbarSpacer/>
@@ -130,6 +130,11 @@
                                                 <Text text="{i18n>PostedValue}" />
                                             </header>
                                         </Column>
+                                        <Column visible="false" customData:p13nData='{"columnKey":"Unit","leadingProperty":"Unit","sortProperty":"Unit","filterProperty":"Unit"}'>
+                                            <header>
+                                                <Text text="{i18n>xexp.expUnit}" />
+                                            </header>
+                                        </Column>
                                     </columns>
                                     <items>
                                         <ColumnListItem id="idColumnListItem">
@@ -149,6 +154,7 @@
                                                 <Text text="{path: 'Erdat', formatter: '.formatter.formatDateTime'}" />
                                                 <Text id="Totalvalue" text="{parts: [{path: 'Value'}, {path: 'Waers'}], formatter: '.formatter.formatValue'}" />
                                                 <Text id="ApprovedValue" text="{parts: [{path: 'ApprvdValue'}, {path: 'Waers'}], formatter: '.formatter.formatValue'}" />
+                                                <Link text="{Unit}" press="onUnitPress" />
                                             </cells>
                                         </ColumnListItem>
                                     </items>
@@ -166,7 +172,7 @@
 
                             <Toolbar style="Standard" design="Transparent" height="0.1rem" />
 
-                             <layout:Grid defaultSpan="XL12 L12 M12 S12" hSpacing="4" vSpacing="4" class="sapUiResponsiveMargin sapUiSmallMarginTopBottom">
+                            <layout:Grid defaultSpan="XL12 L12 M12 S12" hSpacing="4" vSpacing="4" class="sapUiResponsiveMargin sapUiSmallMarginTopBottom">
                                 <layout:content>
                                     <f:Card class="sapUiSmallMargin" width="100%">
                                         <f:content>
@@ -367,6 +373,11 @@
                                             <Text text="{i18n>Value}" />
                                         </header>
                                     </Column>
+                                    <Column visible="false" customData:p13nData='{"columnKey":"Unit","leadingProperty":"Unit","sortProperty":"Unit","filterProperty":"Unit"}'>
+                                        <header>
+                                            <Text text="{i18n>xexp.expUnit}" />
+                                        </header>
+                                    </Column>
                                 </columns>
                                 <items>
                                     <ColumnListItem id="idColumnListItemApprovals">
@@ -388,6 +399,7 @@
                                             <Text text="{Reason}" />
                                             <Text text="{path: 'Erdat', formatter: '.formatter.formatDateTime'}" />
                                             <Text text="{Value} {Waers}" />
+                                            <Link text="{Unit}" press="onUnitPress" />
                                         </cells>
                                     </ColumnListItem>
                                 </items>
