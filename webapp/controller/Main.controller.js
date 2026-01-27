@@ -48,6 +48,7 @@ sap.ui.define([
                 this._cancel = false;
                 this._chknum = "";
                 this._cardnum = "";
+                this._exptype = "";
 
                 this._bScan = false;
 
@@ -71,6 +72,8 @@ sap.ui.define([
                 this.getView().setModel(new JSONModel({ showCollaborators: false }), "Collaborators");
 
                 this.getView().setModel(new JSONModel({ exp: "", results: [] }), "Collab");
+
+                this.getView().setModel(new JSONModel({ exp: "", results: [] }), "Plate");
 
                 this._iPollInterval = 2000;
                 this._sPollTimerId = null;
@@ -566,6 +569,104 @@ sap.ui.define([
                         var oCollabModel = this.getView().getModel("Collab");
 
                         oCollabModel.setData({
+                            exp: sExp,
+                            results: (oData && oData.results) ? oData.results : []
+                        });
+
+                        oPopover.openBy(oButton);
+                    }.bind(this));
+
+                } catch (error) {
+                    if (this.showErrorMessage) {
+                        this.showErrorMessage({
+                            oTitle: this.getResourceBundle().getText("error"),
+                            oText: error.message
+                        });
+                    } else {
+                        MessageBox.alert(error.message);
+                    }
+                }
+            },
+
+            /**
+             * Handles the press event on the Plate link.
+             * Reads the plates EntitySet filtered by the current expense (ExpNo),
+             * and opens the plates popover with the returned results.
+             * @param {sap.ui.base.Event} oEvent The press event fired by the Link control.
+             */
+            onPlatePress: function (oEvent) {
+                try {
+                    var oModel = this.getModel();
+                    var oButton = oEvent.getSource();
+
+                    var oCtx = oButton.getBindingContext();
+                    var oRow = oCtx && oCtx.getObject();
+
+                    var sExp = oRow && oRow.ExpNo;
+
+                    if (!sExp) {
+                        return;
+                    }
+
+                    var aFilters = [
+                        new Filter("Exp", FilterOperator.EQ, sExp)
+                    ];
+
+                    oModel.read("/ZFI_EXPENSES_PLATES2", {
+                        filters: aFilters,
+
+                        urlParameters: {
+                            "$select": "Plate,Aufnr"
+                        },
+
+                        success: function (oData) {
+                            this.onBuildPlatesPopOver(oButton, oData, sExp);
+                        }.bind(this),
+
+                        error: function (oError) {
+                            var sError = JSON.parse(oError.responseText).error.message.value || sError;
+
+                            MessageBox.alert(sError, {
+                                icon: "ERROR",
+                                onClose: null,
+                                styleClass: "",
+                                initialFocus: null,
+                                textDirection: sap.ui.core.TextDirection.Inherit
+                            });
+                        }.bind(this)
+                    });
+
+                } catch (error) {
+                    if (this.showErrorMessage) {
+                        this.showErrorMessage({
+                            oTitle: this.getResourceBundle().getText("error"),
+                            oText: error.message
+                        });
+                    } else {
+                        MessageBox.alert(error.message);
+                    }
+                }
+            },
+
+            /**
+             * Builds (lazy-loads) and opens the plates popover.
+             * Populates the "Plate" JSONModel with the expense identifier and the plates list.
+             * @param {sap.ui.core.Control} oButton The control used as anchor for the popover (openBy).
+             * @param {object} oData OData response payload containing the plates (typically in oData.results).
+             * @param {string} sExp Expense identifier used to fetch plates (shown in the popover model).
+             */
+            onBuildPlatesPopOver: function (oButton, oData, sExp) {
+                try {
+                    if (!this._pPlatePopover) {
+                        this._pPlatePopover = this.loadFragment({
+                            name: "zfiexpensesmanage.fragments.PlatePopover"
+                        });
+                    }
+
+                    this._pPlatePopover.then(function (oPopover) {
+                        var oPlateModel = this.getView().getModel("Plate");
+
+                        oPlateModel.setData({
                             exp: sExp,
                             results: (oData && oData.results) ? oData.results : []
                         });
@@ -1782,7 +1883,8 @@ sap.ui.define([
 
                 const aForbiddenRules = [
                     { id: "expenseDialog:selectCountry", forbidden: ["0"] },
-                    { id: "expenseDialog:selectCurrency", forbidden: ["0"] }
+                    { id: "expenseDialog:selectCurrency", forbidden: ["0"] },
+                    { id: "expenseDialog:selectExpType", forbidden: ["0"] }
                 ];
 
                 const getForbiddenRule = (oCtrl) => {
@@ -2179,6 +2281,7 @@ sap.ui.define([
                         Fragment.byId(oView.getId(), "expenseDialog:datePicker").setDateValue(new Date());
                         Fragment.byId(oView.getId(), "expenseDialog:selectCurrency").setSelectedKey("0");
                         Fragment.byId(oView.getId(), "expenseDialog:selectCountry").setSelectedKey("0");
+                        Fragment.byId(oView.getId(), "expenseDialog:selectExpType").setSelectedKey("0");
 
                         that.onAddVatLine();
                         that.oExpensesModel.setProperty("/vatEditMode", true);
@@ -2244,7 +2347,7 @@ sap.ui.define([
                 fnById("expenseDialog:selectExpType").setEnabled(false);
                 fnById("expenseDialog:selectExpSubType").setRequired(false);
                 fnById("expenseDialog:selectBP").setRequired(false);
-                fnById("expenseDialog:inputPlate").setRequired(false);
+                fnById("expenseDialog:multiPlates").setRequired(false);
                 fnById("expenseDialog:inputFuelQuantity").setRequired(false);
                 fnById("expenseDialog:selectPymtMeth").setEnabled(false);
                 fnById("expenseDialog:inputAmt").setEnabled(false);
@@ -2272,10 +2375,14 @@ sap.ui.define([
                 Fragment.byId(oView.getId(), "expenseDialog:inputLocal").setValue(oData.Local);
                 Fragment.byId(oView.getId(), "expenseDialog:inputNif").setValue(oData.Nifs);
                 Fragment.byId(oView.getId(), "expenseDialog:selectCountry").setSelectedKey(oData.Country ? oData.Country : "0");
-                Fragment.byId(oView.getId(), "expenseDialog:selectExpType").setSelectedKey(oData.Exptype);
+                Fragment.byId(oView.getId(), "expenseDialog:selectExpType").setSelectedKey(oData.Exptype ? oData.Exptype : "0");
                 Fragment.byId(oView.getId(), "expenseDialog:inputFuelQuantity").setValue(oData.Fuelqty);
                 Fragment.byId(oView.getId(), "expenseDialog:inputAmt").setValue(oData.Amt);
                 Fragment.byId(oView.getId(), "expenseDialog:selectCurrency").setSelectedKey(oData.Waers ? oData.Waers : "0");
+
+                if (oData.Plate) {
+                    this.handleSetPlate(oData.Plate, oView);
+                }
 
                 if (oData.Date) {
                     Fragment.byId(oView.getId(), "expenseDialog:datePicker").setDateValue(oData.Date);
@@ -2325,7 +2432,7 @@ sap.ui.define([
                     "expenseDialog:selectExpType",
                     "expenseDialog:selectExpSubType",
                     "expenseDialog:selectBP",
-                    "expenseDialog:inputPlate",
+                    "expenseDialog:multiPlates",
                     "expenseDialog:inputFuelQuantity",
                     "expenseDialog:selectPymtMeth",
                     "expenseDialog:inputAmt",
@@ -2385,6 +2492,7 @@ sap.ui.define([
                 oEntry.Comments = Fragment.byId(oView.getId(), "expenseDialog:textAreaComments").getValue();
                 oEntry.TableIva = JSON.stringify(oView.getModel("Expenses").getProperty("/vatLines"));
                 oEntry.Collaborators = this.handleFillCollaborators();
+                oEntry.Exptype2 = this._exptype;
 
                 oEntry.Doc = await this.onConvertToPDF(oView.getModel("Expenses").getProperty("/capturedImage"));
                 oEntry.DocType = "PDF";
@@ -2396,8 +2504,8 @@ sap.ui.define([
                     oEntry.Fuelqty = Fragment.byId(oView.getId(), "expenseDialog:inputFuelQuantity").getValue();
                 }
 
-                if (Fragment.byId(oView.getId(), "expenseDialog:inputPlate").getVisible()) {
-                    oEntry.Plate = Fragment.byId(oView.getId(), "expenseDialog:inputPlate").getValue();
+                if (Fragment.byId(oView.getId(), "expenseDialog:multiPlates").getVisible()) {
+                    oEntry.Plates = this.handleFillPlates();
                 }
 
                 if (Fragment.byId(oView.getId(), "expenseDialog:inputUnit").getVisible()) {
@@ -3002,8 +3110,11 @@ sap.ui.define([
                 this.oExpensesModel.setProperty("/exptype", sKey);
                 this.oExpensesModel.refresh(true);
 
-                const oPlateInput = Fragment.byId(this.getView().getId(), "expenseDialog:inputPlate");
+                const oPlateInput = Fragment.byId(this.getView().getId(), "expenseDialog:multiPlates");
                 oPlateInput.setRequired(sKey !== "ADR");
+
+                const oBPInput = Fragment.byId(this.getView().getId(), "expenseDialog:selectBP");
+                oBPInput.setRequired(sKey !== "REF");
 
                 this.handleClearCollaborators();
 
@@ -3590,7 +3701,7 @@ sap.ui.define([
                     { id: "expenseDialog:selectExpType", label: "tipo de despesa" },
                     { id: "expenseDialog:selectExpSubType", label: "subtipo de despesa" },
                     { id: "expenseDialog:selectBP", label: "parceiro" },
-                    { id: "expenseDialog:inputPlate", label: "matrícula" },
+                    { id: "expenseDialog:multiPlates", label: "matrícula" },
                     { id: "expenseDialog:inputFuelQuantity", label: "quantidade de combustível" },
                     { id: "expenseDialog:selectPymtMeth", label: "método de pagamento" },
                     { id: "expenseDialog:inputAmt", label: "montante" },
@@ -3797,12 +3908,12 @@ sap.ui.define([
                 try {
                     this._oBasicSearchField = new sap.m.SearchField();
 
-                    this._oMaterialVh = this.loadFragment({
+                    this._oPartnerVh = this.loadFragment({
                         name: "zfiexpensesmanage.fragments.BusinessPartner"
                     }).then(function (oDialogSuggestions) {
                         var oFilterBar = oDialogSuggestions.getFilterBar();
 
-                        this._oMaterialVh = oDialogSuggestions;
+                        this._oPartnerVh = oDialogSuggestions;
 
                         this.getView().addDependent(oDialogSuggestions);
 
@@ -3900,6 +4011,18 @@ sap.ui.define([
                             oDialogSuggestions.update();
                         }.bind(this));
 
+                        var oBPInput = Fragment.byId(this.getView().getId(), "expenseDialog:selectBP");
+                        var sBPKey = oBPInput && oBPInput.data("BPKey");
+                        var sBPText = oBPInput && oBPInput.getValue();
+
+                        if (sBPKey) {
+                            oDialogSuggestions.setTokens([
+                                new sap.m.Token({ key: sBPKey, text: sBPText || sBPKey })
+                            ]);
+                        } else {
+                            oDialogSuggestions.setTokens([]);
+                        }
+
                         oDialogSuggestions.open();
                     }.bind(this));
                 } catch (e) {
@@ -3916,6 +4039,14 @@ sap.ui.define([
                     var aTokens = oEvent.getParameter("tokens");
                     var oBusinessPartner = Fragment.byId(this.getView().getId(), "expenseDialog:selectBP");
 
+                    if (aTokens.length === 0) {
+                        oBusinessPartner.setValue("");
+                        oBusinessPartner.data("BPKey", "");
+
+                        this._exptype = null;
+                        this._oPartnerVh.close();
+                        return;
+                    }
 
                     if (aTokens.length > 0) {
                         if (aTokens.length > 1) {
@@ -3929,9 +4060,13 @@ sap.ui.define([
 
                         oBusinessPartner.setValue(sBusinessPartnerName);
                         oBusinessPartner.data("BPKey", sBusinessPartner);
+
+                        if (this.getModel("Expenses").getProperty("/exptype") != 'UE') {
+                            this._exptype = 'DESREP';
+                        }
                     }
 
-                    this._oMaterialVh.close();
+                    this._oPartnerVh.close();
                 } catch (e) {
                     this.showErrorMessage(e.message);
                 }
@@ -3942,9 +4077,9 @@ sap.ui.define([
              */
             handlePartnerVhClose: function () {
                 try {
-                    this._oMaterialVh.close();
-                    this._oMaterialVh.destroy();
-                    this._oMaterialVh = null;
+                    this._oPartnerVh.close();
+                    this._oPartnerVh.destroy();
+                    this._oPartnerVh = null;
                 } catch (oError) {
                     this.showErrorMessage(oError.message);
                 }
@@ -3979,7 +4114,7 @@ sap.ui.define([
                         and: false
                     }));
 
-                    this.handleFilterVhTable(new sap.ui.model.Filter({ filters: aFilters, and: true }), this._oMaterialVh);
+                    this.handleFilterVhTable(new sap.ui.model.Filter({ filters: aFilters, and: true }), this._oPartnerVh);
                 } catch (e) {
                     this.showErrorMessage(e.message);
                 }
@@ -4002,6 +4137,299 @@ sap.ui.define([
 
                     oValueHelp.update();
                 });
+            },
+
+            /**
+             * Handles the business partner cleared event
+             * @param {sap.ui.core.Control} oEvent
+             */
+            onBPCleared: function (oEvent) {
+                var sVal = (oEvent.getParameter("value") || "").trim();
+                if (sVal) {
+                    return;
+                }
+
+                var oBusinessPartner = Fragment.byId(this.getView().getId(), "expenseDialog:selectBP");
+                oBusinessPartner.data("BPKey", "");
+
+                this._exptype = null;
+            },
+
+            /* ************************************************************************************** */
+            /* *                                   Plates VH                                        * */
+            /* ************************************************************************************** */
+
+            /**
+             * Opens the plates value help dialog (multi-select).
+             * Loads the fragment, configures the FilterBar (basic search + fields),
+             * binds the table to /ZFI_EXPENSES_PLATES and pre-loads current tokens from the MultiInput.
+             */
+            handleOpenPlatesVH: function () {
+                try {
+                    this._oBasicSearchFieldPlate = new sap.m.SearchField();
+
+                    this._oPlatesVh = this.loadFragment({
+                        name: "zfiexpensesmanage.fragments.Plates"
+                    }).then(function (oDialog) {
+                        var oFilterBar = oDialog.getFilterBar();
+                        this._oPlatesVh = oDialog;
+
+                        this.getView().addDependent(oDialog);
+
+                        oDialog.setRangeKeyFields([{
+                            label: "Plate",
+                            key: "Plate",
+                            type: "string",
+                            typeInstance: new sap.ui.model.type.String({ maxLength: 15 })
+                        }]);
+
+                        oFilterBar.setFilterBarExpanded(false);
+                        oFilterBar.setBasicSearch(this._oBasicSearchFieldPlate);
+
+                        this._oBasicSearchFieldPlate.attachSearch(function () {
+                            oFilterBar.search();
+                        });
+
+                        oDialog.getTableAsync().then(function (oTable) {
+                            oTable.setModel(this.getView().getModel());
+
+                            if (oTable.bindRows) {
+                                oTable.bindAggregation("rows", {
+                                    path: "/ZFI_EXPENSES_PLATES",
+                                    events: {
+                                        dataReceived: function () { oDialog.update(); }
+                                    }
+                                });
+
+                                var oColPlate = new sap.ui.table.Column({
+                                    label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.colPlate") }),
+                                    template: new sap.m.Text({ wrapping: false, text: "{Plate}" })
+                                });
+                                oColPlate.data({ fieldName: "Plate" });
+                                oTable.addColumn(oColPlate);
+                            }
+
+                            if (oTable.bindItems) {
+                                if (oTable.removeAllColumns) {
+                                    oTable.removeAllColumns();
+                                }
+
+                                var oMColPlate = new sap.m.Column({
+                                    header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.colPlate") })
+                                });
+                                oMColPlate.data({ fieldName: "Plate" });
+                                oTable.addColumn(oMColPlate);
+
+                                oTable.bindAggregation("items", {
+                                    path: "/ZFI_EXPENSES_PLATES",
+                                    template: new sap.m.ColumnListItem({
+                                        cells: [
+                                            new sap.m.Text({ text: "{Plate}" })
+                                        ]
+                                    }),
+                                    events: {
+                                        dataReceived: function () { oDialog.update(); }
+                                    }
+                                });
+                            }
+
+                            oDialog.update();
+                        }.bind(this));
+
+                        var oMI = sap.ui.core.Fragment.byId(this.getView().getId(), "expenseDialog:multiPlates");
+                        if (oMI) {
+                            oDialog.setTokens(oMI.getTokens());
+                        }
+
+                        oDialog.open();
+                    }.bind(this));
+                } catch (e) {
+                    this.handleErrorMessage(e.message);
+                }
+            },
+
+            /**
+             * Handles the OK press on the plates value help dialog.
+             * Applies the selected tokens to the MultiInput and clears typed value.
+             * @param {sap.ui.base.Event} oEvent - ValueHelpDialog OK event
+             */
+            handlePlatesPress: function (oEvent) {
+                try {
+                    var aTokens = oEvent.getParameter("tokens") || [];
+                    var oMI = sap.ui.core.Fragment.byId(this.getView().getId(), "expenseDialog:multiPlates");
+
+                    if (oMI) {
+                        oMI.setTokens(aTokens);
+                        oMI.setValue("");
+                    }
+
+                    this._oPlatesVh.close();
+                } catch (e) {
+                    this.handleErrorMessage(e.message);
+                }
+            },
+
+            /**
+             * Handles the close/cancel of the plates value help dialog.
+             * Closes and destroys the dialog instance to avoid duplicates/leaks.
+             */
+            handlePlatesVhClose: function () {
+                try {
+                    if (this._oPlatesVh) {
+                        this._oPlatesVh.close();
+                        this._oPlatesVh.destroy();
+                        this._oPlatesVh = null;
+                    }
+                } catch (e) {
+                    this.handleErrorMessage(e.message);
+                }
+            },
+
+            /**
+             * Handles the search event on the plates value help FilterBar.
+             * Builds filters from the selection set plus the basic search and applies them to the table binding.
+             * Searches over Plate
+             * @param {sap.ui.base.Event} oEvent - FilterBar search event
+             */
+            handlePlatesVhSearch: function (oEvent) {
+                try {
+                    var sSearchQuery = this._oBasicSearchFieldPlate.getValue();
+                    var aSelectionSet = oEvent.getParameter("selectionSet");
+
+                    var aFilters = aSelectionSet.reduce(function (aResult, oControl) {
+                        if (oControl.getValue()) {
+                            aResult.push(new sap.ui.model.Filter({
+                                path: oControl.getName(),
+                                operator: sap.ui.model.FilterOperator.Contains,
+                                value1: oControl.getValue()
+                            }));
+                        }
+                        return aResult;
+                    }, []);
+
+                    if (sSearchQuery) {
+                        aFilters.push(new sap.ui.model.Filter({
+                            filters: [
+                                new sap.ui.model.Filter({ path: "Plate", operator: sap.ui.model.FilterOperator.Contains, value1: sSearchQuery })
+                            ],
+                            and: false
+                        }));
+                    }
+
+                    this.handleFilterVhTable(
+                        new sap.ui.model.Filter({ filters: aFilters, and: true }),
+                        this._oPlatesVh
+                    );
+                } catch (e) {
+                    this.handleErrorMessage(e.message);
+                }
+            },
+
+            /**
+             * Provides suggestion (type-ahead) for the plates MultiInput.
+             * Filters the suggestionItems binding (OData) by Plate.
+             * @param {sap.ui.base.Event} oEvent - suggest event from MultiInput
+             */
+            onSuggestPlates: function (oEvent) {
+                try {
+                    var sValue = (oEvent.getParameter("suggestValue") || "").trim();
+                    var oMI = oEvent.getSource();
+                    var oBinding = oMI.getBinding("suggestionItems");
+                    if (!oBinding) return;
+
+                    if (sValue.length < 2) {
+                        oBinding.filter([]);
+                        return;
+                    }
+
+                    var oFilter = new sap.ui.model.Filter({
+                        filters: [
+                            new sap.ui.model.Filter({ path: "Plate", operator: sap.ui.model.FilterOperator.Contains, value1: sValue })
+                        ],
+                        and: false
+                    });
+
+                    oBinding.filter([oFilter]);
+                } catch (e) {
+                    this.handleErrorMessage(e.message);
+                }
+            },
+
+            /**
+             * Handles selecting a suggestion item in the plates MultiInput.
+             * Converts the chosen item into a Token (avoids duplicates) and clears the typed value.
+             * @param {sap.ui.base.Event} oEvent - suggestionItemSelected event from MultiInput
+             */
+            onPlateSuggestionItemSelected: function (oEvent) {
+                try {
+                    var oItem = oEvent.getParameter("selectedItem");
+                    if (!oItem) return;
+
+                    var oMI = oEvent.getSource();
+                    var sKey = oItem.getKey();
+                    var sText = oItem.getText();
+
+                    var bExists = oMI.getTokens().some(function (t) { return t.getKey() === sKey; });
+                    if (!bExists) {
+                        oMI.addToken(new sap.m.Token({ key: sKey, text: sText }));
+                    }
+
+                    oMI.setValue("");
+                } catch (e) {
+                    this.handleErrorMessage(e.message);
+                }
+            },
+
+            /**
+             * Builds the plates payload from the selected tokens (MultiInput) and returns it as a JSON string.
+             * Maps tokens to { plate }. If field is not visible or empty, returns "[]".
+             * @returns {string} JSON string representing selected plates
+             */
+            handleFillPlates: function () {
+                try {
+                    var oMI = sap.ui.core.Fragment.byId(this.getView().getId(), "expenseDialog:multiPlates");
+
+                    if (!oMI || !oMI.getVisible()) {
+                        return "[]";
+                    }
+
+                    var aTokens = oMI.getTokens() || [];
+                    var aPlates = aTokens.map(function (oToken) {
+                        return { order: oToken.getKey(), plate: oToken.getText() };
+                    });
+
+                    return JSON.stringify(aPlates);
+                } catch (e) {
+                    this.handleErrorMessage(e.message);
+                    return "[]";
+                }
+            },
+
+            /**
+             * Sets a single plate on the Plates MultiInput as one token (replaces existing tokens).
+             * @param {string} sPlate - Plate value to set
+             * @param {sap.ui.core.mvc.View} oView - View instance (used to resolve Fragment IDs)
+             */
+            handleSetPlate: function (sPlate, oView) {
+                try {
+                    var oMI = sap.ui.core.Fragment.byId(oView.getId(), "expenseDialog:multiPlates");
+                    if (!oMI) {
+                        return;
+                    }
+
+                    oMI.removeAllTokens();
+
+                    var sVal = (sPlate || "").trim();
+                    if (!sVal) {
+                        oMI.setValue("");
+                        return;
+                    }
+
+                    oMI.addToken(new sap.m.Token({ key: sVal, text: sVal }));
+                    oMI.setValue("");
+                } catch (e) {
+                    this.handleErrorMessage(e.message);
+                }
             },
 
             /* ************************************************************************************** */

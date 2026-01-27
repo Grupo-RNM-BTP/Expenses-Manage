@@ -3,6 +3,12 @@ sap.ui.define([
 ], function (BaseObject) {
     "use strict";
 
+    /**
+     * Returns the intrinsic bitmap dimensions of an IMG or VIDEO element.
+     * For images it uses naturalWidth/naturalHeight; for video it uses videoWidth/videoHeight.
+     * @param {HTMLImageElement|HTMLVideoElement} oMedia - The media element.
+     * @returns {{w:number, h:number}} The bitmap width/height in pixels.
+     */
     const fnGetBitmapDims = (oMedia) => {
         const bIsImg = oMedia.tagName === "IMG";
 
@@ -12,10 +18,22 @@ sap.ui.define([
         };
     };
 
+    /**
+     * Orders a quadrilateral's points using the instance method handleOrderTLTRBRBL.
+     * Expected order: Top-Left, Top-Right, Bottom-Right, Bottom-Left.
+     * @param {Array<{x:number, y:number}>} aPts - The 4 points to order.
+     * @returns {Array<{x:number, y:number}>} The ordered points.
+     */
     const fnOrderTLTRBRBL = function (aPts) {
         return this.handleOrderTLTRBRBL(aPts);
     };
 
+    /**
+     * Computes an output image size (width/height) from a detected quadrilateral.
+     * The size is estimated from the average of opposite edge lengths and clamped to safe bounds.
+     * @param {Array<{x:number, y:number}>} aQuad - Ordered quad points (TL,TR,BR,BL).
+     * @returns {{nOutW:number, nOutH:number}} Output width/height in pixels.
+     */
     const fnComputeOutSizeFromQuad = (aQuad) => {
         const d = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 
@@ -28,6 +46,16 @@ sap.ui.define([
         return { nOutW, nOutH };
     };
 
+    /**
+     * Warps the source canvas perspective defined by a quadrilateral into a rectangular output,
+     * renders it to a temporary canvas, and returns the result as a PNG Data URL.
+     * @param {any} oCv - OpenCV.js instance (window.cv).
+     * @param {HTMLCanvasElement} oSrcCanvas - Source canvas containing the frame/image.
+     * @param {Array<{x:number, y:number}>} aQuadOrdered - Ordered quad (TL,TR,BR,BL) in source pixel space.
+     * @param {number} nOutW - Output width in pixels.
+     * @param {number} nOutH - Output height in pixels.
+     * @returns {string} PNG Data URL of the warped result.
+     */
     const fnWarpToDataURL = (oCv, oSrcCanvas, aQuadOrdered, nOutW, nOutH) => {
         const oSrc = oCv.imread(oSrcCanvas);
         const oDst = new oCv.Mat();
@@ -67,7 +95,12 @@ sap.ui.define([
         return sDataUrl;
     };
 
-    // Função única para imagens OU vídeo
+    /**
+     * Warps a detected quadrilateral from an image or video element into a cropped, perspective-corrected PNG Data URL.
+     * @param {HTMLImageElement|HTMLVideoElement} oMedia - Source media element.
+     * @param {Array<{x:number, y:number}>} aQuadPx - Quad points in media pixel coordinates (length = 4).
+     * @returns {Promise<string>} PNG Data URL of the warped crop.
+     */
     const handleWarpFromMedia = async function (oMedia, aQuadPx) {
         await this.handleEnsureOpenCVReady();
 
@@ -96,7 +129,7 @@ sap.ui.define([
         return fnWarpToDataURL(window.cv, oSrcCanvas, aQuadOrdered, nOutW, nOutH);
     };
 
-    const ScanUtil = BaseObject.extend("my.app.util.ScanUtil", {
+    const ScanUtil = BaseObject.extend("zfiexpenses.util.ScanUtil", {
         /**
          * Attaches selected handler methods to a target controller instance.
          * @param {object} oController - The controller to receive the handlers.
@@ -116,7 +149,10 @@ sap.ui.define([
                 "handleEnableDrawModeImage",
                 "handleDisableDrawModeImage",
                 "onStartAutoDetect",
-                "onLiveDetect"
+                "onLiveDetect",
+                "handleSetHoldStillHint",
+                "handleEnsureHoldStillHint",
+                "handleGetI18nText"
             ];
             aHandlerNames.forEach((sKey) => { oController[sKey] = this[sKey]; });
 
@@ -219,6 +255,7 @@ sap.ui.define([
             if (!oVideo) return;
 
             const oOverlayCanvas = this.handleCreateOverlayCanvas(oVideo);
+            this.handleSetHoldStillHint(oVideo, false);
 
             try {
                 await this.handleEnsureOpenCVReady();
@@ -237,7 +274,7 @@ sap.ui.define([
 
             let iLastTimestamp = 0;
 
-            // ----- parâmetros de filtro -----
+            // ----- parâmetros de filtro (ajustáveis) -----
             const MIN_AREA_RATIO = 0.035;  // >= 3.5% do frame processado
             const MAX_AREA_RATIO = 0.98;   // <= 98% (evita “mesa inteira”)
             const MIN_RECT_DOC = 0.65;     // retangularidade p/ docs “quadrados”
@@ -613,6 +650,8 @@ sap.ui.define([
 
                     fnDrawQuad(aQuadOverlayCss);
 
+                    this.handleSetHoldStillHint(oVideo, !!oBest);
+
                     oSrc.delete();
                     oGray.delete();
                     oBlur.delete();
@@ -672,6 +711,7 @@ sap.ui.define([
                 }
                 let aQuad = aQuadRaw.map(p => ({ x: p.x, y: p.y }));
 
+                this.handleSetHoldStillHint(oVideo, false);
                 this.handleStopLiveDetect?.();
                 this.handleClearAutoDetectTimer?.();
 
@@ -749,26 +789,58 @@ sap.ui.define([
                 oM.delete?.();
             };
 
+            let aPrevQuad = null;
+            let nPrevTs = null;
+
+            const MOVE_PX_TOL = 6;
+
             const fnTick = () => {
                 if (bDone) return;
 
-                const bDetected = !!this._aLastQuadVideoPx && this._aLastQuadVideoPx.length === 4;
+                const aQ = this._aLastQuadVideoPx;
+                const bDetected = !!aQ && aQ.length === 4;
                 const nNow = Date.now();
 
-                if (bDetected) {
-                    if (nStableSinceMs == null) {
-                        nStableSinceMs = nNow;
-                    }
-
-                    if (nNow - nStableSinceMs >= STABLE_MS) {
-                        bDone = true;
-                        clearInterval(this._iAutoDetectTimer);
-                        this._iAutoDetectTimer = null;
-
-                        fnWarpAndSave().catch(() => { });
-                    }
-                } else {
+                if (!bDetected) {
                     nStableSinceMs = null;
+                    aPrevQuad = null;
+                    nPrevTs = null;
+                    return;
+                }
+
+                let nMove = 9999;
+                if (aPrevQuad) {
+                    const d = (p, q) => Math.hypot(p.x - q.x, p.y - q.y);
+                    nMove = (
+                        d(aQ[0], aPrevQuad[0]) +
+                        d(aQ[1], aPrevQuad[1]) +
+                        d(aQ[2], aPrevQuad[2]) +
+                        d(aQ[3], aPrevQuad[3])
+                    ) / 4;
+                }
+
+                aPrevQuad = aQ.map(p => ({ x: p.x, y: p.y }));
+                nPrevTs = nNow;
+
+                const bIsSteady = (nMove <= MOVE_PX_TOL);
+
+                try { this.handleSetHoldStillHint(oVideo, true); } catch (e) { }
+
+                if (!bIsSteady) {
+                    nStableSinceMs = null;
+                    return;
+                }
+
+                if (nStableSinceMs == null) {
+                    nStableSinceMs = nNow;
+                }
+
+                if (nNow - nStableSinceMs >= STABLE_MS) {
+                    bDone = true;
+                    clearInterval(this._iAutoDetectTimer);
+                    this._iAutoDetectTimer = null;
+
+                    fnWarpAndSave().catch(() => { });
                 }
             };
 
@@ -810,6 +882,13 @@ sap.ui.define([
                     (oDomRef) ||
                     (this.oCameraDialog && this.oCameraDialog.getDomRef && this.oCameraDialog.getDomRef()) ||
                     (this.getView && this.getView() && this.getView().getDomRef && this.getView().getDomRef()) || null;
+
+                try {
+                    const oV = (oRoot && oRoot.querySelector && oRoot.querySelector("#cameraVideo")) || null;
+                    if (oV) {
+                        this.handleSetHoldStillHint(oV, false);
+                    }
+                } catch (e) { }
 
                 if (oRoot) {
                     const oOverlay = oRoot.querySelector && oRoot.querySelector("#cameraOverlay");
@@ -1090,6 +1169,234 @@ sap.ui.define([
             if (oOverlay) {
                 const oCtx = oOverlay.getContext("2d");
                 oCtx && oCtx.clearRect(0, 0, oOverlay.width, oOverlay.height);
+            }
+        },
+
+        /**
+         * Ensures a "hold still" hint element exists above the video container and returns it.
+         * The hint is created once and reused across detection cycles.
+         * @param {HTMLVideoElement} oVideo - The camera video element.
+         * @returns {HTMLElement|null} The hint element or null if creation failed.
+         */
+        handleEnsureHoldStillHint: function (oVideo) {
+            try {
+                const oContainer = oVideo.parentElement || oVideo;
+                if (!oContainer) return null;
+
+                const sPos = getComputedStyle(oContainer).position;
+                if (sPos === "static") {
+                    oContainer.style.position = "relative";
+                }
+
+                let oHint = oContainer.querySelector("#holdStillHint");
+                if (!oHint) {
+                    oHint = document.createElement("div");
+                    oHint.id = "holdStillHint";
+
+                    oHint.style.position = "absolute";
+                    oHint.style.left = "16px";
+                    oHint.style.top = "16px";
+                    oHint.style.padding = "7px 10px";
+                    oHint.style.borderRadius = "12px";
+                    oHint.style.fontSize = "12px";
+                    oHint.style.lineHeight = "16px";
+                    oHint.style.color = "#fff";
+                    oHint.style.background = "rgba(0,0,0,0.62)";
+                    oHint.style.backdropFilter = "blur(6px)";
+                    oHint.style.webkitBackdropFilter = "blur(6px)";
+                    oHint.style.boxShadow = "0 6px 18px rgba(0,0,0,0.22)";
+                    oHint.style.zIndex = "50";
+                    oHint.style.pointerEvents = "none";
+                    oHint.style.userSelect = "none";
+                    oHint.style.display = "none";
+                    oHint.style.maxWidth = "60%";
+
+                    oHint.style.display = "none";
+                    oHint.style.alignItems = "center";
+                    oHint.style.gap = "8px";
+                    oHint.style.display = "none";
+                    oHint.style.flexDirection = "row";
+                    oHint.style.justifyContent = "flex-start";
+                    oHint.style.display = "none";
+                    oHint.style.whiteSpace = "normal";
+                    oHint.style.display = "none";
+                    oHint.style.setProperty("display", "none");
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+
+                    const oIcon = document.createElement("span");
+                    oIcon.setAttribute("aria-hidden", "true");
+                    oIcon.style.display = "inline-flex";
+                    oIcon.style.width = "18px";
+                    oIcon.style.height = "18px";
+                    oIcon.style.flex = "0 0 auto";
+
+                    oIcon.innerHTML = `
+                        <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
+                            <path fill="rgba(255,165,0,0.95)" d="M12 2 1 21h22L12 2zm1 14h-2v-2h2v2zm0-4h-2V8h2v4z"/>
+                        </svg>
+                    `;
+
+                    const oText = document.createElement("span");
+                    oText.id = "holdStillHintText";
+                    oText.style.display = "inline";
+                    oText.style.textAlign = "left";
+
+                    const sMsg = this.handleGetI18nText(
+                        "scan.holdStillHint",
+                        [],
+                        "Documento detetado — mantenha o telemóvel parado para recortar com nitidez."
+                    );
+                    oText.textContent = sMsg;
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+                    oHint.style.display = "none";
+
+                    oHint.appendChild(oIcon);
+                    oHint.appendChild(oText);
+
+                    oContainer.appendChild(oHint);
+                }
+
+                return oHint;
+            } catch (e) {
+                return null;
+            }
+        },
+
+        /**
+         * Shows or hides the "hold still" hint.
+         * Uses display:flex when visible to align icon + text.
+         * @param {HTMLVideoElement} oVideo - The camera video element.
+         * @param {boolean} bShow - True to show, false to hide.
+         */
+        handleSetHoldStillHint: function (oVideo, bShow) {
+            const oHint = this.handleEnsureHoldStillHint(oVideo);
+            if (!oHint) return;
+
+            const sTarget = bShow ? "flex" : "none";
+            if (oHint.style.display !== sTarget) {
+                oHint.style.display = sTarget;
+            }
+        },
+
+        /**
+         * Returns a translated text from the i18n resource bundle.
+         * Falls back to the provided fallback text (or the key) if i18n is not available.
+         * @param {string} sKey - i18n key.
+         * @param {string} [sFallback] - Fallback text if key cannot be resolved.
+         * @returns {string} Resolved text.
+         */
+        handleGetI18nText: function (sKey, sFallback) {
+            try {
+                const oBundle = this.getView?.().getModel?.("i18n")?.getResourceBundle?.();
+                return oBundle ? oBundle.getText(sKey) : (sFallback || sKey);
+            } catch (e) {
+                return sFallback || sKey;
             }
         },
     });

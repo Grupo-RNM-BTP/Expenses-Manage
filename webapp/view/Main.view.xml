@@ -135,6 +135,11 @@
                                                 <Text text="{i18n>xexp.expUnit}" />
                                             </header>
                                         </Column>
+                                        <Column visible="false" customData:p13nData='{"columnKey":"Plate","leadingProperty":"Plate","sortProperty":"Plate","filterProperty":"Plate"}'>
+                                            <header>
+                                                <Text text="{i18n>xexp.colPlate}" />
+                                            </header>
+                                        </Column>
                                     </columns>
                                     <items>
                                         <ColumnListItem id="idColumnListItem">
@@ -155,6 +160,7 @@
                                                 <Text id="Totalvalue" text="{parts: [{path: 'Value'}, {path: 'Waers'}], formatter: '.formatter.formatValue'}" />
                                                 <Text id="ApprovedValue" text="{parts: [{path: 'ApprvdValue'}, {path: 'Waers'}], formatter: '.formatter.formatValue'}" />
                                                 <Link text="{Unit}" press="onUnitPress" />
+                                                <Link text="{Plate}" press="onPlatePress" />
                                             </cells>
                                         </ColumnListItem>
                                     </items>

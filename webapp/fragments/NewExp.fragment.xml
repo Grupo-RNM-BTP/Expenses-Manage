@@ -58,25 +58,19 @@
                             </items>
                         </Select>
 
-                        <Label text="{i18n>xexp.expBP}"/>
-                        <Input id="expenseDialog:selectBP" showValueHelp="true" valueHelpRequest="handleOpenPartnerVH" required="true" visible="{= ['DESPREP','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }">
-                            <customData>
-                                <core:CustomData key="BPKey" value=""/>
-                            </customData>
-                            <suggestionItems>
-                                <core:Item key="{BusinessPartner}" text="{BusinessPartnerName}" />
-                            </suggestionItems>
-                        </Input>
-
                         <Label text="{i18n>xexp.expPlate}"/>
-                        <Input id="expenseDialog:inputPlate" visible="{= ((${Expenses>/exptype} || '').indexOf('LAVCIS')  > -1)  
-                                                                      || ((${Expenses>/exptype} || '').indexOf('LAVCISE') > -1)  
-                                                                      || ((${Expenses>/exptype} || '').indexOf('MANVTR')  > -1)
-                                                                      || ((${Expenses>/exptype} || '').indexOf('COMBST')  > -1)
-                                                                      || ((${Expenses>/exptype} || '').indexOf('PORTA')  > -1)
-                                                                      || ((${Expenses>/exptype} || '').indexOf('ESTACI')  > -1)  
-                                                                      || ((${Expenses>/exptype} || '').indexOf('UE')  > -1)  
-                                                                      || ((${Expenses>/exptype} || '').indexOf('ADR')  > -1) }" liveChange=".onStripSpaces" required="true"/>
+                        <MultiInput id="expenseDialog:multiPlates" visible="{= ((${Expenses>/exptype} || '').indexOf('LAVCIS')  > -1)
+                                                                            || ((${Expenses>/exptype} || '').indexOf('LAVCISE') > -1)
+                                                                            || ((${Expenses>/exptype} || '').indexOf('MANVTR')  > -1)
+                                                                            || ((${Expenses>/exptype} || '').indexOf('COMBST')  > -1)
+                                                                            || ((${Expenses>/exptype} || '').indexOf('PORTA')   > -1)
+                                                                            || ((${Expenses>/exptype} || '').indexOf('ESTACI')  > -1)
+                                                                            || ((${Expenses>/exptype} || '').indexOf('UE')      > -1)
+                                                                            || ((${Expenses>/exptype} || '').indexOf('ADR')     > -1) }" required="true" width="100%" showValueHelp="true" valueHelpRequest=".handleOpenPlatesVH" showSuggestion="true" filterSuggests="false" suggest=".onSuggestPlates" suggestionItemSelected=".onPlateSuggestionItemSelected" suggestionItems="{ path: '/ZFI_EXPENSES_PLATES', length: 50 }" placeholder="{i18n>xexp.expPlate}">
+                            <suggestionItems>
+                                <core:Item key="{OrderNo}" text="{Plate}" />
+                            </suggestionItems>
+                        </MultiInput>
 
                         <Label text="{i18n>xexp.expFuelQuantity}"/>
                         <Input id="expenseDialog:inputFuelQuantity" type="Number" visible="{= (${Expenses>/exptype} || '').indexOf('COMBST') > -1 || (${Expenses>/exptype} || '').indexOf('UE') > -1 }" required="true"/>
@@ -117,6 +111,16 @@
                                 <core:Item key="{pernr}" text="{cname}" />
                             </suggestionItems>
                         </MultiInput>
+
+                        <Label text="{i18n>xexp.expBP}"/>
+                        <Input id="expenseDialog:selectBP" showValueHelp="true" valueHelpRequest="handleOpenPartnerVH" required="true" visible="{= ['DESREP','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }">
+                            <customData>
+                                <core:CustomData key="BPKey" value=""/>
+                            </customData>
+                            <suggestionItems>
+                                <core:Item key="{BusinessPartner}" text="{BusinessPartnerName}" />
+                            </suggestionItems>
+                        </Input>
 
                         <Label text="" visible="false"/>
                         <Title id="expenseDialog:titleVatTable" text="{i18n>xexp.expVatTable}" level="H6" class="sapUiSmallMarginTop"/>

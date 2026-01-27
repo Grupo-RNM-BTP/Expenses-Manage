@@ -1,0 +1,23 @@
+<core:FragmentDefinition xmlns="sap.ui.comp.valuehelpdialog"
+    xmlns:m="sap.m"
+    xmlns:fb="sap.ui.comp.filterbar"
+    xmlns:core="sap.ui.core">
+
+    <ValueHelpDialog title="{i18n>xexp.expPlate}" ok=".handlePlatesPress" cancel=".handlePlatesVhClose" afterClose=".handlePlatesVhClose" supportRanges="true" key="OrderNo" descriptionKey="Plate" supportMultiselect="true">
+
+        <filterBar>
+            <fb:FilterBar advancedMode="true" search=".handlePlatesVhSearch" isRunningInValueHelpDialog="true">
+                <fb:filterGroupItems>
+
+                    <fb:FilterGroupItem groupName="__$INTERNAL$" name="Plate" label="Matrícula" visibleInFilterBar="true">
+                        <fb:control>
+                            <m:Input name="Plate" />
+                        </fb:control>
+                    </fb:FilterGroupItem>
+
+                </fb:filterGroupItems>
+            </fb:FilterBar>
+        </filterBar>
+
+    </ValueHelpDialog>
+</core:FragmentDefinition>
