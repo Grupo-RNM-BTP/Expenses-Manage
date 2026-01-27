@@ -38,6 +38,8 @@ sap.ui.define([
                     ExpenseDevolution: [],
                     inputValue: "",
                     sliderMax: "",
+                    showCheckProjects: false,
+                    projects: []
                 });
                 this.getView().setModel(oModel, "Main");
                 this.getView().setModel(new JSONModel({}), "graficoModel");
@@ -2243,12 +2245,70 @@ sap.ui.define([
                 }, 200);
             },
 
+            onGetProjects: function () {
+                var oModel = this.getModel(),
+                    sPath = "/ProjectsEvents";
+
+                return new Promise(function (resolve, reject) {
+                    oModel.read(sPath, {
+                        success: function (oData) {
+                            try {
+                                this.getModel("Main").setProperty("/projects", oData.results);
+                                if (oData.results.length > 0) {
+                                    this.getModel("Main").setProperty("/showCheckProjects", true);
+                                }
+                                resolve(oData);
+                            } catch (e) {
+                                reject(e);
+                            }
+                        }.bind(this),
+
+                        error: function (oError) {
+                            reject(oError);
+                        }
+                    });
+                }.bind(this));
+            },
+
+            onProjectChange: function (oEvent) {
+                var oSrc = oEvent.getSource(),
+                    bSelected = oSrc.getSelected(),
+                    oView = this.getView(),
+                    oYes = oView.byId("expenseDialog:checkBoxProjectYes"),
+                    oNo = oView.byId("expenseDialog:checkBoxProjectNo"),
+                    oMulti = oView.byId("expenseDialog:multiProjects");
+
+                if (!bSelected) {
+                    return;
+                }
+
+                if (oSrc === oYes) {
+                    oNo.setSelected(false);
+                    oMulti.setVisible(true);
+                    return;
+                }
+
+                if (oSrc === oNo) {
+                    oYes.setSelected(false);
+                    oMulti.setVisible(false);
+                    return;
+                }
+            },
+
             /**
              * Loads and opens the expense entry dialog fragment
              */
-            handleFinishProcess: function (oData, oAction) {
+            handleFinishProcess: async function (oData, oAction) {
                 var that = this,
                     oView = this.getView();
+
+                try {
+                    await this.onGetProjects();
+                } catch (oError) {
+                    var sError = JSON.parse(oError.responseText).error.message.value;
+                    sap.m.MessageBox.alert(sError, { icon: "ERROR" });
+                    return;
+                }
 
                 if (!this._pExpenseDialog) {
                     this._pExpenseDialog = Fragment.load({
@@ -2841,7 +2901,6 @@ sap.ui.define([
                 var vAiScan = this.oScanModel.getProperty("/aiScan");
 
                 this.onCloseCamera();
-
                 if (!vAiScan) {
                     this.handleFinishProcess();
                     return;
@@ -2862,10 +2921,8 @@ sap.ui.define([
                 if (!vBase64) return;
 
                 if (this._cancel) return;
-
                 oEntry.Base64 = vBase64;
                 oEntry.DocType = vDocType;
-
                 oModel.create("/ReadImage", oEntry, {
                     success: (oData) => {
                         if (!this._cancel) {
@@ -4525,6 +4582,11 @@ sap.ui.define([
                     this.handleScanPhoto?.();
                 }
             },
+
+
+            /* ************************************************************************************** */
+            /* *                                   Projects (PS) VH                                      * */
+            /* ************************************************************************************** */
 
         });
     });

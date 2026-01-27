@@ -122,6 +122,18 @@
                             </suggestionItems>
                         </Input>
 
+                        <Label text="{i18n>xexp.Projects}"/>
+                        <CheckBox id="expenseDialog:checkBoxProjectYes" visible="{Main>/showCheckProjects}" select=".onProjectChange" selected="false" text="{i18n>xexp.ProjectsYes}"/>
+                        <CheckBox id="expenseDialog:checkBoxProjectNo" visible="{Main>/showCheckProjects}" select=".onProjectChange" selected="true" text="{i18n>xexp.ProjectsNo}"/>
+
+
+                        <Label id="expenseDialog:labelProjects" text="{i18n>xexp.expProjects}" />
+                        <MultiInput id="expenseDialog:multiProjects" visible="false" showValueHelp="true" valueHelpRequest=".handleOpenProjectsVH" showSuggestion="true" filterSuggests="false" suggest=".onSuggestProjects" suggestionItemSelected=".onProjectSuggestionItemSelected" placeholder="{i18n>xexp.expProjectsPlaceholder}" width="100%" suggestionItems="{ path: 'Main>/projects', length: 50 }" required="true">
+                            <suggestionItems>
+                                <core:Item key="" text="" />
+                            </suggestionItems>
+                        </MultiInput>
+
                         <Label text="" visible="false"/>
                         <Title id="expenseDialog:titleVatTable" text="{i18n>xexp.expVatTable}" level="H6" class="sapUiSmallMarginTop"/>
 
