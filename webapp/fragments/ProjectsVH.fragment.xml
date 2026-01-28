@@ -1,0 +1,41 @@
+<core:FragmentDefinition xmlns="sap.ui.comp.valuehelpdialog"
+    xmlns:m="sap.m"
+    xmlns:fb="sap.ui.comp.filterbar"
+    xmlns:core="sap.ui.core">
+
+    <ValueHelpDialog title="{i18n>xexp.Projects}" ok=".handleProjectPress" cancel=".handleProjectVhClose" afterClose=".handleProjectVhClose" supportRanges="false" supportMultiselect="false" key="Network" descriptionKey="NetworkDesc">
+
+        <filterBar>
+            <fb:FilterBar advancedMode="true" search=".handleProjectVhSearch" isRunningInValueHelpDialog="true">
+                <fb:filterGroupItems>
+
+                    <fb:FilterGroupItem groupName="__$INTERNAL$" name="Network" label="{i18n>xexp.ProjectId}" visibleInFilterBar="true">
+                        <fb:control>
+                            <m:Input name="Network"/>
+                        </fb:control>
+                    </fb:FilterGroupItem>
+
+                    <fb:FilterGroupItem groupName="__$INTERNAL$" name="NetworkDesc" label="{i18n>xexp.ProjectName}" visibleInFilterBar="true">
+                        <fb:control>
+                            <m:Input name="NetworkDesc"/>
+                        </fb:control>
+                    </fb:FilterGroupItem>
+
+                    <fb:FilterGroupItem groupName="__$INTERNAL$" name="Acvity" label="{i18n>xexp.Activity}" visibleInFilterBar="true">
+                        <fb:control>
+                            <m:Input name="Acvity"/>
+                        </fb:control>
+                    </fb:FilterGroupItem>
+
+                    <fb:FilterGroupItem groupName="__$INTERNAL$" name="AcvityDesc" label="{i18n>xexp.ActivityDesc}" visibleInFilterBar="true">
+                        <fb:control>
+                            <m:Input name="AcvityDesc"/>
+                        </fb:control>
+                    </fb:FilterGroupItem>
+
+                </fb:filterGroupItems>
+            </fb:FilterBar>
+        </filterBar>
+
+    </ValueHelpDialog>
+</core:FragmentDefinition>

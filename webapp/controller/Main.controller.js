@@ -2245,56 +2245,6 @@ sap.ui.define([
                 }, 200);
             },
 
-            onGetProjects: function () {
-                var oModel = this.getModel(),
-                    sPath = "/ProjectsEvents";
-
-                return new Promise(function (resolve, reject) {
-                    oModel.read(sPath, {
-                        success: function (oData) {
-                            try {
-                                this.getModel("Main").setProperty("/projects", oData.results);
-                                if (oData.results.length > 0) {
-                                    this.getModel("Main").setProperty("/showCheckProjects", true);
-                                }
-                                resolve(oData);
-                            } catch (e) {
-                                reject(e);
-                            }
-                        }.bind(this),
-
-                        error: function (oError) {
-                            reject(oError);
-                        }
-                    });
-                }.bind(this));
-            },
-
-            onProjectChange: function (oEvent) {
-                var oSrc = oEvent.getSource(),
-                    bSelected = oSrc.getSelected(),
-                    oView = this.getView(),
-                    oYes = oView.byId("expenseDialog:checkBoxProjectYes"),
-                    oNo = oView.byId("expenseDialog:checkBoxProjectNo"),
-                    oMulti = oView.byId("expenseDialog:multiProjects");
-
-                if (!bSelected) {
-                    return;
-                }
-
-                if (oSrc === oYes) {
-                    oNo.setSelected(false);
-                    oMulti.setVisible(true);
-                    return;
-                }
-
-                if (oSrc === oNo) {
-                    oYes.setSelected(false);
-                    oMulti.setVisible(false);
-                    return;
-                }
-            },
-
             /**
              * Loads and opens the expense entry dialog fragment
              */
@@ -2503,9 +2453,28 @@ sap.ui.define([
                     "expenseDialog:vatTable"
                 ];
                 var oView = this.getView(),
+                    oEntry = {},
                     sExpType = Fragment.byId(oView.getId(), "expenseDialog:selectExpType").getSelectedKey(),
                     sAmt = Fragment.byId(oView.getId(), "expenseDialog:inputAmt").getValue(),
-                    sTotal = parseFloat((sAmt * 1.75).toFixed(2));
+                    sTotal = parseFloat((sAmt * 1.75).toFixed(2)),
+                    sCheckBoxYes = Fragment.byId(oView.getId(), "expenseDialog:checkBoxProjectYes"),
+                    sInputProject = Fragment.byId(oView.getId(), "expenseDialog:selectProject");
+
+                if (sCheckBoxYes.getSelected() === true && sInputProject.getValue() === "") {
+                    sInputProject.setValueState(sap.ui.core.ValueState.Error)
+                    return;
+                } else if (sCheckBoxYes.getSelected() === true && sInputProject.getValue() != "") {
+                    var aProjects = this.getModel("Main").getProperty("/projects");
+
+                    aProjects.forEach(function (oItem) {
+                        var sNetWorkSelected = sInputProject.data("ProjectKey")
+                        if (oItem.Network === sNetWorkSelected) {
+                            oEntry.Network = oItem.Network;
+                            oEntry.Acvity = oItem.Acvity;
+                            return;
+                        }
+                    })
+                }
 
                 if (sExpType !== "UE") {
                     if (!this.handleValidateRequiredFields(sIds)) {
@@ -2533,8 +2502,7 @@ sap.ui.define([
                 }
 
                 var oModel = oView.getModel(),
-                    that = this,
-                    oEntry = {};
+                    that = this;
 
                 oEntry.Valid = this.oExpensesModel.getProperty("/valid");
                 oEntry.OExpNo = this.oExpensesModel.getProperty("/expNo");
@@ -2587,6 +2555,8 @@ sap.ui.define([
                 }
 
                 var sCardnumber = this.byId("expenseDialog:selectCreditCard").getSelectedKey();
+
+
 
                 oEntry.Cardnumber = sCardnumber || this._cardnum;
                 oEntry.Chknum = this._chknum;
@@ -3956,7 +3926,9 @@ sap.ui.define([
                 } catch (e) { }
             },
 
-            /* ************************************** VH PARTNER ************************************* */
+            /* ************************************************************************************** */
+            /* *                                   Business VH                                      * */
+            /* ************************************************************************************** */
 
             /**
              * Opens the partner value help dialog
@@ -4210,6 +4182,62 @@ sap.ui.define([
                 oBusinessPartner.data("BPKey", "");
 
                 this._exptype = null;
+            },
+
+            onGetProjects: function () {
+                var oModel = this.getModel(),
+                    sPath = "/ProjectsEvents";
+
+                return new Promise(function (resolve, reject) {
+                    oModel.read(sPath, {
+                        success: function (oData) {
+                            try {
+                                this.getModel("Main").setProperty("/projects", oData.results);
+                                if (oData.results.length > 0) {
+                                    this.getModel("Main").setProperty("/showCheckProjects", true);
+                                }
+                                resolve(oData);
+                            } catch (e) {
+                                reject(e);
+                            }
+                        }.bind(this),
+
+                        error: function (oError) {
+                            reject(oError);
+                        }
+                    });
+                }.bind(this));
+            },
+
+            onProjectChange: function (oEvent) {
+                var oSrc = oEvent.getSource(),
+                    bSelected = oSrc.getSelected(),
+                    oView = this.getView(),
+                    oYes = oView.byId("expenseDialog:checkBoxProjectYes"),
+                    oNo = oView.byId("expenseDialog:checkBoxProjectNo"),
+                    oMulti = oView.byId("expenseDialog:selectProject");
+
+                if (!bSelected) {
+                    return;
+                }
+
+                if (oSrc === oYes) {
+                    oNo.setSelected(false);
+                    oMulti.setVisible(true);
+                    return;
+                }
+
+                if (oSrc === oNo) {
+                    oYes.setSelected(false);
+                    oMulti.setVisible(false);
+                    oMulti.setValue("");
+                    oMulti.data("ProjectKey", "");
+
+                    if (this._oProjectsVh) {
+                        this._oProjectsVh.setTokens([]);
+                    }
+                    return;
+                }
             },
 
             /* ************************************************************************************** */
@@ -4585,8 +4613,201 @@ sap.ui.define([
 
 
             /* ************************************************************************************** */
-            /* *                                   Projects (PS) VH                                      * */
+            /* *                                   Projects (PS) VH                                 * */
             /* ************************************************************************************** */
 
+            /**
+           * Opens the partner value help dialog
+           */
+            handleOpenProjectsVH: async function () {
+                try {
+
+                    this._oBasicSearchField = new sap.m.SearchField();
+
+                    if (!this._oProjectsVh) {
+                        this._oProjectsVh = await this.loadFragment({
+                            name: "zfiexpensesmanage.fragments.ProjectsVH"
+                        });
+                        this.getView().addDependent(this._oProjectsVh);
+
+                        var oFilterBar = this._oProjectsVh.getFilterBar();
+                        oFilterBar.setFilterBarExpanded(false);
+                        oFilterBar.setBasicSearch(this._oBasicSearchField);
+
+                        this._oBasicSearchField.attachSearch(function () {
+                            oFilterBar.search();
+                        });
+                    }
+
+                    var oVh = this._oProjectsVh,
+                        oMainModel = this.getModel("Main"),
+                        oTable = await oVh.getTableAsync();
+
+                    oTable.setModel(oMainModel, "Main");
+
+                    if (oTable.bindRows) {
+                        oTable.unbindRows();
+                        oTable.bindRows("Main>/projects");
+
+                        oTable.removeAllColumns();
+                        oTable.addColumn(new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ProjectId") }), template: new sap.m.Text({ text: "{Main>Network}" }) }).data({ fieldName: "Network" }));
+
+                        oTable.addColumn(new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ProjectName") }), template: new sap.m.Text({ text: "{Main>NetworkDesc}" }) }).data({ fieldName: "NetworkDesc" }));
+
+                        oTable.addColumn(new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.Activity") }), template: new sap.m.Text({ text: "{Main>Acvity}" }) }).data({ fieldName: "Acvity" }));
+
+                        oTable.addColumn(new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ActivityDesc") }), template: new sap.m.Text({ text: "{Main>AcvityDesc}" }) }).data({ fieldName: "AcvityDesc" }));
+                    }
+
+                    if (oTable.bindItems) {
+                        if (oTable.removeAllColumns) {
+                            oTable.removeAllColumns();
+                        }
+
+                        oTable.unbindItems();
+                        oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ProjectId") }) }).data({ fieldName: "Network" }));
+                        oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ProjectName") }) }).data({ fieldName: "NetworkDesc" }));
+                        oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.Activity") }) }).data({ fieldName: "Acvity" }));
+                        oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ActivityDesc") }) }).data({ fieldName: "AcvityDesc" }));
+
+                        oTable.bindItems({
+                            path: "Main>/projects",
+                            template: new sap.m.ColumnListItem({
+                                cells: [
+                                    new sap.m.Text({ text: "{Main>Network}" }),
+                                    new sap.m.Text({ text: "{Main>NetworkDesc}" }),
+                                    new sap.m.Text({ text: "{Main>Acvity}" }),
+                                    new sap.m.Text({ text: "{Main>AcvityDesc}" })
+                                ]
+                            })
+                        });
+                    }
+
+                    var oInput = this.getView().byId("expenseDialog:selectProject");
+                    var sKey = oInput && oInput.data("ProjectKey");
+                    var sText = oInput && oInput.getValue();
+
+                    if (sKey) {
+                        oVh.setTokens([new sap.m.Token({ key: sKey, text: sText || sKey })]);
+                    } else {
+                        oVh.setTokens([]);
+                    }
+
+                    oVh.update();
+                    oVh.open();
+
+                } catch (e) {
+                    sap.m.MessageBox.error(e.message || String(e));
+                }
+            },
+
+
+            /**
+             * Handles the partner press event
+             * @param {sap.ui.core.Control} oEvent
+             */
+            handleProjectPress: function (oEvent) {
+                try {
+                    var aTokens = oEvent.getParameter("tokens") || [];
+                    var oInput = this.getView().byId("expenseDialog:selectProject");
+
+                    if (!aTokens.length) {
+                        oInput.setValue("");
+                        oInput.data("ProjectKey", "");
+                        this._oProjectsVh.close();
+                        return;
+                    }
+
+                    if (aTokens.length > 1) {
+                        sap.m.MessageBox.error(this.getResourceBundle().getText("MultipleSelection"));
+                        return;
+                    }
+
+                    var oToken = aTokens[0];
+                    oInput.setValue(oToken.getText());
+                    oInput.data("ProjectKey", oToken.getKey());
+
+                    this._oProjectsVh.close();
+                } catch (e) {
+                    sap.m.MessageBox.error(e.message || String(e));
+                }
+            },
+
+
+            /**
+             * Handles the partner value help close event
+             */
+            handleProjectVhClose: function () {
+                try {
+                    if (this._oProjectsVh) {
+                        this._oProjectsVh.close();
+                        this._oProjectsVh.destroy();
+                        this._oProjectsVh = null;
+                    }
+                } catch (e) {
+                    sap.m.MessageBox.error(e.message || String(e));
+                }
+            },
+
+            /**
+             * Handles the partner value help search event
+             * @param {sap.ui.core.Control} oEvent
+             */
+            handleProjectVhSearch: function (oEvent) {
+                try {
+                    var sSearchQuery = (this._oBasicSearchField.getValue() || "").toUpperCase(),
+                        aSelectionSet = oEvent.getParameter("selectionSet") || [];
+
+                    var aFilters = aSelectionSet.reduce(function (aResult, oControl) {
+                        var sVal = oControl.getValue && oControl.getValue();
+                        if (sVal) {
+                            aResult.push(new sap.ui.model.Filter({
+                                path: oControl.getName(),
+                                operator: sap.ui.model.FilterOperator.Contains,
+                                value1: sVal
+                            }));
+                        }
+                        return aResult;
+                    }, []);
+
+                    if (sSearchQuery) {
+                        aFilters.push(new sap.ui.model.Filter({
+                            filters: [
+                                new sap.ui.model.Filter("Network", sap.ui.model.FilterOperator.Contains, sSearchQuery),
+                                new sap.ui.model.Filter("NetworkDesc", sap.ui.model.FilterOperator.Contains, sSearchQuery),
+                                new sap.ui.model.Filter("Acvity", sap.ui.model.FilterOperator.Contains, sSearchQuery),
+                                new sap.ui.model.Filter("AcvityDesc", sap.ui.model.FilterOperator.Contains, sSearchQuery)
+                            ],
+                            and: false
+                        }));
+                    }
+
+                    var oFinalFilter = aFilters.length ? new sap.ui.model.Filter({ filters: aFilters, and: true }) : [];
+
+                    this.handleFilterVhTable(oFinalFilter, this._oProjectsVh);
+
+                } catch (e) {
+                    sap.m.MessageBox.error(e.message || String(e));
+                }
+            },
+
+            /**
+             * Filters the value help table
+             * @param {sap.ui.model.Filter} oFilter
+             * @param {sap.ui.core.Control} oValueHelp
+             */
+            handleFilterVhTable: function (oFilter, oValueHelp) {
+                oValueHelp.getTableAsync().then(function (oTable) {
+                    if (oTable.bindRows) {
+                        oTable.getBinding("rows").filter(oFilter);
+                    }
+
+                    if (oTable.bindItems) {
+                        oTable.getBinding("items").filter(oFilter);
+                    }
+
+                    oValueHelp.update();
+                });
+            },
         });
     });
