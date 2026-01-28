@@ -3,7 +3,7 @@
     xmlns:fb="sap.ui.comp.filterbar"
     xmlns:core="sap.ui.core">
 
-    <ValueHelpDialog title="{i18n>xexp.expPlate}" ok=".handlePlatesPress" cancel=".handlePlatesVhClose" afterClose=".handlePlatesVhClose" supportRanges="true" key="OrderNo" descriptionKey="Plate" supportMultiselect="true">
+    <ValueHelpDialog title="{i18n>xexp.expPlate}" ok=".handlePlatesPress" cancel=".handlePlatesVhClose" afterClose=".handlePlatesVhClose" supportRanges="true" key="Plate" supportMultiselect="true">
 
         <filterBar>
             <fb:FilterBar advancedMode="true" search=".handlePlatesVhSearch" isRunningInValueHelpDialog="true">
