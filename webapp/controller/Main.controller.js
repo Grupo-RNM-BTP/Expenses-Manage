@@ -4192,7 +4192,6 @@ sap.ui.define([
                     oModel.read(sPath, {
                         success: function (oData) {
                             try {
-                                debugger;
                                 this.getModel("Main").setProperty("/projects", oData.results);
                                 if (oData.results.length > 0) {
                                     this.getModel("Main").setProperty("/showCheckProjects", true);
