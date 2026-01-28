@@ -4192,6 +4192,7 @@ sap.ui.define([
                     oModel.read(sPath, {
                         success: function (oData) {
                             try {
+                                debugger;
                                 this.getModel("Main").setProperty("/projects", oData.results);
                                 if (oData.results.length > 0) {
                                     this.getModel("Main").setProperty("/showCheckProjects", true);
@@ -4652,11 +4653,11 @@ sap.ui.define([
                         oTable.removeAllColumns();
                         oTable.addColumn(new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ProjectId") }), template: new sap.m.Text({ text: "{Main>Network}" }) }).data({ fieldName: "Network" }));
 
-                        oTable.addColumn(new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ProjectName") }), template: new sap.m.Text({ text: "{Main>NetworkDesc}" }) }).data({ fieldName: "NetworkDesc" }));
+                        oTable.addColumn(new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ProjectName") }), template: new sap.m.Text({ text: "{Main>Project}" }) }).data({ fieldName: "Project" }));
 
-                        oTable.addColumn(new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.Activity") }), template: new sap.m.Text({ text: "{Main>Acvity}" }) }).data({ fieldName: "Acvity" }));
+                        oTable.addColumn(new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.Activity") }), template: new sap.m.Text({ text: "{Main>Activity}" }) }).data({ fieldName: "Activity" }));
 
-                        oTable.addColumn(new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ActivityDesc") }), template: new sap.m.Text({ text: "{Main>AcvityDesc}" }) }).data({ fieldName: "AcvityDesc" }));
+                        oTable.addColumn(new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ActivityDesc") }), template: new sap.m.Text({ text: "{Main>ActivityDesc}" }) }).data({ fieldName: "ActivityDesc" }));
                     }
 
                     if (oTable.bindItems) {
@@ -4666,18 +4667,18 @@ sap.ui.define([
 
                         oTable.unbindItems();
                         oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ProjectId") }) }).data({ fieldName: "Network" }));
-                        oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ProjectName") }) }).data({ fieldName: "NetworkDesc" }));
-                        oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.Activity") }) }).data({ fieldName: "Acvity" }));
-                        oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ActivityDesc") }) }).data({ fieldName: "AcvityDesc" }));
+                        oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ProjectName") }) }).data({ fieldName: "Project" }));
+                        oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.Activity") }) }).data({ fieldName: "Activity" }));
+                        oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ActivityDesc") }) }).data({ fieldName: "ActivityDesc" }));
 
                         oTable.bindItems({
                             path: "Main>/projects",
                             template: new sap.m.ColumnListItem({
                                 cells: [
                                     new sap.m.Text({ text: "{Main>Network}" }),
-                                    new sap.m.Text({ text: "{Main>NetworkDesc}" }),
-                                    new sap.m.Text({ text: "{Main>Acvity}" }),
-                                    new sap.m.Text({ text: "{Main>AcvityDesc}" })
+                                    new sap.m.Text({ text: "{Main>Project}" }),
+                                    new sap.m.Text({ text: "{Main>Activity}" }),
+                                    new sap.m.Text({ text: "{Main>ActivityDesc}" })
                                 ]
                             })
                         });
@@ -4774,9 +4775,9 @@ sap.ui.define([
                         aFilters.push(new sap.ui.model.Filter({
                             filters: [
                                 new sap.ui.model.Filter("Network", sap.ui.model.FilterOperator.Contains, sSearchQuery),
-                                new sap.ui.model.Filter("NetworkDesc", sap.ui.model.FilterOperator.Contains, sSearchQuery),
-                                new sap.ui.model.Filter("Acvity", sap.ui.model.FilterOperator.Contains, sSearchQuery),
-                                new sap.ui.model.Filter("AcvityDesc", sap.ui.model.FilterOperator.Contains, sSearchQuery)
+                                new sap.ui.model.Filter("Project", sap.ui.model.FilterOperator.Contains, sSearchQuery),
+                                new sap.ui.model.Filter("Activity", sap.ui.model.FilterOperator.Contains, sSearchQuery),
+                                new sap.ui.model.Filter("ActivityDesc", sap.ui.model.FilterOperator.Contains, sSearchQuery)
                             ],
                             and: false
                         }));

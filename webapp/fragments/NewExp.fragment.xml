@@ -129,7 +129,7 @@
                         <Label id="expenseDialog:labelProjects" text="{i18n>xexp.Project}" />
                         <Input id="expenseDialog:selectProject" showValueHelp="true" valueHelpRequest=".handleOpenProjectsVH" required="true" visible="false" valueHelpOnly="true" showSuggestion="false" suggestionItems="{path: 'Main>/projects'}">
                             <suggestionItems>
-                                <core:Item key="{Main>Network}" text="{Main>NetworkDesc}" />
+                                <core:Item key="{Main>Network}" text="{Main>Project}" />
                             </suggestionItems>
                         </Input>
 

@@ -3,7 +3,7 @@
     xmlns:fb="sap.ui.comp.filterbar"
     xmlns:core="sap.ui.core">
 
-    <ValueHelpDialog title="{i18n>xexp.Projects}" ok=".handleProjectPress" cancel=".handleProjectVhClose" afterClose=".handleProjectVhClose" supportRanges="false" supportMultiselect="false" key="Network" descriptionKey="NetworkDesc">
+    <ValueHelpDialog title="{i18n>xexp.Projects}" ok=".handleProjectPress" cancel=".handleProjectVhClose" afterClose=".handleProjectVhClose" supportRanges="false" supportMultiselect="false" key="Network" descriptionKey="Project">
 
         <filterBar>
             <fb:FilterBar advancedMode="true" search=".handleProjectVhSearch" isRunningInValueHelpDialog="true">
@@ -15,21 +15,21 @@
                         </fb:control>
                     </fb:FilterGroupItem>
 
-                    <fb:FilterGroupItem groupName="__$INTERNAL$" name="NetworkDesc" label="{i18n>xexp.ProjectName}" visibleInFilterBar="true">
+                    <fb:FilterGroupItem groupName="__$INTERNAL$" name="Project" label="{i18n>xexp.ProjectName}" visibleInFilterBar="true">
                         <fb:control>
-                            <m:Input name="NetworkDesc"/>
+                            <m:Input name="Project"/>
                         </fb:control>
                     </fb:FilterGroupItem>
 
-                    <fb:FilterGroupItem groupName="__$INTERNAL$" name="Acvity" label="{i18n>xexp.Activity}" visibleInFilterBar="true">
+                    <fb:FilterGroupItem groupName="__$INTERNAL$" name="Activity" label="{i18n>xexp.Activity}" visibleInFilterBar="true">
                         <fb:control>
-                            <m:Input name="Acvity"/>
+                            <m:Input name="Activity"/>
                         </fb:control>
                     </fb:FilterGroupItem>
 
-                    <fb:FilterGroupItem groupName="__$INTERNAL$" name="AcvityDesc" label="{i18n>xexp.ActivityDesc}" visibleInFilterBar="true">
+                    <fb:FilterGroupItem groupName="__$INTERNAL$" name="ActivityDesc" label="{i18n>xexp.ActivityDesc}" visibleInFilterBar="true">
                         <fb:control>
-                            <m:Input name="AcvityDesc"/>
+                            <m:Input name="ActivityDesc"/>
                         </fb:control>
                     </fb:FilterGroupItem>
 
