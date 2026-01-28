@@ -62,6 +62,12 @@
                     <m:Label text="{i18n>Country}"/>
                     <m:Text text="{Land1Desc}"/>
 
+                    <m:Label text="{i18n>xexp.Project}"  />
+                    <m:Text id="textProject" visible="{= !!${Network} }" text="{NetworkDsc} ({Network})" />
+
+                    <m:Label text="{i18n>xexp.Activity}" />
+                    <m:Text id="textActivity" visible="{= !!${Network} }" text="{ActivityDsc} ({Activity})" />
+
                     <!-- Despesa / Pagamento -->
                     <core:Title text="{i18n>invoiceForm.Expense}"/>
                     <m:Label text="{i18n>ExpType}"/>

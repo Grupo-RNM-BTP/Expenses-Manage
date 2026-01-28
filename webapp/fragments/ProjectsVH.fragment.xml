@@ -15,12 +15,6 @@
                         </fb:control>
                     </fb:FilterGroupItem>
 
-                    <fb:FilterGroupItem groupName="__$INTERNAL$" name="Project" label="{i18n>xexp.ProjectName}" visibleInFilterBar="true">
-                        <fb:control>
-                            <m:Input name="Project"/>
-                        </fb:control>
-                    </fb:FilterGroupItem>
-
                     <fb:FilterGroupItem groupName="__$INTERNAL$" name="Activity" label="{i18n>xexp.Activity}" visibleInFilterBar="true">
                         <fb:control>
                             <m:Input name="Activity"/>
@@ -33,6 +27,11 @@
                         </fb:control>
                     </fb:FilterGroupItem>
 
+                    <fb:FilterGroupItem groupName="__$INTERNAL$" name="Project" label="{i18n>xexp.ProjectName}" visibleInFilterBar="true">
+                        <fb:control>
+                            <m:Input name="Project"/>
+                        </fb:control>
+                    </fb:FilterGroupItem>
                 </fb:filterGroupItems>
             </fb:FilterBar>
         </filterBar>
