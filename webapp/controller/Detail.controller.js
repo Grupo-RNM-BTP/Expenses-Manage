@@ -264,6 +264,9 @@ sap.ui.define([
                 })
             },
 
+            /**
+             * Opens the first attachment (image lightbox or PDF) from the attachment model.
+             */
             onPressAvatar: function () {
                 this.getModel("global").setProperty("/busy", true);
 
@@ -296,6 +299,10 @@ sap.ui.define([
 
             },
 
+            /**
+             * Handles action button presses (Save, Cancel, Edit).
+             * @param {string} oAction
+             */
             onPressActionButtons: function (oAction) {
                 if (oAction === "S") {
                     this.onSaveEdit();
@@ -309,6 +316,9 @@ sap.ui.define([
                 }
             },
 
+            /**
+             * Saves edited comments for the current expense.
+             */
             onSaveEdit: function () {
                 var oModel = this.getModel(),
                     sReference = this.byId("TextReference").getText(),

@@ -182,9 +182,9 @@ sap.ui.define([
             },
 
 
-            //---------------------------------------------------------------------------------------------------------------------------------------------------------
-            //---------------------------------------------------------------------- Manage Expenses ------------------------------------------------------------------
-            //---------------------------------------------------------------------------------------------------------------------------------------------------------
+            /* ************************************************************************************** */
+            /* *                                   Manage Expenses                                 * */
+            /* ************************************************************************************** */
 
             /**
              * Apply initial sorter before table binding.
@@ -689,9 +689,9 @@ sap.ui.define([
             },
 
 
-            //---------------------------------------------------------------------------------------------------------------------------------------------------------
-            //---------------------------------------------------------------------- Transactions ---------------------------------------------------------------------
-            //---------------------------------------------------------------------------------------------------------------------------------------------------------
+            /* ************************************************************************************** */
+            /* *                                   Transactions                                   * */
+            /* ************************************************************************************** */
 
             /**
              * Handles the synchronize action triggered from the UI.
@@ -912,9 +912,10 @@ sap.ui.define([
                 oBindingParams.sorter = aSorters;
             },
 
-            //---------------------------------------------------------------------------------------------------------------------------------------------------------
-            //---------------------------------------------------------------------- Reconciliation -----------------------------------------------------------------
-            //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+            /* ************************************************************************************** */
+            /* *                                   Reconciliation                                  * */
+            /* ************************************************************************************** */
 
             /**
              * Apply initial sorter and grouping before table binding (Reconciliation table).
@@ -1031,7 +1032,10 @@ sap.ui.define([
                 this.byId("idCompensation").setEnabled(CompState);
             },
 
-            /* ************************************** CONFIDENCIAL EXPENSE ************************************* */
+
+            /* ************************************************************************************** */
+            /* *                              Confidential Expense                                * */
+            /* ************************************************************************************** */
 
             /**
              * Handle expense without attach.
@@ -1076,6 +1080,7 @@ sap.ui.define([
                 oData.Country = "PT";
                 oData.Fuelqty = "";
                 oData.TableIva = "";
+                oData.Waers = "EUR";
                 this._cardnum = oTable[0].getBindingContext().getObject().Cardnumber;
                 this._chknum = oTable[0].getBindingContext().getObject().Chknum;
 
@@ -1090,7 +1095,10 @@ sap.ui.define([
                 this.handleFinishProcess(oData, "M");
             },
 
-            /* ************************************** RECONCILIATION ************************************* */
+
+            /* ************************************************************************************** */
+            /* *                                   Reconciliation                                  * */
+            /* ************************************************************************************** */
 
             /**
              * Handle reconcile.
@@ -1217,6 +1225,11 @@ sap.ui.define([
                 });
             },
 
+            /**
+             * Formats a date string from "DD.MM.YYYY" to "DDMMYYYY".
+             * @param {string} sDateFormated - Date string with dot separators.
+             * @returns {string} Date string without separators.
+             */
             onFormatedateYYYYMMDD: function (sDateFormated) {
                 var aParts = sDateFormated.split("."),
                     sDateForPicker = aParts[0] + aParts[1] + aParts[2];
@@ -1242,7 +1255,10 @@ sap.ui.define([
                 oTableSmart.removeSelections();
             },
 
-            /* ************************************** DECISION ************************************* */
+
+            /* ************************************************************************************** */
+            /* *                                     Decision                                     * */
+            /* ************************************************************************************** */
 
             /**
              * Handle open decision dialog.
@@ -1318,7 +1334,10 @@ sap.ui.define([
                 oTableSmart.removeSelections();
             },
 
-            /* ************************************** COMPENSION ************************************* */
+
+            /* ************************************************************************************** */
+            /* *                                   Compensation                                   * */
+            /* ************************************************************************************** */
 
             /**
              * Handle compensation.
@@ -1374,7 +1393,10 @@ sap.ui.define([
                 });
             },
 
-            /* ************************************** DEVOLUTION ************************************* */
+
+            /* ************************************************************************************** */
+            /* *                                    Devolution                                    * */
+            /* ************************************************************************************** */
 
             /**
              * Handle devolution.
@@ -1489,9 +1511,10 @@ sap.ui.define([
                 }
             },
 
-            //---------------------------------------------------------------------------------------------------------------------------------------------------------
-            //---------------------------------------------------------------------- Leader Management -----------------------------------------------------------------
-            //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+            /* ************************************************************************************** */
+            /* *                                 Leader Management                                 * */
+            /* ************************************************************************************** */
 
             /**
              * Apply initial sorter before table binding.
@@ -1534,6 +1557,9 @@ sap.ui.define([
                 })
             },
 
+            /**
+             * Opens the rejection reason dialog for selected approval items.
+             */
             onOpenDialogReason: function () {
                 var oView = this.getView();
                 var that = this;
@@ -1776,6 +1802,9 @@ sap.ui.define([
                 this.byId("sliderValue").setValue(fValue);
             },
 
+            /**
+             * Confirms partial approval using the current slider/input value.
+             */
             onConfirmPartial: function () {
                 var oSelectedItems = this.byId("idTableApprovals").getSelectedItems()[0].getBindingContext().getObject(),
                     sPernr = oSelectedItems.Pernr,
@@ -1835,9 +1864,10 @@ sap.ui.define([
                 oModel.refresh();
             },
 
-            //---------------------------------------------------------------------------------------------------------------------------------------------------------
-            //---------------------------------------------------------------------- New Expense ----------------------------------------------------------------------
-            //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+            /* ************************************************************************************** */
+            /* *                                    New Expense                                   * */
+            /* ************************************************************************************** */
 
             /**
              * Detaches the camera DOM handlers.
@@ -2132,7 +2162,6 @@ sap.ui.define([
                 }
             },
 
-
             /**
              * Starts the expense creation process by opening the camera fragment,
              * initializing the camera, and binding click handlers for capture/upload/close actions.
@@ -2361,7 +2390,7 @@ sap.ui.define([
                 fnById("expenseDialog:inputFuelQuantity").setRequired(false);
                 fnById("expenseDialog:selectPymtMeth").setEnabled(false);
                 fnById("expenseDialog:inputAmt").setEnabled(false);
-                fnById("expenseDialog:selectCurrency").setVisible(false);
+                fnById("expenseDialog:selectCurrency").setEnabled(false);
                 fnById("expenseDialog:titleVatTable").setVisible(false);
                 fnById("expenseDialog:vatTable").setVisible(false);
                 fnById("expenseDialog:labelAttachment").setVisible(false);
@@ -2863,7 +2892,6 @@ sap.ui.define([
                 }
             },
 
-
             /**
              * Handles the scanning of a photo by closing the camera and opening the scanning dialog.
              */
@@ -3027,7 +3055,6 @@ sap.ui.define([
                     oPopover.close();
                 });
             },
-
 
             /**
              * Captures a photo from the live camera stream,
@@ -3590,7 +3617,9 @@ sap.ui.define([
             /* ************************************************************************************** */
 
 
-            /* ************************************** VAT Table ************************************* */
+            /* ************************************************************************************** */
+            /* *                                     VAT Table                                    * */
+            /* ************************************************************************************** */
 
             /**
              * Recursively searches for final controls (Input/Select) within a container.
@@ -3702,7 +3731,10 @@ sap.ui.define([
                 ctrl.data("__prev", newVal);
             },
 
-            /* ************************************** Other Fields ************************************* */
+
+            /* ************************************************************************************** */
+            /* *                                   Other Fields                                   * */
+            /* ************************************************************************************** */
 
             /**
              * Call this when the dialog opens: wires logging to all simple fields.
@@ -3807,7 +3839,9 @@ sap.ui.define([
             },
 
 
-            /* ************************************** Geral ************************************* */
+            /* ************************************************************************************** */
+            /* *                                      General                                     * */
+            /* ************************************************************************************** */
 
             /**
              * Logs the prefilled fields.
@@ -3925,6 +3959,7 @@ sap.ui.define([
                     ctrl.data("__prev", this.handleGetFieldValue(ctrl));
                 } catch (e) { }
             },
+
 
             /* ************************************************************************************** */
             /* *                                   Business VH                                      * */
@@ -4184,6 +4219,10 @@ sap.ui.define([
                 this._exptype = null;
             },
 
+            /**
+             * Loads projects from backend and stores them in the Main model.
+             * @returns {Promise<object>} Promise resolved with the OData response.
+             */
             onGetProjects: function () {
                 var oModel = this.getModel(),
                     sPath = "/ProjectsEvents";
@@ -4209,6 +4248,10 @@ sap.ui.define([
                 }.bind(this));
             },
 
+            /**
+             * Handles project checkbox changes and toggles project selection UI.
+             * @param {sap.ui.base.Event} oEvent
+             */
             onProjectChange: function (oEvent) {
                 var oSrc = oEvent.getSource(),
                     bSelected = oSrc.getSelected(),
@@ -4239,6 +4282,7 @@ sap.ui.define([
                     return;
                 }
             },
+
 
             /* ************************************************************************************** */
             /* *                                   Plates VH                                        * */
@@ -4517,6 +4561,7 @@ sap.ui.define([
                 }
             },
 
+
             /* ************************************************************************************** */
             /* *                                        Crop                                        * */
             /* ************************************************************************************** */
@@ -4698,7 +4743,6 @@ sap.ui.define([
                 }
             },
 
-
             /**
              * Handles the partner press event
              * @param {sap.ui.core.Control} oEvent
@@ -4729,7 +4773,6 @@ sap.ui.define([
                     sap.m.MessageBox.error(e.message || String(e));
                 }
             },
-
 
             /**
              * Handles the partner value help close event
