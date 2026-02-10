@@ -25,6 +25,9 @@
                         <Label text="{i18n>xexp.expDate}"/>
                         <DatePicker id="expenseDialog:datePicker" valueFormat="yyyyMMdd" displayFormat="dd/MM/yyyy" required="true"/>
 
+                        <Label text="{i18n>xexp.expStayDate}" visible="{= ((${Expenses>/exptype} || '') === 'ALJ') }"/>
+                        <DateRangeSelection id="expenseDialog:dateStay" valueFormat="yyyyMMdd" displayFormat="dd/MM/yyyy" required="true" visible="{= ((${Expenses>/exptype} || '') === 'ALJ') }"/>
+
                         <Label text="{i18n>xexp.expNif}"/>
                         <Input id="expenseDialog:inputNif" liveChange=".onStripSpaces" required="true"/>
 

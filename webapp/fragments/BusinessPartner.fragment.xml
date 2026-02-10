@@ -2,7 +2,7 @@
     xmlns:m="sap.m"
     xmlns:fb="sap.ui.comp.filterbar"
     xmlns:core="sap.ui.core">
-    <ValueHelpDialog title="{i18n>BusinessPartner}" ok=".handlePartnerPress" cancel=".handlePartnerVhClose" afterClose=".handlePartnerVhClose" supportRanges="true" key="BusinessPartnerName">
+    <ValueHelpDialog title="{i18n>BusinessPartner}" ok=".handlePartnerPress" cancel=".handlePartnerVhClose" afterClose=".handlePartnerVhClose" supportRanges="true" key="BusinessPartner" descriptionKey="BusinessPartnerName">
         <filterBar>
             <fb:FilterBar advancedMode="true" search=".handlePartnerVhSearch" isRunningInValueHelpDialog="true">
                 <fb:filterGroupItems>

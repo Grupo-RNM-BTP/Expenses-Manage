@@ -2466,6 +2466,7 @@ sap.ui.define([
                     "expenseDialog:inputExpNo",
                     "expenseDialog:inputLocal",
                     "expenseDialog:datePicker",
+                    "expenseDialog:dateStay",
                     "expenseDialog:inputNif",
                     "expenseDialog:selectCountry",
                     "expenseDialog:selectExpType",
@@ -2559,6 +2560,16 @@ sap.ui.define([
 
                 if ((oEntry.Exptype || '').indexOf('COMBST') > -1) {
                     oEntry.Fuelqty = Fragment.byId(oView.getId(), "expenseDialog:inputFuelQuantity").getValue();
+                }
+
+                var oDateStay = Fragment.byId(oView.getId(), "expenseDialog:dateStay");
+                if (oDateStay && oDateStay.getVisible()) {
+                    var oStartDate = oDateStay.getDateValue();
+                    var oEndDate = oDateStay.getSecondDateValue();
+                    var oDateFormat = sap.ui.core.format.DateFormat.getDateInstance({ pattern: "yyyyMMdd" });
+
+                    oEntry.Sdatefrom = oStartDate ? oDateFormat.format(oStartDate) : "";
+                    oEntry.Sdateto = oEndDate ? oDateFormat.format(oEndDate) : "";
                 }
 
                 if (Fragment.byId(oView.getId(), "expenseDialog:multiPlates").getVisible()) {
