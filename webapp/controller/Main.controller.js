@@ -4710,6 +4710,7 @@ sap.ui.define([
                         oTable.addColumn(new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.Activity") }), template: new sap.m.Text({ text: "{Main>Activity}" }) }).data({ fieldName: "Activity" }));
                         oTable.addColumn(new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ActivityDesc") }), template: new sap.m.Text({ text: "{Main>ActivityDesc}" }) }).data({ fieldName: "ActivityDesc" }));
                         oTable.addColumn(new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ProjectName") }), template: new sap.m.Text({ text: "{Main>Project}" }) }).data({ fieldName: "Project" }));
+                        oTable.addColumn(new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.BilledToCustomer") }), template: new sap.m.Text({ text: { path: "Main>Bill", formatter: formatter.formatBill } }) }).data({ fieldName: "Bill" }));
                     }
 
                     if (oTable.bindItems) {
@@ -4722,6 +4723,7 @@ sap.ui.define([
                         oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.Activity") }) }).data({ fieldName: "Activity" }));
                         oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ActivityDesc") }) }).data({ fieldName: "ActivityDesc" }));
                         oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ProjectName") }) }).data({ fieldName: "Project" }));
+                        oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.BilledToCustomer") }) }).data({ fieldName: "Bill" }));
                         oTable.bindItems({
                             path: "Main>/projects",
                             template: new sap.m.ColumnListItem({
@@ -4729,7 +4731,8 @@ sap.ui.define([
                                     new sap.m.Text({ text: "{Main>Network}" }),
                                     new sap.m.Text({ text: "{Main>Activity}" }),
                                     new sap.m.Text({ text: "{Main>ActivityDesc}" }),
-                                    new sap.m.Text({ text: "{Main>Project}" })
+                                    new sap.m.Text({ text: "{Main>Project}" }),
+                                    new sap.m.Text({ text: { path: "Main>Bill", formatter: formatter.formatBill } })
 
                                 ]
                             })

@@ -282,6 +282,24 @@ sap.ui.define([], function () {
                 .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
             return formatted + " EUR";
+        },
+
+        /**
+         * Formats Bill flag into localized Yes/No text.
+         * @param {string} sBill Bill flag (e.g., "X").
+         * @returns {string} Localized Yes/No text.
+         */
+        formatBill: function (sBill) {
+            var oBundle = sap.ui.getCore && sap.ui.getCore().getModel && sap.ui.getCore().getModel("i18n")
+                ? sap.ui.getCore().getModel("i18n").getResourceBundle()
+                : null;
+
+            var sYes = oBundle ? oBundle.getText("xexp.Yes") : "Yes";
+            var sNo = oBundle ? oBundle.getText("xexp.No") : "No";
+
+            return sBill === "X"
+                ? sYes
+                : sNo;
         }
     };
 });
