@@ -19,11 +19,17 @@ sap.ui.define([
         onRouteMatched: function () {
             var that = this,
                 urlParams = new URLSearchParams(window.location.search),
-                token = urlParams.get('token');
+                token = urlParams.get('token'),
+                sEmail = this.getShellUserEmail();
 
-            if (token != null) {
+            if (token != null || sEmail) {
                 var headers = new Headers();
-                headers.append("X-authorization", token);
+                if (token != null) {
+                    headers.append("X-authorization", token);
+                }
+                if (sEmail) {
+                    headers.append("X-user-email", sEmail);
+                }
 
                 var requestOptions = {
                     method: 'GET',

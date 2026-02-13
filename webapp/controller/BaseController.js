@@ -15,26 +15,44 @@ sap.ui.define([
     return Controller.extend("zfiexpensesmanage.controller.BaseController", {
 
         /**
-         * Set OData model with token and user language.
+         * Set OData model with token/email and user language.
          * @param {string} token Authentication token
+         * @param {string} sEmail User email
          */
-        setModelCA: function (token) {
+        setModelCA: function (token, sEmail) {
             var userLanguage = sessionStorage.getItem("oLangu");
             if (!userLanguage) {
                 userLanguage = "EN";
             }
+
             var serviceUrlWithLanguage = this.getModel().sServiceUrl + (this.getModel().sServiceUrl.includes("?") ? "&" : "?") + "sap-language=" + userLanguage;
+            var oHeaders = {
+                "applicationName": "ZFI_EXP_MNG"
+            };
+
+            if (token) {
+                oHeaders.authorization = token;
+            }
+
+            if (sEmail) {
+                oHeaders["X-user-email"] = sEmail;
+            }
 
             CAModel = new sap.ui.model.odata.v2.ODataModel({
                 serviceUrl: serviceUrlWithLanguage,
                 annotationURI: "/zsrv_iwfnd/Annotations(TechnicalName='ZFI_EXPENSES_ANNO_MDL',Version='0001')/$value/",
-                headers: {
-                    "authorization": token,
-                    "applicationName": "ZFI_EXP_MNG"
-                }
+                headers: oHeaders
             });
 
             this.setModel(CAModel);
+        },
+
+        /**
+         * Get current user email from FLP/Work Zone shell.
+         * @returns {string}
+         */
+        getShellUserEmail: function () {
+            return sap.ushell?.Container?.getUser()?.getEmail?.() || "";
         },
 
         /**
@@ -45,15 +63,25 @@ sap.ui.define([
             var that = this,
                 urlParams = new URLSearchParams(window.location.search),
                 token = urlParams.get('token'),
+                sEmail = this.getShellUserEmail(),
                 sViewName = this.getView().getParent().getParent().getLayout();
 
             if (sViewName.includes("OneColumn")) {
                 this.getCardValues();
             }
 
-            if (token != null) {
+            if (sEmail) {
+                that.getModel("global").setProperty("/userEmail", sEmail);
+            }
+
+            if (token != null || sEmail) {
                 var headers = new Headers();
-                headers.append("X-authorization", token);
+                if (token != null) {
+                    headers.append("X-authorization", token);
+                }
+                if (sEmail) {
+                    headers.append("X-user-email", sEmail);
+                }
 
                 var requestOptions = {
                     method: 'GET',
@@ -78,7 +106,9 @@ sap.ui.define([
                             that.getRouter().navTo("NotFound");
                         }
                         else {
-                            that.getModel("global").setProperty("/token", token);
+                            that.getModel("global").setProperty("/token", token || "");
+                            that.getModel("global").setProperty("/userEmail", sEmail || "");
+                            that.getModel("global").setProperty("/authSource", token ? "token" : "shell");
                         }
                     })
                     .catch(function (error) {

@@ -17,9 +17,14 @@ sap.ui.define(
         this.setModel(oModel, "global");
 
         var urlParams = new URLSearchParams(window.location.search),
-          token = urlParams.get('token');
+          token = urlParams.get('token'),
+          sEmail = this.getShellUserEmail();
 
-        this.setModelCA(token);
+        oModel.setProperty("/token", token || "");
+        oModel.setProperty("/userEmail", sEmail);
+        oModel.setProperty("/authSource", token ? "token" : (sEmail ? "shell" : "none"));
+
+        this.setModelCA(token, sEmail);
 
         if (!sessionStorage.getItem("oLangu"))
           sap.ui.getCore().getConfiguration().setLanguage("EN");
