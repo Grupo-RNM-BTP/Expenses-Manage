@@ -6,16 +6,9 @@ sap.ui.define([
     "../util/ScanUtil",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
-    "sap/m/MessageToast",
     "sap/m/MessageBox",
-    "sap/m/Dialog",
-    "sap/m/Table",
-    "sap/m/Column",
-    "sap/m/ColumnListItem",
-    "sap/m/Text",
-    "sap/m/Button"
 ],
-    function (BaseController, formatter, JSONModel, Fragment, ScanUtil, Filter, FilterOperator, MessageToast, MessageBox, Dialog, Table, Column, ColumnListItem, Text, Button) {
+    function (BaseController, formatter, JSONModel, Fragment, ScanUtil, Filter, FilterOperator, MessageBox) {
         "use strict";
 
         /**
@@ -76,6 +69,7 @@ sap.ui.define([
                 this.getView().setModel(new JSONModel({ exp: "", results: [] }), "Collab");
 
                 this.getView().setModel(new JSONModel({ exp: "", results: [] }), "Plate");
+                this.getView().setModel(new JSONModel({ exp: "", results: [] }), "Partner");
 
                 this._iPollInterval = 2000;
                 this._sPollTimerId = null;
@@ -192,13 +186,13 @@ sap.ui.define([
              */
             onBeforeRebindTable: function (oEvent) {
                 var oBindingParams = oEvent.getParameter("bindingParams");
+                var bHasCustomSorting = oBindingParams.sorter && oBindingParams.sorter.length > 0;
 
-                if (!this._bInitialSorterApplied2) {
-                    oBindingParams.sorter.push(
-                        new sap.ui.model.Sorter("Erdat", true)
-                    );
-                    this._bInitialSorterApplied2 = true;
+                if (bHasCustomSorting) {
+                    return;
                 }
+
+                oBindingParams.sorter = [new sap.ui.model.Sorter("Erdat", true)];
             },
 
             /**
@@ -502,7 +496,6 @@ sap.ui.define([
                 try {
                     var oModel = this.getModel();
                     var oButton = oEvent.getSource();
-
                     var oCtx = oButton.getBindingContext();
                     var oRow = oCtx && oCtx.getObject();
 
@@ -600,7 +593,6 @@ sap.ui.define([
                 try {
                     var oModel = this.getModel();
                     var oButton = oEvent.getSource();
-
                     var oCtx = oButton.getBindingContext();
                     var oRow = oCtx && oCtx.getObject();
 
@@ -669,6 +661,93 @@ sap.ui.define([
                         var oPlateModel = this.getView().getModel("Plate");
 
                         oPlateModel.setData({
+                            exp: sExp,
+                            results: (oData && oData.results) ? oData.results : []
+                        });
+
+                        oPopover.openBy(oButton);
+                    }.bind(this));
+
+                } catch (error) {
+                    if (this.showErrorMessage) {
+                        this.showErrorMessage({
+                            oTitle: this.getResourceBundle().getText("error"),
+                            oText: error.message
+                        });
+                    } else {
+                        MessageBox.alert(error.message);
+                    }
+                }
+            },
+
+            /**
+             * Handles the press event on the Partner link.
+             * Reads partner data by expense number and opens the partner popover.
+             * @param {sap.ui.base.Event} oEvent The press event fired by the Link control.
+             */
+            onPartnerPress: function (oEvent) {
+                try {
+                    var oModel = this.getModel();
+                    var oButton = oEvent.getSource();
+                    var oCtx = oButton.getBindingContext();
+                    var oRow = oCtx && oCtx.getObject();
+                    var sExp = oRow && oRow.ExpNo;
+
+                    if (!oRow || !sExp) {
+                        return;
+                    }
+
+                    oModel.read("/ZFI_EXPENSES_PARTNERS", {
+                        filters: [new Filter("Exp", FilterOperator.EQ, sExp)],
+                        urlParameters: {
+                            "$select": "Exp,Partner,PartnerName"
+                        },
+                        success: function (oData) {
+                            this.onBuildPartnersPopOver(oButton, { results: oData.results }, sExp);
+                        }.bind(this),
+                        error: function (oError) {
+                            var sError = JSON.parse(oError.responseText).error.message.value || sError;
+
+                            MessageBox.alert(sError, {
+                                icon: "ERROR",
+                                onClose: null,
+                                styleClass: "",
+                                initialFocus: null,
+                                textDirection: sap.ui.core.TextDirection.Inherit
+                            });
+                        }.bind(this)
+                    });
+                } catch (error) {
+                    if (this.showErrorMessage) {
+                        this.showErrorMessage({
+                            oTitle: this.getResourceBundle().getText("error"),
+                            oText: error.message
+                        });
+                    } else {
+                        MessageBox.alert(error.message);
+                    }
+                }
+            },
+
+            /**
+             * Builds (lazy-loads) and opens the partners popover.
+             * Populates the "Partner" JSONModel with the expense identifier and partners list.
+             * @param {sap.ui.core.Control} oButton The control used as anchor for the popover (openBy).
+             * @param {object} oData Data payload containing partners in oData.results.
+             * @param {string} sExp Expense identifier.
+             */
+            onBuildPartnersPopOver: function (oButton, oData, sExp) {
+                try {
+                    if (!this._pPartnerPopover) {
+                        this._pPartnerPopover = this.loadFragment({
+                            name: "zfiexpensesmanage.fragments.PartnerPopover"
+                        });
+                    }
+
+                    this._pPartnerPopover.then(function (oPopover) {
+                        var oPartnerModel = this.getView().getModel("Partner");
+
+                        oPartnerModel.setData({
                             exp: sExp,
                             results: (oData && oData.results) ? oData.results : []
                         });
@@ -2479,6 +2558,7 @@ sap.ui.define([
                     "expenseDialog:selectCurrency",
                     "expenseDialog:textAreaComments",
                     "expenseDialog:inputUnit",
+                    "expenseDialog:inputUnitExt",
                     "expenseDialog:multiCollaborators",
                     "expenseDialog:vatTable"
                 ];
@@ -2582,10 +2662,14 @@ sap.ui.define([
                     oEntry.Unit = String(iValue);
                 }
 
-                if (Fragment.byId(oView.getId(), "expenseDialog:selectBP").getVisible()) {
-                    const sValue = Fragment.byId(oView.getId(), "expenseDialog:selectBP").data("BPKey");
+                if (Fragment.byId(oView.getId(), "expenseDialog:inputUnitExt").getVisible()) {
+                    const iValue = Fragment.byId(oView.getId(), "expenseDialog:inputUnitExt").getValue();
 
-                    oEntry.Partner = String(sValue);
+                    oEntry.UnitExt = String(iValue);
+                }
+
+                if (Fragment.byId(oView.getId(), "expenseDialog:selectBP").getVisible()) {
+                    oEntry.Partners = this.handleFillPartners();
                 }
 
                 if (Fragment.byId(oView.getId(), "expenseDialog:selectExpSubType").getVisible()) {
@@ -2595,8 +2679,6 @@ sap.ui.define([
                 }
 
                 var sCardnumber = this.byId("expenseDialog:selectCreditCard").getSelectedKey();
-
-
 
                 oEntry.Cardnumber = sCardnumber || this._cardnum;
                 oEntry.Chknum = this._chknum;
@@ -3622,6 +3704,34 @@ sap.ui.define([
                 }
             },
 
+            /**
+             * Builds the Business Partner payload from selected tokens and returns it as a JSON string.
+             * Maps tokens to { BusinessPartner, BusinessPartnerName }.
+             * If field is not visible or empty, returns "[]".
+             * @returns {string} JSON string representing selected business partners
+             */
+            handleFillPartners: function () {
+                try {
+                    var oMI = sap.ui.core.Fragment.byId(this.getView().getId(), "expenseDialog:selectBP");
+
+                    if (!oMI || !oMI.getVisible()) {
+                        return "[]";
+                    }
+
+                    var aTokens = oMI.getTokens() || [];
+                    var aPartners = aTokens.map(function (oToken) {
+                        return {
+                            Partner: oToken.getKey()
+                        };
+                    });
+
+                    return JSON.stringify(aPartners);
+                } catch (e) {
+                    this.handleErrorMessage(e.message);
+                    return "[]";
+                }
+            },
+
 
             /* ************************************************************************************** */
             /* *                                        Logs                                        * */
@@ -3778,6 +3888,7 @@ sap.ui.define([
                     { id: "expenseDialog:selectCurrency", label: "moeda" },
                     { id: "expenseDialog:textAreaComments", label: "observações" },
                     { id: "expenseDialog:inputUnit", label: "unidade" },
+                    { id: "expenseDialog:inputUnitExt", label: "unidades externas" },
                     { id: "expenseDialog:multiCollaborators", label: "colaboradores" },
                 ];
             },
@@ -4086,16 +4197,9 @@ sap.ui.define([
                             oDialogSuggestions.update();
                         }.bind(this));
 
-                        var oBPInput = Fragment.byId(this.getView().getId(), "expenseDialog:selectBP");
-                        var sBPKey = oBPInput && oBPInput.data("BPKey");
-                        var sBPText = oBPInput && oBPInput.getValue();
-
-                        if (sBPKey) {
-                            oDialogSuggestions.setTokens([
-                                new sap.m.Token({ key: sBPKey, text: sBPText || sBPKey })
-                            ]);
-                        } else {
-                            oDialogSuggestions.setTokens([]);
+                        var oMI = Fragment.byId(this.getView().getId(), "expenseDialog:selectBP");
+                        if (oMI) {
+                            oDialogSuggestions.setTokens(oMI.getTokens());
                         }
 
                         oDialogSuggestions.open();
@@ -4111,35 +4215,15 @@ sap.ui.define([
              */
             handlePartnerPress: function (oEvent) {
                 try {
-                    var aTokens = oEvent.getParameter("tokens");
+                    var aTokens = oEvent.getParameter("tokens") || [];
                     var oBusinessPartner = Fragment.byId(this.getView().getId(), "expenseDialog:selectBP");
 
-                    if (aTokens.length === 0) {
+                    if (oBusinessPartner) {
+                        oBusinessPartner.setTokens(aTokens);
                         oBusinessPartner.setValue("");
-                        oBusinessPartner.data("BPKey", "");
-
-                        this._exptype = null;
-                        this._oPartnerVh.close();
-                        return;
                     }
 
-                    if (aTokens.length > 0) {
-                        if (aTokens.length > 1) {
-                            this.showErrorMessage(this.getResourceBundle().getText("MultipleSelection"));
-                            return;
-                        }
-
-                        var oToken = aTokens[0],
-                            sBusinessPartner = oToken.getKey(),
-                            sBusinessPartnerName = oToken.getText();
-
-                        oBusinessPartner.setValue(sBusinessPartnerName);
-                        oBusinessPartner.data("BPKey", sBusinessPartner);
-
-                        if (this.getModel("Expenses").getProperty("/exptype") != 'UE') {
-                            this._exptype = 'DESREP';
-                        }
-                    }
+                    this._exptype = aTokens.length > 0 && this.getModel("Expenses").getProperty("/exptype") !== "UE" ? "DESREP" : null;
 
                     this._oPartnerVh.close();
                 } catch (e) {
@@ -4196,6 +4280,65 @@ sap.ui.define([
             },
 
             /**
+             * Provides suggestion (type-ahead) for the business partner MultiInput.
+             * Filters the suggestionItems binding (OData) by BusinessPartner or BusinessPartnerName.
+             * @param {sap.ui.base.Event} oEvent - suggest event from MultiInput
+             */
+            onSuggestBusinessPartners: function (oEvent) {
+                try {
+                    var sValue = (oEvent.getParameter("suggestValue") || "").trim();
+                    var oMI = oEvent.getSource();
+                    var oBinding = oMI.getBinding("suggestionItems");
+
+                    if (!oBinding) {
+                        return;
+                    }
+
+                    if (sValue.length < 2) {
+                        oBinding.filter([]);
+                        return;
+                    }
+
+                    var oFilter = new sap.ui.model.Filter({
+                        filters: [
+                            new sap.ui.model.Filter({ path: "BusinessPartner", operator: sap.ui.model.FilterOperator.Contains, value1: sValue }),
+                            new sap.ui.model.Filter({ path: "BusinessPartnerName", operator: sap.ui.model.FilterOperator.Contains, value1: sValue })
+                        ],
+                        and: false
+                    });
+
+                    oBinding.filter([oFilter]);
+                } catch (e) {
+                    this.handleErrorMessage(e.message);
+                }
+            },
+
+            /**
+             * Handles selecting a suggestion item in the business partner MultiInput.
+             * Converts the chosen item into a Token (avoids duplicates) and clears typed value.
+             * @param {sap.ui.base.Event} oEvent - suggestionItemSelected event from MultiInput
+             */
+            onBusinessPartnerSuggestionItemSelected: function (oEvent) {
+                try {
+                    var oItem = oEvent.getParameter("selectedItem");
+                    if (!oItem) return;
+
+                    var oMI = oEvent.getSource();
+                    var sKey = oItem.getKey();
+                    var sText = oItem.getText();
+
+                    var bExists = oMI.getTokens().some(function (t) { return t.getKey() === sKey; });
+                    if (!bExists) {
+                        oMI.addToken(new sap.m.Token({ key: sKey, text: sText }));
+                    }
+
+                    oMI.setValue("");
+                } catch (e) {
+                    this.handleErrorMessage(e.message);
+                }
+            },
+
+            /**
              * Filters the value help table
              * @param {sap.ui.model.Filter} oFilter
              * @param {sap.ui.core.Control} oValueHelp
@@ -4219,15 +4362,15 @@ sap.ui.define([
              * @param {sap.ui.core.Control} oEvent
              */
             onBPCleared: function (oEvent) {
-                var sVal = (oEvent.getParameter("value") || "").trim();
-                if (sVal) {
+                var oBusinessPartner = Fragment.byId(this.getView().getId(), "expenseDialog:selectBP");
+                if (!oBusinessPartner) {
                     return;
                 }
 
-                var oBusinessPartner = Fragment.byId(this.getView().getId(), "expenseDialog:selectBP");
-                oBusinessPartner.data("BPKey", "");
-
-                this._exptype = null;
+                var aTokens = oBusinessPartner.getTokens() || [];
+                if (aTokens.length === 0) {
+                    this._exptype = null;
+                }
             },
 
             /**

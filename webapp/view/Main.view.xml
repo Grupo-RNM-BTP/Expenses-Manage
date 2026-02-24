@@ -85,7 +85,7 @@
                             </l:Grid>
 
                             <smartFilterBar:SmartFilterBar id="idSmartFilterBar" entitySet="ZFI_EXPENSES_MNG" />
-                            <smartTable:SmartTable id="MyExpensesTable" demandPopin="true" showRowCount="false" enableAutoBinding="true" entitySet="ZFI_EXPENSES_MNG" persistencyKey='pKeyOperationsTable' useVariantManagement="false" smartFilterId="idSmartFilterBar" tableType="ResponsiveTable" beforeRebindTable="onBeforeRebindTable" useExportToExcel="false" width="100%" useTablePersonalisation="true" requestAtLeastFields="Doc,Unit,Reason,ExpNo,ApprvdValue,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus">
+                            <smartTable:SmartTable id="MyExpensesTable" demandPopin="true" showRowCount="false" enableAutoBinding="true" entitySet="ZFI_EXPENSES_MNG" persistencyKey='pKeyOperationsTable' useVariantManagement="false" smartFilterId="idSmartFilterBar" tableType="ResponsiveTable" beforeRebindTable="onBeforeRebindTable" useExportToExcel="false" width="100%" useTablePersonalisation="true" requestAtLeastFields="Doc,Unit,Reason,ExpNo,ApprvdValue,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus,PartnerNo">
                                 <smartTable:customToolbar>
                                     <OverflowToolbar design="Transparent">
                                         <ToolbarSpacer/>
@@ -140,6 +140,11 @@
                                                 <Text text="{i18n>xexp.colPlate}" />
                                             </header>
                                         </Column>
+                                        <Column visible="false" customData:p13nData='{"columnKey":"PartnerNo","leadingProperty":"PartnerNo","sortProperty":"PartnerNo","filterProperty":"PartnerNo"}'>
+                                            <header>
+                                                <Text text="{i18n>xexp.expBP}" />
+                                            </header>
+                                        </Column>
                                     </columns>
                                     <items>
                                         <ColumnListItem id="idColumnListItem">
@@ -161,6 +166,7 @@
                                                 <Text id="ApprovedValue" text="{parts: [{path: 'ApprvdValue'}, {path: 'Waers'}], formatter: '.formatter.formatValue'}" />
                                                 <Link text="{Unit}" press="onUnitPress" />
                                                 <Link text="{Plate}" press="onPlatePress" />
+                                                <Link text="{PartnerNo}" press="onPartnerPress"/>
                                             </cells>
                                         </ColumnListItem>
                                     </items>

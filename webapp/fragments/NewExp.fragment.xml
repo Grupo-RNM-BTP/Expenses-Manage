@@ -105,6 +105,9 @@
                         <Label id="expenseDialog:labelComments" text="{i18n>xexp.expComments}"/>
                         <TextArea id="expenseDialog:textAreaComments" />
 
+                        <Label text="" visible="false"/>
+                        <Title text="{i18n>xexp.expUnitsCollaboratorsTitle}" level="H6" class="sapUiSmallMarginTop" visible="{= !!${Expenses>/unitVisible} || !!${Collaborators>/showCollaborators} }"/>
+
                         <Label text="{i18n>xexp.expUnit}" visible="{Expenses>/unitVisible}"/>
                         <StepInput id="expenseDialog:inputUnit" min="1" max="100" step="1" value="1" visible="{Expenses>/unitVisible}" change=".onUnitChange" textAlign="Center" width="120px"/>
 
@@ -115,15 +118,18 @@
                             </suggestionItems>
                         </MultiInput>
 
-                        <Label text="{i18n>xexp.expBP}"/>
-                        <Input id="expenseDialog:selectBP" showValueHelp="true" valueHelpRequest="handleOpenPartnerVH" required="true" visible="{= ['DESREP','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }">
-                            <customData>
-                                <core:CustomData key="BPKey" value=""/>
-                            </customData>
+                        <Label text="" visible="false"/>
+                        <Title text="{i18n>xexp.expPartnerUnitsExtTitle}" level="H6" class="sapUiSmallMarginTop" visible="{= ['DESREP','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }"/>
+
+                        <Label text="{i18n>xexp.expBP}" visible="{= ['DESREP','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }"/>
+                        <MultiInput id="expenseDialog:selectBP" width="100%" showValueHelp="true" valueHelpRequest="handleOpenPartnerVH" tokenUpdate=".onBPCleared" required="true" visible="{= ['DESREP','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }" showSuggestion="true" filterSuggests="false" suggest=".onSuggestBusinessPartners" suggestionItemSelected=".onBusinessPartnerSuggestionItemSelected" suggestionItems="{ path: '/ZFI_BUSINESS_PARTNER', length: 50 }">
                             <suggestionItems>
                                 <core:Item key="{BusinessPartner}" text="{BusinessPartnerName}" />
                             </suggestionItems>
-                        </Input>
+                        </MultiInput>
+
+                        <Label text="{i18n>xexp.expUnitExt}" visible="{= ['DESREP','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }"/>
+                        <StepInput id="expenseDialog:inputUnitExt" min="1" max="100" step="1" value="1" visible="{= ['DESREP','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }" textAlign="Center" width="120px"/>
 
                         <Label text="{i18n>xexp.IsProjectExpenseQuestion}" />
                         <CheckBox id="expenseDialog:checkBoxProjectYes" visible="{Main>/showCheckProjects}" select=".onProjectChange" selected="false" text="{i18n>xexp.Yes}" />

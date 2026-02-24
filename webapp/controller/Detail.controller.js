@@ -1,10 +1,9 @@
 sap.ui.define([
     "./BaseController",
     "../model/formatter",
-    "sap/ui/model/json/JSONModel",
     "../util/ScanUtil",
 ],
-    function (BaseController, formatter, JSONModel, ScanUtil) {
+    function (BaseController, formatter, ScanUtil) {
         "use strict";
 
         /**
