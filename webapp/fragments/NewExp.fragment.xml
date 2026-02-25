@@ -128,8 +128,8 @@
                             </suggestionItems>
                         </MultiInput>
 
-                        <Label text="{i18n>xexp.expUnitExt}" visible="{= ['DESREP','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }"/>
-                        <StepInput id="expenseDialog:inputUnitExt" min="1" max="100" step="1" value="1" visible="{= ['DESREP','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }" textAlign="Center" width="120px"/>
+                        <Label text="{i18n>xexp.expUnitExt}" visible="{Expenses>/unitVisible}"/>
+                        <StepInput id="expenseDialog:inputUnitExt" min="1" max="100" step="1" value="1" visible="{Expenses>/unitVisible}" textAlign="Center" width="120px"/>
 
                         <Label text="{i18n>xexp.IsProjectExpenseQuestion}" />
                         <CheckBox id="expenseDialog:checkBoxProjectYes" visible="{Main>/showCheckProjects}" select=".onProjectChange" selected="false" text="{i18n>xexp.Yes}" />
