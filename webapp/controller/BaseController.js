@@ -291,9 +291,6 @@ sap.ui.define([
                                 dataLabel: { visible: true }
                             }
                         });
-
-                        this.getCreditCardInfo();
-
                     }.bind(this),
 
                     error: function (oError) {
