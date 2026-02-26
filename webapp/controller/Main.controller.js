@@ -29,6 +29,8 @@ sap.ui.define([
                     ExpNo: "",
                     ExpensesReconciled: [],
                     ExpenseDevolution: [],
+                    reconcileSearch: "",
+                    devolutionSearch: "",
                     inputValue: "",
                     sliderMax: "",
                     showCheckProjects: false,
@@ -82,6 +84,8 @@ sap.ui.define([
                 this._bInitialSorterApplied = false;
                 this._bInitialSorterApplied2 = false;
                 this._bInitialSorterApplied3 = false;
+                this._oReconcileTableSettings = null;
+                this._oDevolutionTableSettings = null;
 
 
                 sessionStorage.setItem("goToLaunchpad", "X");
@@ -1111,6 +1115,277 @@ sap.ui.define([
                 this.byId("idCompensation").setEnabled(CompState);
             },
 
+            /**
+             * Handles live search for the reconcile dialog table.
+             * @param {sap.ui.base.Event} oEvent - Search field liveChange event
+             */
+            onReconcileSearchLiveChange: function (oEvent) {
+                this.getView().getModel("Main").setProperty("/reconcileSearch", oEvent.getParameter("newValue") || "");
+                this.handleApplyDialogTableState("R");
+            },
+
+            /**
+             * Opens the sort/filter settings dialog for Reconcile.
+             */
+            handleOpenReconcileTableSettings: function () {
+                this.handleOpenDialogTableSettings("R");
+            },
+
+            /**
+             * Handles click on a Reconcile column header.
+             * @param {sap.ui.base.Event} oEvent - Column header press event
+             */
+            onReconcileColumnPress: function (oEvent) {
+                var sColumnKey = oEvent.getSource().data("columnKey");
+                this.handleOpenDialogTableSettings("R", sColumnKey);
+            },
+
+            /**
+             * Returns table metadata for dialog settings by dialog type.
+             * @param {string} sDialogType - "R" for Reconcile, "D" for Devolution
+             * @returns {object} Metadata with table id, search path and state properties
+             */
+            handleGetDialogTableMetadata: function (sDialogType) {
+                if (sDialogType === "R") {
+                    return {
+                        tableId: "reconcileTable",
+                        searchPath: "/reconcileSearch",
+                        settingsProp: "_oReconcileTableSettings",
+                        dialogProp: "_oReconcileTableSettingsDialog"
+                    };
+                }
+
+                return {
+                    tableId: "DevolutionTable",
+                    searchPath: "/devolutionSearch",
+                    settingsProp: "_oDevolutionTableSettings",
+                    dialogProp: "_oDevolutionTableSettingsDialog"
+                };
+            },
+
+            /**
+             * Builds a global search filter for dialog tables.
+             * @param {string} sSearchValue - Search text
+             * @returns {sap.ui.model.Filter|null} Search filter or null
+             */
+            handleGetDialogTableSearchFilter: function (sSearchValue) {
+                if (!sSearchValue) {
+                    return null;
+                }
+
+                return new Filter({
+                    filters: [
+                        new Filter("ExpNo", FilterOperator.Contains, sSearchValue),
+                        new Filter("DocumentHeader", FilterOperator.Contains, sSearchValue),
+                        new Filter("ExpTypeDsc", FilterOperator.Contains, sSearchValue),
+                        new Filter("PayMethodDsc", FilterOperator.Contains, sSearchValue),
+                        new Filter("Value", FilterOperator.Contains, sSearchValue),
+                        new Filter("VYearMonthDay", FilterOperator.Contains, sSearchValue)
+                    ],
+                    and: false
+                });
+            },
+
+            /**
+             * Applies search, selected filters and sorting to a dialog table.
+             * @param {string} sDialogType - "R" for Reconcile, "D" for Devolution
+             */
+            handleApplyDialogTableState: function (sDialogType) {
+                var oMeta = this.handleGetDialogTableMetadata(sDialogType);
+                var oTable = this.byId(oMeta.tableId);
+                if (!oTable) {
+                    return;
+                }
+
+                var oBinding = oTable.getBinding("items");
+                if (!oBinding) {
+                    return;
+                }
+
+                var oMainModel = this.getView().getModel("Main");
+                var sSearchValue = (oMainModel.getProperty(oMeta.searchPath) || "").trim();
+                var oSearchFilter = this.handleGetDialogTableSearchFilter(sSearchValue);
+                var oState = this[oMeta.settingsProp] || {};
+                var oStateFilters = oState.filters || {};
+                var aFilters = [];
+
+                if (oSearchFilter) {
+                    aFilters.push(oSearchFilter);
+                }
+
+                Object.keys(oStateFilters).forEach(function (sPath) {
+                    var aValues = oStateFilters[sPath] || [];
+                    if (!aValues.length) {
+                        return;
+                    }
+
+                    var aInnerFilters = aValues.map(function (sValue) {
+                        return new Filter(sPath, FilterOperator.EQ, sValue);
+                    });
+                    aFilters.push(new Filter({ filters: aInnerFilters, and: false }));
+                });
+
+                if (aFilters.length) {
+                    oBinding.filter(new Filter({ filters: aFilters, and: true }));
+                } else {
+                    oBinding.filter([]);
+                }
+
+                if (oState.sortKey) {
+                    oBinding.sort([new sap.ui.model.Sorter(oState.sortKey, !!oState.sortDescending)]);
+                } else {
+                    oBinding.sort([]);
+                }
+            },
+
+            /**
+             * Builds available filter values for the settings dialog.
+             * @param {sap.m.ViewSettingsDialog} oDialog - Settings dialog instance
+             * @param {string} sDialogType - "R" for Reconcile, "D" for Devolution
+             */
+            handleBuildDialogFilterItems: function (oDialog, sDialogType) {
+                var oMeta = this.handleGetDialogTableMetadata(sDialogType);
+                var oMainModel = this.getView().getModel("Main");
+                var sPath = sDialogType === "R" ? "/ExpensesReconciled" : "/ExpenseDevolution";
+                var aData = oMainModel.getProperty(sPath) || [];
+                var oBundle = this.getResourceBundle();
+                var aFilterDefs = [
+                    { key: "ExpNo", text: oBundle.getText("ExpNo") },
+                    { key: "DocumentHeader", text: oBundle.getText("DocumentHeader") },
+                    { key: "ExpTypeDsc", text: oBundle.getText("ExpTypeDsc") },
+                    { key: "PayMethodDsc", text: oBundle.getText("PayMethodDsc") },
+                    { key: "Value", text: oBundle.getText("Value") },
+                    { key: "VYearMonthDay", text: oBundle.getText("Sdate") }
+                ];
+
+                oDialog.destroyFilterItems();
+
+                aFilterDefs.forEach(function (oFilterDef) {
+                    var mUnique = {};
+                    aData.forEach(function (oRow) {
+                        var sVal = oRow[oFilterDef.key];
+                        if (sVal !== undefined && sVal !== null && sVal !== "") {
+                            mUnique[sVal] = true;
+                        }
+                    });
+
+                    var aItems = Object.keys(mUnique).sort().map(function (sKey) {
+                        return new sap.m.ViewSettingsItem({
+                            key: sKey,
+                            text: sKey
+                        });
+                    });
+
+                    oDialog.addFilterItem(new sap.m.ViewSettingsFilterItem({
+                        key: oFilterDef.key,
+                        text: oFilterDef.text,
+                        items: aItems
+                    }));
+                });
+
+                var oState = this[oMeta.settingsProp] || {};
+                var oStateFilters = oState.filters || {};
+
+                oDialog.getFilterItems().forEach(function (oFilterItem) {
+                    var sFilterKey = oFilterItem.getKey();
+                    var aSelectedValues = oStateFilters[sFilterKey] || [];
+
+                    oFilterItem.getItems().forEach(function (oItem) {
+                        oItem.setSelected(aSelectedValues.indexOf(oItem.getKey()) > -1);
+                    });
+                });
+            },
+
+            /**
+             * Opens table settings dialog with optional preferred sort key.
+             * @param {string} sDialogType - "R" for Reconcile, "D" for Devolution
+             * @param {string} [sPreferredSortKey] - Sort key to preselect
+             */
+            handleOpenDialogTableSettings: function (sDialogType, sPreferredSortKey) {
+                var oMeta = this.handleGetDialogTableMetadata(sDialogType);
+                var oBundle = this.getResourceBundle();
+                var oDialog = this[oMeta.dialogProp];
+
+                if (!oDialog) {
+                    oDialog = new sap.m.ViewSettingsDialog({
+                        title: oBundle.getText("SortFilter"),
+                        confirm: function (oEvent) {
+                            this.onDialogTableSettingsConfirm(sDialogType, oEvent);
+                        }.bind(this),
+                        resetFilters: function () {
+                            var oState = this[oMeta.settingsProp] || {};
+                            oState.filters = {};
+                            this[oMeta.settingsProp] = oState;
+                            this.handleApplyDialogTableState(sDialogType);
+                        }.bind(this)
+                    });
+
+                    oDialog.addSortItem(new sap.m.ViewSettingsItem({ key: "ExpNo", text: oBundle.getText("ExpNo") }));
+                    oDialog.addSortItem(new sap.m.ViewSettingsItem({ key: "DocumentHeader", text: oBundle.getText("DocumentHeader") }));
+                    oDialog.addSortItem(new sap.m.ViewSettingsItem({ key: "ExpTypeDsc", text: oBundle.getText("ExpTypeDsc") }));
+                    oDialog.addSortItem(new sap.m.ViewSettingsItem({ key: "PayMethodDsc", text: oBundle.getText("PayMethodDsc") }));
+                    oDialog.addSortItem(new sap.m.ViewSettingsItem({ key: "Value", text: oBundle.getText("Value") }));
+                    oDialog.addSortItem(new sap.m.ViewSettingsItem({ key: "VYearMonthDay", text: oBundle.getText("Sdate") }));
+
+                    this.getView().addDependent(oDialog);
+                    this[oMeta.dialogProp] = oDialog;
+                }
+
+                this.handleBuildDialogFilterItems(oDialog, sDialogType);
+
+                var oState = this[oMeta.settingsProp] || {};
+                var aSortItems = oDialog.getSortItems();
+                var oSelectedSortItem = null;
+                var sSortKeyToSelect = sPreferredSortKey || oState.sortKey;
+                if (sSortKeyToSelect) {
+                    aSortItems.some(function (oItem) {
+                        if (oItem.getKey() === sSortKeyToSelect) {
+                            oSelectedSortItem = oItem;
+                            return true;
+                        }
+                        return false;
+                    });
+                }
+
+                if (oSelectedSortItem) {
+                    oDialog.setSelectedSortItem(oSelectedSortItem);
+                }
+                oDialog.setSortDescending(!!oState.sortDescending);
+                oDialog.open();
+            },
+
+            /**
+             * Handles settings dialog confirmation and persists state.
+             * @param {string} sDialogType - "R" for Reconcile, "D" for Devolution
+             * @param {sap.ui.base.Event} oEvent - ViewSettingsDialog confirm event
+             */
+            onDialogTableSettingsConfirm: function (sDialogType, oEvent) {
+                var oMeta = this.handleGetDialogTableMetadata(sDialogType);
+                var oSortItem = oEvent.getParameter("sortItem");
+                var aFilterItems = oEvent.getParameter("filterItems") || [];
+                var oState = {
+                    sortKey: oSortItem ? oSortItem.getKey() : "",
+                    sortDescending: !!oEvent.getParameter("sortDescending"),
+                    filters: {}
+                };
+
+                aFilterItems.forEach(function (oFilterItem) {
+                    var oParent = oFilterItem.getParent();
+                    if (!oParent || !oParent.getKey) {
+                        return;
+                    }
+
+                    var sGroup = oParent.getKey();
+                    if (!oState.filters[sGroup]) {
+                        oState.filters[sGroup] = [];
+                    }
+                    oState.filters[sGroup].push(oFilterItem.getKey());
+                });
+
+                this[oMeta.settingsProp] = oState;
+                this.handleApplyDialogTableState(sDialogType);
+            },
+
 
             /* ************************************************************************************** */
             /* *                              Confidential Expense                                * */
@@ -1214,12 +1489,15 @@ sap.ui.define([
                 this.onGetExpenses('R').then(function (aFiltered) {
                     if (aFiltered && aFiltered.length) {
                         that._pReconcileDialog.then(function (oDialog) {
+                            that.getView().getModel("Main").setProperty("/reconcileSearch", "");
+                            that._oReconcileTableSettings = null;
                             if (that.byId("smartTableTransRecon").getTable().getSelectedItems().length === 1) {
                                 that.byId("reconcileTable").setMode("MultiSelect");
                             } else {
                                 that.byId("reconcileTable").setMode("SingleSelectLeft");
                             }
                             oDialog.open();
+                            that.handleApplyDialogTableState("R");
                         });
                     } else {
                         that.showErrorMessage({
@@ -1327,6 +1605,13 @@ sap.ui.define([
                     });
                     this._pReconcileDialog = null;
 
+                }
+
+                this.getView().getModel("Main").setProperty("/reconcileSearch", "");
+                this._oReconcileTableSettings = null;
+                if (this._oReconcileTableSettingsDialog) {
+                    this._oReconcileTableSettingsDialog.destroy();
+                    this._oReconcileTableSettingsDialog = null;
                 }
 
                 this.onChangeStateReconButtons(false, false);
@@ -1512,7 +1797,10 @@ sap.ui.define([
                 this.onGetExpenses('D').then(function (aFiltered) {
                     if (aFiltered && aFiltered.length) {
                         that._pDevolutionDialog.then(function (oDialog) {
+                            that.getView().getModel("Main").setProperty("/devolutionSearch", "");
+                            that._oDevolutionTableSettings = null;
                             oDialog.open();
+                            that.handleApplyDialogTableState("D");
                         });
                     } else {
                         this.showErrorMessage({
@@ -1588,6 +1876,38 @@ sap.ui.define([
                     this._pDevolutionDialog = null;
 
                 }
+
+                this.getView().getModel("Main").setProperty("/devolutionSearch", "");
+                this._oDevolutionTableSettings = null;
+                if (this._oDevolutionTableSettingsDialog) {
+                    this._oDevolutionTableSettingsDialog.destroy();
+                    this._oDevolutionTableSettingsDialog = null;
+                }
+            },
+
+            /**
+            * Handles live search for the devolution dialog table.
+            * @param {sap.ui.base.Event} oEvent - Search field liveChange event
+            */
+            onDevolutionSearchLiveChange: function (oEvent) {
+                this.getView().getModel("Main").setProperty("/devolutionSearch", oEvent.getParameter("newValue") || "");
+                this.handleApplyDialogTableState("D");
+            },
+
+            /**
+             * Opens the sort/filter settings dialog for Devolution.
+             */
+            handleOpenDevolutionTableSettings: function () {
+                this.handleOpenDialogTableSettings("D");
+            },
+
+            /**
+             * Handles click on a Devolution column header.
+             * @param {sap.ui.base.Event} oEvent - Column header press event
+             */
+            onDevolutionColumnPress: function (oEvent) {
+                var sColumnKey = oEvent.getSource().data("columnKey");
+                this.handleOpenDialogTableSettings("D", sColumnKey);
             },
 
 

@@ -2,31 +2,61 @@
     xmlns:core="sap.ui.core"
     xmlns:layout="sap.ui.layout">
 
-    <Dialog id="reconcileDialog" title="{i18n>Reconcile}" contentWidth="1500px" contentHeight="400px" initialFocus="beginButton" class="sapUiSizeCompact sapUiNoContentPadding" stretchOnPhone="false">
+    <Dialog id="reconcileDialog" title="{i18n>Reconcile}" contentWidth="1700px" contentHeight="650px" initialFocus="beginButton" class="sapUiSizeCompact sapUiNoContentPadding" stretchOnPhone="false" draggable="true" resizable="true">
 
         <VBox class="sapUiSmallMargin sapUiNoContentPadding">
 
             <MessageStrip text="{i18n>ReconcileMessage}" type="Information" showIcon="true" showCloseButton="false" class="sapUiSmallMarginBottom" />
 
+            <OverflowToolbar design="Transparent" class="sapUiTinyMarginBottom">
+                <SearchField width="22rem" placeholder="{i18n>Search}" liveChange=".onReconcileSearchLiveChange" />
+                <ToolbarSpacer />
+                <Button icon="sap-icon://action-settings" type="Transparent" tooltip="{i18n>SortFilter}" press=".handleOpenReconcileTableSettings" />
+            </OverflowToolbar>
+
             <Table id="reconcileTable" mode="MultiSelect" inset="false" width="100%" demandPopin="true" class="sapUiResponsiveContentPadding" fixedLayout="false" growing="true" growingThreshold="7" items="{Main>/ExpensesReconciled}">
                 <columns>
                     <Column minScreenWidth="Tablet" demandPopin="true" hAlign="Center" width="7rem">
-                        <Text text="{i18n>ExpNo}" />
+                        <Button type="Transparent" text="{i18n>ExpNo}" press=".onReconcileColumnPress">
+                            <customData>
+                                <core:CustomData key="columnKey" value="ExpNo" />
+                            </customData>
+                        </Button>
                     </Column>
                     <Column minScreenWidth="Small" demandPopin="true">
-                        <Text text="{i18n>DocumentHeader}" />
+                        <Button type="Transparent" text="{i18n>DocumentHeader}" press=".onReconcileColumnPress">
+                            <customData>
+                                <core:CustomData key="columnKey" value="DocumentHeader" />
+                            </customData>
+                        </Button>
                     </Column>
                     <Column minScreenWidth="Small" demandPopin="true">
-                        <Text text="{i18n>ExpTypeDsc}" />
+                        <Button type="Transparent" text="{i18n>ExpTypeDsc}" press=".onReconcileColumnPress">
+                            <customData>
+                                <core:CustomData key="columnKey" value="ExpTypeDsc" />
+                            </customData>
+                        </Button>
                     </Column>
                     <Column minScreenWidth="Desktop" demandPopin="true">
-                        <Text text="{i18n>PayMethodDsc}" />
+                        <Button type="Transparent" text="{i18n>PayMethodDsc}" press=".onReconcileColumnPress">
+                            <customData>
+                                <core:CustomData key="columnKey" value="PayMethodDsc" />
+                            </customData>
+                        </Button>
                     </Column>
                     <Column minScreenWidth="Desktop" demandPopin="true" hAlign="End">
-                        <Text text="{i18n>Value}" />
+                        <Button type="Transparent" text="{i18n>Value}" press=".onReconcileColumnPress">
+                            <customData>
+                                <core:CustomData key="columnKey" value="Value" />
+                            </customData>
+                        </Button>
                     </Column>
                     <Column minScreenWidth="Desktop" demandPopin="true" hAlign="End">
-                        <Text text="{i18n>Sdate}" />
+                        <Button type="Transparent" text="{i18n>Sdate}" press=".onReconcileColumnPress">
+                            <customData>
+                                <core:CustomData key="columnKey" value="VYearMonthDay" />
+                            </customData>
+                        </Button>
                     </Column>
                 </columns>
                 <items>
