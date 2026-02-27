@@ -136,11 +136,12 @@
                         <CheckBox id="expenseDialog:checkBoxProjectNo" visible="{Main>/showCheckProjects}" select=".onProjectChange" selected="true" text="{i18n>xexp.No}" />
 
                         <Label id="expenseDialog:labelProjects" text="{i18n>xexp.Project}" />
-                        <Input id="expenseDialog:selectProject" showValueHelp="true" valueHelpRequest=".handleOpenProjectsVH" required="true" visible="false" valueHelpOnly="true" showSuggestion="false" suggestionItems="{path: 'Main>/projects'}">
+                        <Input id="expenseDialog:selectProject" showValueHelp="true" required="true" visible="false" valueHelpRequest=".onProjectValueHelpRequested" valueHelpOnly="true" />
+                        <!-- <Input id="expenseDialog:selectProject" showValueHelp="true" valueHelpRequest=".handleOpenProjectsVH" required="true" visible="false" valueHelpOnly="true" showSuggestion="false" suggestionItems="{path: 'Main>/projects'}">
                             <suggestionItems>
                                 <core:Item key="{Main>Network}" text="{Main>Project}" />
                             </suggestionItems>
-                        </Input>
+                        </Input> -->
 
                         <Label text="" visible="false"/>
                         <Title id="expenseDialog:titleVatTable" text="{i18n>xexp.expVatTable}" level="H6" class="sapUiSmallMarginTop"/>

@@ -5136,194 +5136,175 @@ sap.ui.define([
             /* ************************************************************************************** */
 
             /**
-           * Opens the partner value help dialog
-           */
-            handleOpenProjectsVH: async function () {
-                try {
+             * Opens the partner value help dialog
+             */
+            onProjectValueHelpRequested: function () {
+                this._oBasicSearchField = new sap.m.SearchField({
+                    search: function () {
+                        this.oProjectDialog.getFilterBar().search();
+                    }.bind(this)
+                });
 
-                    this._oBasicSearchField = new sap.m.SearchField();
+                this.pProjectDialog = this.loadFragment({
+                    name: "zfiexpensesmanage.fragments.ProjectsVH"
+                }).then(function (oProjectDialog) {
+                    var oFilterBar = oProjectDialog.getFilterBar();
+                    this.oProjectDialog = oProjectDialog;
 
-                    if (!this._oProjectsVh) {
-                        this._oProjectsVh = await this.loadFragment({
-                            name: "zfiexpensesmanage.fragments.ProjectsVH"
-                        });
-                        this.getView().addDependent(this._oProjectsVh);
+                    this.getView().addDependent(oProjectDialog);
 
-                        var oFilterBar = this._oProjectsVh.getFilterBar();
-                        oFilterBar.setFilterBarExpanded(false);
-                        oFilterBar.setBasicSearch(this._oBasicSearchField);
+                    oFilterBar.setFilterBarExpanded(false);
+                    oFilterBar.setBasicSearch(this._oBasicSearchField);
 
-                        this._oBasicSearchField.attachSearch(function () {
-                            oFilterBar.search();
-                        });
-                    }
+                    oProjectDialog.getTableAsync().then(function (oTable) {
+                        oTable.setModel(this.getModel("Main"));
 
-                    var oVh = this._oProjectsVh,
-                        oMainModel = this.getModel("Main"),
-                        oTable = await oVh.getTableAsync();
+                        if (oTable.bindRows) {
+                            oTable.addColumn(new sap.ui.table.Column({
+                                label: new sap.m.Label({ text: "{i18n>xexp.ProjectId}" }),
+                                template: new sap.m.Text({ text: "{Main>Network}" })
+                            }));
+                            oTable.addColumn(new sap.ui.table.Column({
+                                label: new sap.m.Label({ text: "{i18n>xexp.ProjectName}" }),
+                                template: new sap.m.Text({ text: "{Main>Project}" })
+                            }));
+                            oTable.addColumn(new sap.ui.table.Column({
+                                label: new sap.m.Label({ text: "{i18n>xexp.Activity}" }),
+                                template: new sap.m.Text({ text: "{Main>Activity}" })
+                            }));
+                            oTable.addColumn(new sap.ui.table.Column({
+                                label: new sap.m.Label({ text: "{i18n>xexp.ActivityDesc}" }),
+                                template: new sap.m.Text({ text: "{Main>ActivityDesc}" })
+                            }));
 
-                    oTable.setModel(oMainModel, "Main");
-
-                    if (oTable.bindRows) {
-                        oTable.unbindRows();
-                        oTable.bindRows("Main>/projects");
-
-                        oTable.removeAllColumns();
-                        oTable.addColumn(new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ProjectId") }), template: new sap.m.Text({ text: "{Main>Network}" }) }).data({ fieldName: "Network" }));
-                        oTable.addColumn(new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.Activity") }), template: new sap.m.Text({ text: "{Main>Activity}" }) }).data({ fieldName: "Activity" }));
-                        oTable.addColumn(new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ActivityDesc") }), template: new sap.m.Text({ text: "{Main>ActivityDesc}" }) }).data({ fieldName: "ActivityDesc" }));
-                        oTable.addColumn(new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ProjectName") }), template: new sap.m.Text({ text: "{Main>Project}" }) }).data({ fieldName: "Project" }));
-                        oTable.addColumn(new sap.ui.table.Column({ label: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.BilledToCustomer") }), template: new sap.m.Text({ text: { path: "Main>Bill", formatter: formatter.formatBill } }) }).data({ fieldName: "Bill" }));
-                    }
-
-                    if (oTable.bindItems) {
-                        if (oTable.removeAllColumns) {
-                            oTable.removeAllColumns();
+                            oTable.bindAggregation("rows", {
+                                path: "Main>/projects",
+                                events: {
+                                    dataReceived: function () {
+                                        oProjectDialog.update();
+                                    }
+                                }
+                            });
                         }
 
-                        oTable.unbindItems();
-                        oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ProjectId") }) }).data({ fieldName: "Network" }));
-                        oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.Activity") }) }).data({ fieldName: "Activity" }));
-                        oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ActivityDesc") }) }).data({ fieldName: "ActivityDesc" }));
-                        oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.ProjectName") }) }).data({ fieldName: "Project" }));
-                        oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: this.getResourceBundle().getText("xexp.BilledToCustomer") }) }).data({ fieldName: "Bill" }));
-                        oTable.bindItems({
-                            path: "Main>/projects",
-                            template: new sap.m.ColumnListItem({
-                                cells: [
-                                    new sap.m.Text({ text: "{Main>Network}" }),
-                                    new sap.m.Text({ text: "{Main>Activity}" }),
-                                    new sap.m.Text({ text: "{Main>ActivityDesc}" }),
-                                    new sap.m.Text({ text: "{Main>Project}" }),
-                                    new sap.m.Text({ text: { path: "Main>Bill", formatter: formatter.formatBill } })
+                        if (oTable.bindItems) {
+                            oTable.setMode("SingleSelectMaster");
 
-                                ]
-                            })
-                        });
-                    }
+                            oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: "{i18n>xexp.ProjectId}" }) }));
+                            oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: "{i18n>xexp.ProjectName}" }), minScreenWidth: "Tablet", demandPopin: true }));
+                            oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: "{i18n>xexp.Activity}" }), minScreenWidth: "Tablet", demandPopin: true }));
+                            oTable.addColumn(new sap.m.Column({ header: new sap.m.Label({ text: "{i18n>xexp.ActivityDesc}" }), minScreenWidth: "Tablet", demandPopin: true }));
 
-                    var oInput = this.getView().byId("expenseDialog:selectProject");
-                    var sKey = oInput && oInput.data("ProjectKey");
-                    var sText = oInput && oInput.getValue();
+                            oTable.bindItems({
+                                path: "Main>/projects",
+                                template: new sap.m.ColumnListItem({
+                                    type: "Active",
+                                    cells: [
+                                        new sap.m.Label({ text: "{Main>Network}" }),
+                                        new sap.m.Label({ text: "{Main>Project}" }),
+                                        new sap.m.Label({ text: "{Main>Activity}" }),
+                                        new sap.m.Label({ text: "{Main>ActivityDesc}" })
+                                    ]
+                                }),
+                                events: {
+                                    dataReceived: function () {
+                                        oProjectDialog.update();
+                                    }
+                                }
+                            });
+                        }
 
-                    if (sKey) {
-                        oVh.setTokens([new sap.m.Token({ key: sKey, text: sText || sKey })]);
-                    } else {
-                        oVh.setTokens([]);
-                    }
+                        oProjectDialog.update();
+                    }.bind(this));
 
-                    oVh.update();
-                    oVh.open();
-
-                } catch (e) {
-                    sap.m.MessageBox.error(e.message || String(e));
-                }
+                    oProjectDialog.open();
+                }.bind(this));
             },
 
             /**
-             * Handles the partner press event
-             * @param {sap.ui.core.Control} oEvent
+             * Handles the project selection in the value help dialog.
+             * @param {sap.ui.base.Event} oEvent - The event object
              */
             handleProjectPress: function (oEvent) {
-                try {
-                    var aTokens = oEvent.getParameter("tokens") || [];
-                    var oInput = this.getView().byId("expenseDialog:selectProject");
+                var oInput = this.byId("expenseDialog:selectProject");
+                var aTokens = oEvent.getParameter("tokens");
+                var sFinalValue, sKey;
 
-                    if (!aTokens.length) {
-                        oInput.setValue("");
-                        oInput.data("ProjectKey", "");
-                        this._oProjectsVh.close();
-                        return;
+                if (aTokens && aTokens.length > 0) {
+                    sFinalValue = aTokens[0].getText();
+                    sKey = aTokens[0].getKey();
+                } else {
+                    var oTable = this.oProjectDialog.getTable();
+                    var oSelectedItem = oTable.getSelectedItem();
+
+                    if (oSelectedItem) {
+                        var oContext = oSelectedItem.getBindingContext("Main");
+                        var sProjectName = oContext.getProperty("Project");
+                        sKey = oContext.getProperty("Network");
+                        sFinalValue = sProjectName + " (" + sKey + ")";
                     }
-
-                    if (aTokens.length > 1) {
-                        sap.m.MessageBox.error(this.getResourceBundle().getText("MultipleSelection"));
-                        return;
-                    }
-
-                    var oToken = aTokens[0];
-                    oInput.setValue(oToken.getText());
-                    oInput.data("ProjectKey", oToken.getKey());
-
-                    this._oProjectsVh.close();
-                } catch (e) {
-                    sap.m.MessageBox.error(e.message || String(e));
                 }
+
+                if (sFinalValue) {
+                    oInput.setValue(sFinalValue);
+                    oInput.data("ProjectKey", sKey);
+                    oInput.setVisible(true);
+                }
+
+                this.oProjectDialog.close();
             },
 
             /**
-             * Handles the partner value help close event
-             */
-            handleProjectVhClose: function () {
-                try {
-                    if (this._oProjectsVh) {
-                        this._oProjectsVh.close();
-                        this._oProjectsVh.destroy();
-                        this._oProjectsVh = null;
-                    }
-                } catch (e) {
-                    sap.m.MessageBox.error(e.message || String(e));
-                }
+            * Handles the project value help cancel.
+            */
+            onProjectVhCancel: function () {
+                this.oProjectDialog.close();
             },
 
             /**
-             * Handles the partner value help search event
-             * @param {sap.ui.core.Control} oEvent
-             */
+            * Handles the project value help after close.
+            */
+            onProjectVhAfterClose: function () {
+                this.oProjectDialog.destroy();
+            },
+
+            /**
+            * Handles the project value help search.
+            * @param {sap.ui.base.Event} oEvent - The event object
+            */
             handleProjectVhSearch: function (oEvent) {
-                try {
-                    var sSearchQuery = (this._oBasicSearchField.getValue() || "").toUpperCase(),
-                        aSelectionSet = oEvent.getParameter("selectionSet") || [];
+                var sSearchQuery = this._oBasicSearchField.getValue(),
+                    aSelectionSet = oEvent.getParameter("selectionSet"),
 
-                    var aFilters = aSelectionSet.reduce(function (aResult, oControl) {
-                        var sVal = oControl.getValue && oControl.getValue();
-                        if (sVal) {
+                    aFilters = aSelectionSet && aSelectionSet.reduce(function (aResult, oControl) {
+                        if (oControl.getValue()) {
                             aResult.push(new sap.ui.model.Filter({
                                 path: oControl.getName(),
                                 operator: sap.ui.model.FilterOperator.Contains,
-                                value1: sVal
+                                value1: oControl.getValue()
                             }));
                         }
                         return aResult;
                     }, []);
 
-                    if (sSearchQuery) {
-                        aFilters.push(new sap.ui.model.Filter({
-                            filters: [
-                                new sap.ui.model.Filter("Network", sap.ui.model.FilterOperator.Contains, sSearchQuery),
-                                new sap.ui.model.Filter("Activity", sap.ui.model.FilterOperator.Contains, sSearchQuery),
-                                new sap.ui.model.Filter("ActivityDesc", sap.ui.model.FilterOperator.Contains, sSearchQuery),
-                                new sap.ui.model.Filter("Project", sap.ui.model.FilterOperator.Contains, sSearchQuery)
-                            ],
-                            and: false
+                if (sSearchQuery) {
+                    aFilters.push(new sap.ui.model.Filter({
+                        filters: [
+                            new sap.ui.model.Filter({ path: "Network", operator: sap.ui.model.FilterOperator.Contains, value1: sSearchQuery }),
+                            new sap.ui.model.Filter({ path: "Project", operator: sap.ui.model.FilterOperator.Contains, value1: sSearchQuery })
+                        ],
+                        and: false
+                    }));
+                }
+
+                this.oProjectDialog.getTableAsync().then(function (oTable) {
+                    var oBinding = oTable.getBinding("items") || oTable.getBinding("rows");
+                    if (oBinding) {
+                        oBinding.filter(new sap.ui.model.Filter({
+                            filters: aFilters,
+                            and: true
                         }));
                     }
-
-                    var oFinalFilter = aFilters.length ? new sap.ui.model.Filter({ filters: aFilters, and: true }) : [];
-
-                    this.handleFilterVhTable(oFinalFilter, this._oProjectsVh);
-
-                } catch (e) {
-                    sap.m.MessageBox.error(e.message || String(e));
-                }
-            },
-
-            /**
-             * Filters the value help table
-             * @param {sap.ui.model.Filter} oFilter
-             * @param {sap.ui.core.Control} oValueHelp
-             */
-            handleFilterVhTable: function (oFilter, oValueHelp) {
-                oValueHelp.getTableAsync().then(function (oTable) {
-                    if (oTable.bindRows) {
-                        oTable.getBinding("rows").filter(oFilter);
-                    }
-
-                    if (oTable.bindItems) {
-                        oTable.getBinding("items").filter(oFilter);
-                    }
-
-                    oValueHelp.update();
                 });
             },
         });

@@ -1,32 +1,25 @@
-<core:FragmentDefinition xmlns="sap.ui.comp.valuehelpdialog"
-    xmlns:m="sap.m"
-    xmlns:fb="sap.ui.comp.filterbar"
-    xmlns:core="sap.ui.core">
+<!-- <core:FragmentDefinition xmlns="sap.ui.comp.valuehelpdialog" xmlns:m="sap.m" xmlns:fb="sap.ui.comp.filterbar" xmlns:core="sap.ui.core">
 
-    <ValueHelpDialog title="{i18n>xexp.Projects}" ok=".handleProjectPress" cancel=".handleProjectVhClose" afterClose=".handleProjectVhClose" supportRanges="false" supportMultiselect="false" key="Network" descriptionKey="Project">
+    <ValueHelpDialog title="{i18n>xexp.Projects}" ok=".handleProjectPress" cancel=".onProjectVhCancel" afterClose=".onProjectVhAfterClose" key="Network" descriptionKey="Project" supportRanges="false" supportMultiselect="true">
 
         <filterBar>
             <fb:FilterBar advancedMode="true" search=".handleProjectVhSearch" isRunningInValueHelpDialog="true">
                 <fb:filterGroupItems>
-
                     <fb:FilterGroupItem groupName="__$INTERNAL$" name="Network" label="{i18n>xexp.ProjectId}" visibleInFilterBar="true">
                         <fb:control>
                             <m:Input name="Network"/>
                         </fb:control>
                     </fb:FilterGroupItem>
-
                     <fb:FilterGroupItem groupName="__$INTERNAL$" name="Activity" label="{i18n>xexp.Activity}" visibleInFilterBar="true">
                         <fb:control>
                             <m:Input name="Activity"/>
                         </fb:control>
                     </fb:FilterGroupItem>
-
                     <fb:FilterGroupItem groupName="__$INTERNAL$" name="ActivityDesc" label="{i18n>xexp.ActivityDesc}" visibleInFilterBar="true">
                         <fb:control>
                             <m:Input name="ActivityDesc"/>
                         </fb:control>
                     </fb:FilterGroupItem>
-
                     <fb:FilterGroupItem groupName="__$INTERNAL$" name="Project" label="{i18n>xexp.ProjectName}" visibleInFilterBar="true">
                         <fb:control>
                             <m:Input name="Project"/>
@@ -35,6 +28,39 @@
                 </fb:filterGroupItems>
             </fb:FilterBar>
         </filterBar>
-
+    </ValueHelpDialog>
+</core:FragmentDefinition> -->
+<core:FragmentDefinition xmlns="sap.ui.comp.valuehelpdialog"
+    xmlns:m="sap.m"
+    xmlns:fb="sap.ui.comp.filterbar"
+    xmlns:core="sap.ui.core">
+    <ValueHelpDialog title="{i18n>xexp.Projects}" ok=".handleProjectPress" cancel=".onProjectVhCancel" afterClose=".onProjectVhAfterClose" supportRanges="false" supportMultiselect="false" key="Network" descriptionKey="Project">
+        <filterBar>
+            <fb:FilterBar advancedMode="true" search=".handleProjectVhSearch" isRunningInValueHelpDialog="true">
+                <fb:filterGroupItems>
+                    <fb:FilterGroupItem groupName="__$INTERNAL$" name="Network" label="{i18n>xexp.ProjectId}" visibleInFilterBar="true">
+                        <fb:control>
+                            <m:Input name="Network" showValueHelp="false" />
+                        </fb:control>
+                    </fb:FilterGroupItem>
+                    <fb:FilterGroupItem groupName="__$INTERNAL$" name="Activity" label="{i18n>xexp.Activity}" visibleInFilterBar="true">
+                        <fb:control>
+                            <m:Input name="Activity" showValueHelp="false" />
+                        </fb:control>
+                    </fb:FilterGroupItem>
+                    <fb:FilterGroupItem groupName="__$INTERNAL$" name="ActivityDesc" label="{i18n>xexp.ActivityDesc}" visibleInFilterBar="true">
+                        <fb:control>
+                            <m:Input name="ActivityDesc" showValueHelp="false" />
+                        </fb:control>
+                    </fb:FilterGroupItem>
+                    <fb:FilterGroupItem groupName="__$INTERNAL$" name="Project" label="{i18n>xexp.ProjectName}" visibleInFilterBar="true">
+                        <fb:control>
+                            <m:Input name="Project" showValueHelp="false" />
+                        </fb:control>
+                    </fb:FilterGroupItem>
+                </fb:filterGroupItems>
+            </fb:FilterBar>
+        </filterBar>
     </ValueHelpDialog>
 </core:FragmentDefinition>
+
