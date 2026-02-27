@@ -3573,6 +3573,7 @@ sap.ui.define([
                 const oSelect = oEvent.getSource();
                 const oItem = oEvent.getParameter("selectedItem") || oSelect.getSelectedItem();
                 const sKey = oItem ? oItem.getKey() : oSelect.getSelectedKey();
+                const sPrevKey = this.oExpensesModel.getProperty("/exptype");
 
                 this.oExpensesModel.setProperty("/exptype", sKey);
                 this.oExpensesModel.refresh(true);
@@ -3582,6 +3583,13 @@ sap.ui.define([
 
                 const oBPInput = Fragment.byId(this.getView().getId(), "expenseDialog:selectBP");
                 oBPInput.setRequired(sKey !== "REF");
+
+                const oUnitExtInput = Fragment.byId(this.getView().getId(), "expenseDialog:inputUnitExt");
+                if (sKey !== "DESREP") {
+                    oUnitExtInput.setValue(0);
+                } else if (sKey === "DESREP") {
+                    oUnitExtInput.setValue(1);
+                }
 
                 this.handleClearCollaborators();
 
@@ -5008,14 +5016,19 @@ sap.ui.define([
                 }
             },
 
+            /**
+             * Handles free text input on the plates MultiInput by converting it into a token.
+             * Normalizes the typed value to uppercase and clears the input afterwards.
+             * @param {sap.ui.base.Event} oEvent - MultiInput change event
+             */
             onPlateChange: function (oEvent) {
                 var oMultiInput = oEvent.getSource();
-                var sValue = oEvent.getParameter("value"); 
+                var sValue = oEvent.getParameter("value");
 
                 if (sValue && sValue.trim()) {
                     oMultiInput.addToken(new sap.m.Token({
-                        key: "", 
-                        text: sValue.trim().toUpperCase() 
+                        key: "",
+                        text: sValue.trim().toUpperCase()
                     }));
                     oMultiInput.setValue("");
                 }
