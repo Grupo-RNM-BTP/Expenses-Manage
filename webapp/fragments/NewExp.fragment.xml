@@ -69,7 +69,7 @@
                                                                             || ((${Expenses>/exptype} || '').indexOf('PORTA')   > -1)
                                                                             || ((${Expenses>/exptype} || '').indexOf('ESTACI')  > -1)
                                                                             || ((${Expenses>/exptype} || '').indexOf('UE')      > -1)
-                                                                            || ((${Expenses>/exptype} || '').indexOf('ADR')     > -1) }" required="true" width="100%" showValueHelp="true" valueHelpRequest=".handleOpenPlatesVH" showSuggestion="true" filterSuggests="false" suggest=".onSuggestPlates" suggestionItemSelected=".onPlateSuggestionItemSelected" suggestionItems="{ path: '/ZFI_EXPENSES_PLATES', length: 50 }" placeholder="{i18n>xexp.expPlate}">
+                                                                            || ((${Expenses>/exptype} || '').indexOf('ADR')     > -1) }" required="true" width="100%" showValueHelp="true" valueHelpRequest=".handleOpenPlatesVH"  change=".onPlateChange" showSuggestion="true" filterSuggests="false" suggest=".onSuggestPlates" suggestionItemSelected=".onPlateSuggestionItemSelected" suggestionItems="{ path: '/ZFI_EXPENSES_PLATES', length: 50 }" placeholder="{i18n>xexp.expPlate}">
                             <suggestionItems>
                                 <core:Item key="{OrderNo}" text="{Plate}" />
                             </suggestionItems>
@@ -137,11 +137,6 @@
 
                         <Label id="expenseDialog:labelProjects" text="{i18n>xexp.Project}" />
                         <Input id="expenseDialog:selectProject" showValueHelp="true" required="true" visible="false" valueHelpRequest=".onProjectValueHelpRequested" valueHelpOnly="true" />
-                        <!-- <Input id="expenseDialog:selectProject" showValueHelp="true" valueHelpRequest=".handleOpenProjectsVH" required="true" visible="false" valueHelpOnly="true" showSuggestion="false" suggestionItems="{path: 'Main>/projects'}">
-                            <suggestionItems>
-                                <core:Item key="{Main>Network}" text="{Main>Project}" />
-                            </suggestionItems>
-                        </Input> -->
 
                         <Label text="" visible="false"/>
                         <Title id="expenseDialog:titleVatTable" text="{i18n>xexp.expVatTable}" level="H6" class="sapUiSmallMarginTop"/>

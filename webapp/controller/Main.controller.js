@@ -989,7 +989,7 @@ sap.ui.define([
 
                 aSorters.push(oGroupSorter);
 
-                var oDateSorter = new sap.ui.model.Sorter("VYearMonthDay", true);
+                var oDateSorter = new sap.ui.model.Sorter("VYearMonthDay", false);
                 aSorters.push(oDateSorter);
 
                 oBindingParams.sorter = aSorters;
@@ -5005,6 +5005,19 @@ sap.ui.define([
                 } catch (e) {
                     this.handleErrorMessage(e.message);
                     return "[]";
+                }
+            },
+
+            onPlateChange: function (oEvent) {
+                var oMultiInput = oEvent.getSource();
+                var sValue = oEvent.getParameter("value"); 
+
+                if (sValue && sValue.trim()) {
+                    oMultiInput.addToken(new sap.m.Token({
+                        key: "", 
+                        text: sValue.trim().toUpperCase() 
+                    }));
+                    oMultiInput.setValue("");
                 }
             },
 
