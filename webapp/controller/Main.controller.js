@@ -4551,7 +4551,7 @@ sap.ui.define([
                         oBusinessPartner.setValue("");
                     }
 
-                    this._exptype = aTokens.length > 0 && this.getModel("Expenses").getProperty("/exptype") !== "UE" ? "DESREP" : null;
+                    this._exptype = aTokens.length > 0 && this.getModel("Expenses").getProperty("/exptype") !== "UE" ? "DESREP" : '';
 
                     this._oPartnerVh.close();
                 } catch (e) {
