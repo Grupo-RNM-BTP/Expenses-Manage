@@ -119,7 +119,7 @@
                         </MultiInput>
 
                         <Label text="" visible="false"/>
-                        <Title text="{i18n>xexp.expPartnerUnitsExtTitle}" level="H6" class="sapUiSmallMarginTop" visible="{Expenses>/unitVisible}"/>
+                        <Title text="{i18n>xexp.expPartnerUnitsExtTitle}" level="H6" class="sapUiSmallMarginTop" visible="{= ['DESREP','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }"/>
 
                         <Label text="{i18n>xexp.expBP}" visible="{= ['DESREP','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }"/>
                         <MultiInput id="expenseDialog:selectBP" width="100%" showValueHelp="true" valueHelpRequest="handleOpenPartnerVH" tokenUpdate=".onBPCleared" required="true" visible="{= ['DESREP','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }" showSuggestion="true" filterSuggests="false" suggest=".onSuggestBusinessPartners" suggestionItemSelected=".onBusinessPartnerSuggestionItemSelected" suggestionItems="{ path: '/ZFI_BUSINESS_PARTNER', length: 50 }">
@@ -128,8 +128,8 @@
                             </suggestionItems>
                         </MultiInput>
 
-                        <Label text="{i18n>xexp.expUnitExt}" visible="{Expenses>/unitVisible}"/>
-                        <StepInput id="expenseDialog:inputUnitExt" min="{= ((${Expenses>/exptype} || '') === 'DESREP') ? 1 : 0 }" max="100" step="1" value="1" visible="{Expenses>/unitVisible}" textAlign="Center" width="120px"/>
+                        <Label text="{i18n>xexp.expUnitExt}" visible="{= ['DESREP','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }"/>
+                        <StepInput id="expenseDialog:inputUnitExt" min="{= ((${Expenses>/exptype} || '') === 'DESREP') ? 1 : 0 }" max="100" step="1" value="{= ((${Expenses>/exptype} || '') === 'DESREP') ? 1 : 0 }" visible="{= ['DESREP','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }" textAlign="Center" width="120px"/>
 
                         <Label text="{i18n>xexp.IsProjectExpenseQuestion}" />
                         <CheckBox id="expenseDialog:checkBoxProjectYes" visible="{Main>/showCheckProjects}" select=".onProjectChange" selected="false" text="{i18n>xexp.Yes}" />
