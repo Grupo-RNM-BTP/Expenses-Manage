@@ -2247,8 +2247,6 @@ sap.ui.define([
                     }.bind(this),
                     error: function (oError) {
                         this.getModel("global").setProperty("/busy", false);
-                        this.byId("idTableApprovals").removeSelections();
-                        this.handleButtonsState(false, false);
                         var sError = JSON.parse(oError.responseText).error.message.value;
                         sap.m.MessageBox.alert(sError, {
                             icon: "ERROR",
