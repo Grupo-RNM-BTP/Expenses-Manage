@@ -328,7 +328,7 @@
                     <ScrollContainer id="pageApprovals" horizontal="false" vertical="true" height="100%">
                         <smartFilterBar:SmartFilterBar id="idSmartFilterBarApprovals" entitySet="ZFI_EXPENSES_LAPPRVD" />
 
-                        <smartTable:SmartTable id="smartTableApprovals" entitySet="ZFI_EXPENSES_LAPPRVD" beforeRebindTable="onBeforeRebindTableApprovals" demandPopin="true" smartFilterId="idSmartFilterBarApprovals" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="false" useTablePersonalisation="true" useVariantManagement="false" requestAtLeastFields="Pernr,CompanyCode,CompanyDsc,Doc,Reason,ExpNo,Belnr,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus,FirstName,LastName,FiscalYear,Nif" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="true">
+                        <smartTable:SmartTable id="smartTableApprovals" entitySet="ZFI_EXPENSES_LAPPRVD" beforeRebindTable="onBeforeRebindTableApprovals" demandPopin="true" smartFilterId="idSmartFilterBarApprovals" persistencyKey='pKeyOperationsTable' width="100%" useExportToExcel="false" useTablePersonalisation="true" useVariantManagement="false" requestAtLeastFields="Pernr,CompanyCode,CompanyDsc,Doc,Reason,ExpNo,Belnr,PayMethodDsc,ExpTypeDsc,Erdat,Value,Waers,FiStatus,FirstName,LastName,FiscalYear,Nif,Unit,Plate,PartnerNo" showVariantManagement="false" placeToolbarInTable="true" useOnlyOneSolidToolbar="true" enableAutoBinding="true" tableType="ResponsiveTable" showTablePersonalisation="true">
                             <smartTable:customToolbar>
                                 <OverflowToolbar design="Transparent">
                                     <ToolbarSpacer/>
@@ -390,6 +390,16 @@
                                             <Text text="{i18n>xexp.expUnit}" />
                                         </header>
                                     </Column>
+                                    <Column visible="false" customData:p13nData='{"columnKey":"Plate","leadingProperty":"Plate","sortProperty":"Plate","filterProperty":"Plate"}'>
+                                        <header>
+                                            <Text text="{i18n>xexp.colPlate}" />
+                                        </header>
+                                    </Column>
+                                    <Column visible="false" customData:p13nData='{"columnKey":"PartnerNo","leadingProperty":"PartnerNo","sortProperty":"PartnerNo","filterProperty":"PartnerNo"}'>
+                                        <header>
+                                            <Text text="{i18n>xexp.expBP}" />
+                                        </header>
+                                    </Column>
                                 </columns>
                                 <items>
                                     <ColumnListItem id="idColumnListItemApprovals">
@@ -412,6 +422,8 @@
                                             <Text text="{path: 'Erdat', formatter: '.formatter.formatDateTime'}" />
                                             <Text text="{Value} {Waers}" />
                                             <Link text="{Unit}" press="onUnitPress" />
+                                            <Link text="{Plate}" press="onPlatePress" />
+                                            <Link text="{PartnerNo}" press="onPartnerPress"/>
                                         </cells>
                                     </ColumnListItem>
                                 </items>
