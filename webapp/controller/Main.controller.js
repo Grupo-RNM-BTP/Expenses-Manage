@@ -2006,7 +2006,7 @@ sap.ui.define([
                             press: function () {
                                 that.ReasonRejection = '';
                                 oView.byId("reasonTextArea").setValue("");
-                                this.byId("idTableApprovals").removeSelections();
+                                that.byId("idTableApprovals").removeSelections();
 
                                 that._oReasonDialog.close();
                                 that._oReasonDialog.destroy();
