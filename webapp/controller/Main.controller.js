@@ -4688,15 +4688,26 @@ sap.ui.define([
              * @param {sap.ui.core.Control} oEvent
              */
             onBPCleared: function (oEvent) {
-                var oBusinessPartner = Fragment.byId(this.getView().getId(), "expenseDialog:selectBP");
+                var oBusinessPartner = oEvent.getSource();
                 if (!oBusinessPartner) {
                     return;
                 }
 
-                var aTokens = oBusinessPartner.getTokens() || [];
-                if (aTokens.length === 0) {
-                    this._exptype = null;
+                var sType = oEvent.getParameter("type");
+                if (sType !== "removed" && sType !== "removedAll") {
+                    return;
                 }
+
+                if (sType === "removedAll" || (oBusinessPartner.getTokens() || []).length === 0) {
+                    this._exptype = null;
+                    return;
+                }
+
+                setTimeout(function () {
+                    if ((oBusinessPartner.getTokens() || []).length === 0) {
+                        this._exptype = null;
+                    }
+                }.bind(this), 0);
             },
 
             /**
