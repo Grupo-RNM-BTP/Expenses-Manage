@@ -2887,6 +2887,15 @@ sap.ui.define([
                     sTotal = parseFloat((sAmt * 1.75).toFixed(2)),
                     sCheckBoxYes = Fragment.byId(oView.getId(), "expenseDialog:checkBoxProjectYes"),
                     sInputProject = Fragment.byId(oView.getId(), "expenseDialog:selectProject");
+                const sExpTypeKey = (sExpType || "").toString().trim().toUpperCase();
+                const oBPInput = Fragment.byId(oView.getId(), "expenseDialog:selectBP");
+
+                if (oBPInput) {
+                    oBPInput.setRequired(sExpTypeKey === "DESREP");
+                    if (sExpTypeKey !== "DESREP" && oBPInput.setValueState) {
+                        oBPInput.setValueState(sap.ui.core.ValueState.None);
+                    }
+                }
 
                 if (sCheckBoxYes.getSelected() === true && sInputProject.getValue() === "") {
                     sInputProject.setValueState(sap.ui.core.ValueState.Error)
@@ -3571,6 +3580,7 @@ sap.ui.define([
                 const oSelect = oEvent.getSource();
                 const oItem = oEvent.getParameter("selectedItem") || oSelect.getSelectedItem();
                 const sKey = oItem ? oItem.getKey() : oSelect.getSelectedKey();
+                const sExpTypeKey = (sKey || "").toString().trim().toUpperCase();
                 const sPrevKey = this.oExpensesModel.getProperty("/exptype");
 
                 this.oExpensesModel.setProperty("/exptype", sKey);
@@ -3580,7 +3590,10 @@ sap.ui.define([
                 oPlateInput.setRequired(sKey !== "ADR");
 
                 const oBPInput = Fragment.byId(this.getView().getId(), "expenseDialog:selectBP");
-                oBPInput.setRequired(sKey !== "REF");
+                oBPInput.setRequired(sExpTypeKey === "DESREP");
+                if (sExpTypeKey !== "DESREP" && oBPInput.setValueState) {
+                    oBPInput.setValueState(sap.ui.core.ValueState.None);
+                }
 
                 const oUnitExtInput = Fragment.byId(this.getView().getId(), "expenseDialog:inputUnitExt");
                 if (sKey !== "DESREP") {
@@ -5344,3 +5357,5 @@ sap.ui.define([
             },
         });
     });
+
+

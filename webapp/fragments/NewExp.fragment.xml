@@ -122,7 +122,7 @@
                         <Title text="{i18n>xexp.expPartnerUnitsExtTitle}" level="H6" class="sapUiSmallMarginTop" visible="{= ['DESREP','REF','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }"/>
 
                         <Label text="{i18n>xexp.expBP}" visible="{= ['DESREP','REF','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }"/>
-                        <MultiInput id="expenseDialog:selectBP" width="100%" showValueHelp="true" valueHelpRequest="handleOpenPartnerVH" tokenUpdate=".onBPCleared" required="true" visible="{= ['DESREP','REF','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }" showSuggestion="true" filterSuggests="false" suggest=".onSuggestBusinessPartners" suggestionItemSelected=".onBusinessPartnerSuggestionItemSelected" suggestionItems="{ path: '/ZFI_BUSINESS_PARTNER', length: 50 }">
+                        <MultiInput id="expenseDialog:selectBP" width="100%" showValueHelp="true" valueHelpRequest="handleOpenPartnerVH" tokenUpdate=".onBPCleared" required="{= ((${Expenses>/exptype} || '') === 'DESREP') }" visible="{= ['DESREP','REF','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }" showSuggestion="true" filterSuggests="false" suggest=".onSuggestBusinessPartners" suggestionItemSelected=".onBusinessPartnerSuggestionItemSelected" suggestionItems="{ path: '/ZFI_BUSINESS_PARTNER', length: 50 }">
                             <suggestionItems>
                                 <core:Item key="{BusinessPartner}" text="{BusinessPartnerName}" />
                             </suggestionItems>
