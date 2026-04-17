@@ -32,7 +32,7 @@
         "uri": "/zsrv_iwfnd/Annotations(TechnicalName='ZFI_EXPENSES_ANNO_MDL',Version='0001')/$value/",
         "type": "ODataAnnotation",
         "settings": {
-          "localUri": "localService/ZFI_EXPENSES_ANNO_MDL.xml"
+          "localUri": "localService/mainService/ZFI_EXPENSES_ANNO_MDL.xml"
         }
       },
       "annotation": {

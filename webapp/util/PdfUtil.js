@@ -56,7 +56,7 @@ sap.ui.define([
             };
 
             script.onerror = () => reject(new Error("Falha ao carregar jsPDF"));
-            
+
             document.head.appendChild(script);
         });
 

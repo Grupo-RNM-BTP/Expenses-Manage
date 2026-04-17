@@ -18,7 +18,7 @@
                 <actions>
                     <m:Button id="saveButton" icon="sap-icon://save" text="{i18n>Save}" type="Emphasized" visible="false" press="onPressActionButtons('S')"/>
                     <m:Button id="cancelButton" icon="sap-icon://decline" text="{i18n>Cancel}" type="Emphasized" visible="false" press="onPressActionButtons('C')"/>
-                    <m:Button id="editButton" icon="sap-icon://edit" text="{i18n>Edit}" type="Emphasized" visible="true" press="onPressActionButtons('E')"/>
+                    <m:Button id="editButton" icon="sap-icon://edit" text="{i18n>Edit}" type="Emphasized" visible="false" press="onPressActionButtons('E')"/>
                     <m:Button icon="sap-icon://nav-back" type="Emphasized" press="onPressCloseDetail"/>
                 </actions>
             </ObjectPageDynamicHeaderTitle>
@@ -46,7 +46,8 @@
                     <m:Text text="{ReasonRejection}" visible="{= ${FiStatus} === '9' }"/>
 
                     <m:Label text="{i18n>Comments}"/>
-                    <m:TextArea id="textComments" enabled="false" value="{Comments}" />
+                    <m:TextArea id="textComments" enabled="false" value="{Comments}" visible="{= !${global>/detailReadOnly} }" />
+                    <m:Text text="{Comments}" visible="{= ${global>/detailReadOnly} }" />
 
                     <!-- Empresa / Entidade -->
                     <core:Title text="{i18n>invoiceForm.Document}"/>
@@ -197,7 +198,7 @@
                             <m:VBox id="attachmentIllustration" visible="false" height="100%" justifyContent="SpaceBetween">
                                 <m:IllustratedMessage id="im" title="{i18n>NoAttachments}" description="{i18n>NoAttachmentsDescription}" illustrationType="sapIllus-NoData" class="sapUiSmallMarginTop"/>
                                 <m:HBox justifyContent="Center" width="100%">
-                                    <u:FileUploader id="fileUploader" buttonOnly="true" buttonText="{i18n>btnUpload}" change="onFileChange" class="sapUiSmallMarginBottom"/>
+                                    <u:FileUploader id="fileUploader" buttonOnly="true" buttonText="{i18n>btnUpload}" change="onFileChange" visible="{= !${global>/detailReadOnly} }" class="sapUiSmallMarginBottom"/>
                                 </m:HBox>
                             </m:VBox>
 
@@ -213,7 +214,7 @@
                                                 </m:detailBox>
                                             </m:Avatar>
                                         </m:HBox>
-                                        <m:Button icon="sap-icon://delete" type="Reject" class="sapUiMediumMarginEnd" press="handleDeleteExpense"/>
+                                        <m:Button icon="sap-icon://delete" type="Reject" class="sapUiMediumMarginEnd" visible="{= !${global>/detailReadOnly} }" press="handleDeleteExpense"/>
                                     </m:HBox>
                                 </m:CustomListItem>
                             </m:List>

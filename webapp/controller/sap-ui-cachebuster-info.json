@@ -1,6 +1,7 @@
 {
-    "controller/App.controller.js": "1772204400000",
-    "controller/BaseController.js": "1772204400000",
-    "controller/Detail.controller.js": "1772204400000",
-    "controller/Main.controller.js": "1772204400000"
+    "controller/App.controller.js": "1774364400000",
+    "controller/BaseController.js": "1774364400000",
+    "controller/Detail.controller.js": "1774364400000",
+    "controller/Main.controller.js": "1774364400000",
+    "controller/NotFound.controller.js": "1774364400000"
 }

@@ -1,5 +1,11 @@
 sap.ui.define([], function () {
     "use strict";
+
+    /**
+     * Formatter: Provides shared formatting helpers for views and controllers.
+     *
+     * @namespace zfiexpensesmanage.model
+     */
     return {
 
         /**

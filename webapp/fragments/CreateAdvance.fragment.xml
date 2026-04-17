@@ -1,0 +1,77 @@
+<core:FragmentDefinition xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+
+    <Dialog id="createAdvanceDialog" title="{i18n>adv.AdvanceMovementsDialogTitle}" contentWidth="1700px" contentHeight="650px" initialFocus="beginButton" class="sapUiSizeCompact sapUiNoContentPadding" stretchOnPhone="false" draggable="true" resizable="true">
+
+        <VBox class="sapUiSmallMargin sapUiNoContentPadding">
+
+            <MessageStrip text="{i18n>adv.AdvanceMovementsDialogMessage}" type="Information" showIcon="true" showCloseButton="false" class="sapUiSmallMarginBottom" />
+
+            <OverflowToolbar design="Transparent" class="sapUiTinyMarginBottom">
+                <SearchField width="22rem" placeholder="{i18n>Search}" liveChange=".onAdvanceMovementSearchLiveChange" />
+                <ToolbarSpacer />
+                <Button icon="sap-icon://action-settings" type="Transparent" tooltip="{i18n>SortFilter}" press=".handleOpenAdvanceMovementTableSettings" />
+            </OverflowToolbar>
+
+            <Table id="advanceMovementTable" mode="SingleSelectLeft" inset="false" width="100%" demandPopin="true" class="sapUiResponsiveContentPadding" fixedLayout="false" growing="true" growingThreshold="50" items="{Main>/AdvanceReconMovements}">
+                <columns>
+                    <Column minScreenWidth="Tablet" demandPopin="true">
+                        <Button type="Transparent" text="{i18n>adv.AdvanceMovementName}" press=".onAdvanceMovementColumnPress">
+                            <customData>
+                                <core:CustomData key="columnKey" value="Namekey" />
+                            </customData>
+                        </Button>
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true" hAlign="End">
+                        <Button type="Transparent" text="{i18n>Value}" press=".onAdvanceMovementColumnPress">
+                            <customData>
+                                <core:CustomData key="columnKey" value="Amt" />
+                            </customData>
+                        </Button>
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true">
+                        <Button type="Transparent" text="{i18n>adv.AdvanceMovementCheckNo}" press=".onAdvanceMovementColumnPress">
+                            <customData>
+                                <core:CustomData key="columnKey" value="Chknum" />
+                            </customData>
+                        </Button>
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true">
+                        <Button type="Transparent" text="{i18n>adv.AdvanceMovementCardNo}" press=".onAdvanceMovementColumnPress">
+                            <customData>
+                                <core:CustomData key="columnKey" value="Cardnumber" />
+                            </customData>
+                        </Button>
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true">
+                        <Button type="Transparent" text="{i18n>Sdate}" press=".onAdvanceMovementColumnPress">
+                            <customData>
+                                <core:CustomData key="columnKey" value="sDateFromated" />
+                            </customData>
+                        </Button>
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem type="Active">
+                        <cells>
+                            <Text text="{Main>Namekey}" />
+                            <ObjectNumber number="{Main>Amt}" />
+                            <Text text="{Main>Chknum}" />
+                            <Text text="{Main>Cardnumber}" />
+                            <Text text="{Main>sDateFromated}" />
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </VBox>
+
+        <endButton>
+            <Button text="{i18n>xexp.expCancel}" press=".onCancelCreateAdvance" />
+        </endButton>
+
+        <beginButton>
+            <Button text="{i18n>adv.CreateAdvanceBtn}" type="Emphasized" press=".onCreateAdvance" />
+        </beginButton>
+
+    </Dialog>
+</core:FragmentDefinition>

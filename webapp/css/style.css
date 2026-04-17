@@ -111,3 +111,81 @@
 .desktopHiddenUploader .sapUiFupGroup {
     display: none !important;
 }
+
+:root {
+    --adv-hero-start: #0f5b8d;
+    --adv-hero-end: #23a6a8;
+    --adv-card-bg: #ffffff;
+    --adv-border: #dbe7f2;
+    --adv-shadow: 0 10px 30px rgba(15, 91, 141, 0.12);
+}
+
+.advancesPageWrapper {
+    padding-bottom: 1rem;
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+.advancesHero {
+    border-radius: 1rem;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(120deg, var(--adv-hero-start) 0%, var(--adv-hero-end) 100%);
+    color: #ffffff;
+    box-shadow: var(--adv-shadow);
+}
+
+.advancesHero .sapMTitle,
+.advancesHero .sapMText {
+    color: #ffffff !important;
+}
+
+.advancesActionCard,
+.advancesInfoCard {
+    border-radius: 1rem;
+    border: 1px solid var(--adv-border);
+    background: var(--adv-card-bg);
+    padding: 1rem 1.25rem;
+    box-shadow: 0 4px 16px rgba(16, 40, 64, 0.08);
+}
+
+.advancesActionCard {
+    border-left: 6px solid #f39c12;
+}
+
+.advancesInfoCard {
+    border-left: 6px solid #0f5b8d;
+}
+
+.advancesActionIcon {
+    color: #0f5b8d;
+    background: rgba(15, 91, 141, 0.1);
+    border-radius: 999px;
+    padding: 0.6rem;
+}
+
+@media (max-width: 680px) {
+    .advancesPageWrapper {
+        margin-left: 0.5rem !important;
+        margin-right: 0.5rem !important;
+    }
+
+    .advancesHero {
+        padding: 1rem;
+        border-radius: 0.75rem;
+    }
+
+    .advancesActionCard,
+    .advancesInfoCard {
+        width: 100% !important;
+        padding: 0.9rem 1rem;
+    }
+
+    .advancesActionHeader {
+        align-items: flex-start !important;
+    }
+
+    .advancesActionCard .sapMBtn {
+        width: 100%;
+    }
+}

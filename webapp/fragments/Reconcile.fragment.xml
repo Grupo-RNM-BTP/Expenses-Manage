@@ -14,7 +14,7 @@
                 <Button icon="sap-icon://action-settings" type="Transparent" tooltip="{i18n>SortFilter}" press=".handleOpenReconcileTableSettings" />
             </OverflowToolbar>
 
-            <Table id="reconcileTable" mode="MultiSelect" inset="false" width="100%" demandPopin="true" class="sapUiResponsiveContentPadding" fixedLayout="false" growing="true" growingThreshold="7" items="{Main>/ExpensesReconciled}">
+            <Table id="reconcileTable" mode="MultiSelect" inset="false" width="100%" demandPopin="true" class="sapUiResponsiveContentPadding" fixedLayout="false" growing="true" growingThreshold="50" items="{Main>/ExpensesReconciled}">
                 <columns>
                     <Column minScreenWidth="Tablet" demandPopin="true" hAlign="Center" width="7rem">
                         <Button type="Transparent" text="{i18n>ExpNo}" press=".onReconcileColumnPress">

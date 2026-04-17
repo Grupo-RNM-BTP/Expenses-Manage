@@ -12,7 +12,6 @@ sap.ui.define([
         * @namespace zfiexpensesmanage.controller
         * @extends zfiexpensesmanage.controller.BaseController
         */
-
         return BaseController.extend("zfiexpensesmanage.controller.Detail", {
 
             formatter: formatter,
@@ -68,10 +67,13 @@ sap.ui.define([
              */
             setVisibleSection: function (sObjectPath) {
                 var oModel = this.getModel();
+                var bDetailReadOnly = !!this.getModel("global").getProperty("/detailReadOnly");
 
                 oModel.read(sObjectPath, {
                     success: function (oData) {
-                        if (oData.FiStatus === "0" || oData.FiStatus === "2" || oData.FiStatus === "7") {
+                        if (bDetailReadOnly) {
+                            this.byId("editButton").setVisible(false);
+                        } else if (oData.FiStatus === "0" || oData.FiStatus === "2" || oData.FiStatus === "7") {
                             this.byId("editButton").setVisible(false);
                         } else {
                             this.byId("editButton").setVisible(true);
@@ -149,6 +151,10 @@ sap.ui.define([
              * @param {sap.ui.base.Event} oEvent File change event
              */
             onFileChange: function (oEvent) {
+                if (this.getModel("global").getProperty("/detailReadOnly")) {
+                    return;
+                }
+
                 var aFiles = oEvent.getParameter("files");
                 if (!aFiles || aFiles.length === 0) {
                     return;
@@ -235,6 +241,10 @@ sap.ui.define([
              * Handle delete expense backend.
              */
             onDeleteSelected: function () {
+                if (this.getModel("global").getProperty("/detailReadOnly")) {
+                    return;
+                }
+
                 var oModel = this.getModel(),
                     sFullPath = this.getView().getBindingContext().sPath,
                     match = sFullPath.match(/ExpNo='(.*?)'/),
@@ -303,6 +313,10 @@ sap.ui.define([
              * @param {string} oAction
              */
             onPressActionButtons: function (oAction) {
+                if (this.getModel("global").getProperty("/detailReadOnly")) {
+                    return;
+                }
+
                 if (oAction === "S") {
                     this.onSaveEdit();
                 } else if (oAction === "C") {

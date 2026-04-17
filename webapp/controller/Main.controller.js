@@ -31,13 +31,17 @@ sap.ui.define([
                     ExpenseDevolution: [],
                     reconcileSearch: "",
                     devolutionSearch: "",
+                    AdvanceReconMovements: [],
+                    advanceMovementSearch: "",
+                    isAdvanceFillMode: false,
+                    advanceReferenceExp: "",
                     inputValue: "",
                     sliderMax: "",
                     showCheckProjects: false,
                     projects: []
                 });
+
                 this.getView().setModel(oModel, "Main");
-                this.getView().setModel(new JSONModel({}), "graficoModel");
 
                 this._handlers = {};
                 this._bError = false;
@@ -49,9 +53,23 @@ sap.ui.define([
 
                 this._bScan = false;
 
+                this._iPollInterval = 2000;
+                this._sPollTimerId = null;
+
+                this._sProjectSelectionTarget = "expense";
+                this._bInitialSorterApplied = false;
+                this._bInitialSorterApplied2 = false;
+                this._bInitialSorterApplied3 = false;
+                this._oReconcileTableSettings = null;
+                this._oDevolutionTableSettings = null;
+                this._oAdvanceMovementTableSettings = null;
+                this._oAdvanceProjectSelection = null;
+                this._fnResolveAdvanceProjectSelection = null;
+
                 new ScanUtil().handleAttachToController(this);
 
-                this.getView().setModel(new JSONModel(), "Camera");
+                this.getView().setModel(new JSONModel({}), "graficoModel");
+                this.getView().setModel(new JSONModel({}), "Camera");
                 this.getView().setModel(new JSONModel({ vatLines: [], vatEditMode: true, unitVisible: false }), "Expenses");
 
                 this.getView().setModel(new JSONModel({ processingDialogBtnVisible: true, aiScan: true }), "Scan");
@@ -69,24 +87,13 @@ sap.ui.define([
                 this.getView().setModel(new JSONModel({ showCollaborators: false }), "Collaborators");
 
                 this.getView().setModel(new JSONModel({ exp: "", results: [] }), "Collab");
-
                 this.getView().setModel(new JSONModel({ exp: "", results: [] }), "Plate");
                 this.getView().setModel(new JSONModel({ exp: "", results: [] }), "Partner");
-
-                this._iPollInterval = 2000;
-                this._sPollTimerId = null;
-
 
                 this.oScanModel = this.getView().getModel("Scan");
                 this.oCameraModel = this.getView().getModel("Camera");
                 this.oExpensesModel = this.getView().getModel("Expenses");
                 this.oScanningModel = this.getView().getModel("Scanning");
-                this._bInitialSorterApplied = false;
-                this._bInitialSorterApplied2 = false;
-                this._bInitialSorterApplied3 = false;
-                this._oReconcileTableSettings = null;
-                this._oDevolutionTableSettings = null;
-
 
                 sessionStorage.setItem("goToLaunchpad", "X");
                 this.getRouter().attachRouteMatched(this.getUserAuthentication, this);
@@ -96,18 +103,12 @@ sap.ui.define([
              * Handle after rendering, get card values, and set theme.
              */
             onAfterRendering: async function () {
-                var oCard = this.byId("idNewCard");
-                if (oCard) {
-                    oCard.addEventDelegate({
-                        onclick: function () {
-                            this.handleStartProcess();
-                        }.bind(this)
-                    });
-                }
+                sessionStorage.setItem("goToLaunchpad", "X");
+
                 await this.onCheckLeader();
                 await this.getCardValues();
+
                 this.byId("idTitle1").setText(this.getResourceBundle().getText("ManageMyExpenses"));
-                sessionStorage.setItem("goToLaunchpad", "X");
 
                 this.handleSynchronize();
             },
@@ -154,6 +155,13 @@ sap.ui.define([
                         oToolPage.setSideExpanded(false);
                         break;
 
+                    case "Advances":
+                        this.onPressCloseDetail();
+                        oNavContainer.to(this.byId("pageAdvances"));
+                        this.byId("idTitle1").setText(this.getResourceBundle().getText("adv.AdvancesTitle"));
+                        oToolPage.setSideExpanded(false);
+                        break;
+
                     case "CurrentAccount":
                         this.onPressCloseDetail();
                         oNavContainer.to(this.byId("pageCurrentAccount"));
@@ -181,7 +189,7 @@ sap.ui.define([
 
 
             /* ************************************************************************************** */
-            /* *                                   Manage Expenses                                 * */
+            /* *                                   Manage Expenses                                  * */
             /* ************************************************************************************** */
 
             /**
@@ -390,6 +398,13 @@ sap.ui.define([
 
                 if (oItem) {
                     var sPath = oItem.getBindingContext().sPath;
+                    var bFromAdvances = sPath && sPath.indexOf("/ZFI_EXPENSES_ADVANCES(") === 0;
+
+                    this.getModel("global").setProperty("/detailReadOnly", !!bFromAdvances);
+
+                    if (sPath && sPath.indexOf("(") > -1) {
+                        sPath = "/ZFI_EXPENSES_MNG" + sPath.substring(sPath.indexOf("("));
+                    }
 
                     this.onNavigation(sPath, "Detail", "/ZFI_EXPENSES_MNG");
                     this.byId("toolPage").setSideExpanded(false);
@@ -773,7 +788,7 @@ sap.ui.define([
 
 
             /* ************************************************************************************** */
-            /* *                                   Transactions                                   * */
+            /* *                                   Transactions                                     * */
             /* ************************************************************************************** */
 
             /**
@@ -997,7 +1012,7 @@ sap.ui.define([
 
 
             /* ************************************************************************************** */
-            /* *                                   Reconciliation                                  * */
+            /* *                                   Reconciliation                                   * */
             /* ************************************************************************************** */
 
             /**
@@ -1155,6 +1170,15 @@ sap.ui.define([
                     };
                 }
 
+                if (sDialogType === "A") {
+                    return {
+                        tableId: "advanceMovementTable",
+                        searchPath: "/advanceMovementSearch",
+                        settingsProp: "_oAdvanceMovementTableSettings",
+                        dialogProp: "_oAdvanceMovementTableSettingsDialog"
+                    };
+                }
+
                 return {
                     tableId: "DevolutionTable",
                     searchPath: "/devolutionSearch",
@@ -1168,9 +1192,22 @@ sap.ui.define([
              * @param {string} sSearchValue - Search text
              * @returns {sap.ui.model.Filter|null} Search filter or null
              */
-            handleGetDialogTableSearchFilter: function (sSearchValue) {
+            handleGetDialogTableSearchFilter: function (sSearchValue, sDialogType) {
                 if (!sSearchValue) {
                     return null;
+                }
+
+                if (sDialogType === "A") {
+                    return new Filter({
+                        filters: [
+                            new Filter("Namekey", FilterOperator.Contains, sSearchValue),
+                            new Filter("Amt", FilterOperator.Contains, sSearchValue),
+                            new Filter("Chknum", FilterOperator.Contains, sSearchValue),
+                            new Filter("Cardnumber", FilterOperator.Contains, sSearchValue),
+                            new Filter("sDateFromated", FilterOperator.Contains, sSearchValue)
+                        ],
+                        and: false
+                    });
                 }
 
                 return new Filter({
@@ -1204,7 +1241,7 @@ sap.ui.define([
 
                 var oMainModel = this.getView().getModel("Main");
                 var sSearchValue = (oMainModel.getProperty(oMeta.searchPath) || "").trim();
-                var oSearchFilter = this.handleGetDialogTableSearchFilter(sSearchValue);
+                var oSearchFilter = this.handleGetDialogTableSearchFilter(sSearchValue, sDialogType);
                 var oState = this[oMeta.settingsProp] || {};
                 var oStateFilters = oState.filters || {};
                 var aFilters = [];
@@ -1239,17 +1276,24 @@ sap.ui.define([
             },
 
             /**
-             * Builds available filter values for the settings dialog.
-             * @param {sap.m.ViewSettingsDialog} oDialog - Settings dialog instance
-             * @param {string} sDialogType - "R" for Reconcile, "D" for Devolution
+             * Returns column definitions for each dialog table type.
+             * @param {string} sDialogType - "R" for Reconcile, "D" for Devolution, "A" for Advance movement
+             * @returns {object[]} Columns with key and i18n text
              */
-            handleBuildDialogFilterItems: function (oDialog, sDialogType) {
-                var oMeta = this.handleGetDialogTableMetadata(sDialogType);
-                var oMainModel = this.getView().getModel("Main");
-                var sPath = sDialogType === "R" ? "/ExpensesReconciled" : "/ExpenseDevolution";
-                var aData = oMainModel.getProperty(sPath) || [];
+            handleGetDialogTableDefinitions: function (sDialogType) {
                 var oBundle = this.getResourceBundle();
-                var aFilterDefs = [
+
+                if (sDialogType === "A") {
+                    return [
+                        { key: "Namekey", text: oBundle.getText("adv.AdvanceMovementName") },
+                        { key: "Amt", text: oBundle.getText("Value") },
+                        { key: "Chknum", text: oBundle.getText("adv.AdvanceMovementCheckNo") },
+                        { key: "Cardnumber", text: oBundle.getText("adv.AdvanceMovementCardNo") },
+                        { key: "sDateFromated", text: oBundle.getText("Sdate") }
+                    ];
+                }
+
+                return [
                     { key: "ExpNo", text: oBundle.getText("ExpNo") },
                     { key: "DocumentHeader", text: oBundle.getText("DocumentHeader") },
                     { key: "ExpTypeDsc", text: oBundle.getText("ExpTypeDsc") },
@@ -1257,6 +1301,19 @@ sap.ui.define([
                     { key: "Value", text: oBundle.getText("Value") },
                     { key: "VYearMonthDay", text: oBundle.getText("Sdate") }
                 ];
+            },
+
+            /**
+             * Builds available filter values for the settings dialog.
+             * @param {sap.m.ViewSettingsDialog} oDialog - Settings dialog instance
+             * @param {string} sDialogType - "R" for Reconcile, "D" for Devolution
+             */
+            handleBuildDialogFilterItems: function (oDialog, sDialogType) {
+                var oMeta = this.handleGetDialogTableMetadata(sDialogType);
+                var oMainModel = this.getView().getModel("Main");
+                var sPath = sDialogType === "R" ? "/ExpensesReconciled" : (sDialogType === "A" ? "/AdvanceReconMovements" : "/ExpenseDevolution");
+                var aData = oMainModel.getProperty(sPath) || [];
+                var aFilterDefs = this.handleGetDialogTableDefinitions(sDialogType);
 
                 oDialog.destroyFilterItems();
 
@@ -1320,12 +1377,9 @@ sap.ui.define([
                         }.bind(this)
                     });
 
-                    oDialog.addSortItem(new sap.m.ViewSettingsItem({ key: "ExpNo", text: oBundle.getText("ExpNo") }));
-                    oDialog.addSortItem(new sap.m.ViewSettingsItem({ key: "DocumentHeader", text: oBundle.getText("DocumentHeader") }));
-                    oDialog.addSortItem(new sap.m.ViewSettingsItem({ key: "ExpTypeDsc", text: oBundle.getText("ExpTypeDsc") }));
-                    oDialog.addSortItem(new sap.m.ViewSettingsItem({ key: "PayMethodDsc", text: oBundle.getText("PayMethodDsc") }));
-                    oDialog.addSortItem(new sap.m.ViewSettingsItem({ key: "Value", text: oBundle.getText("Value") }));
-                    oDialog.addSortItem(new sap.m.ViewSettingsItem({ key: "VYearMonthDay", text: oBundle.getText("Sdate") }));
+                    this.handleGetDialogTableDefinitions(sDialogType).forEach(function (oSortDef) {
+                        oDialog.addSortItem(new sap.m.ViewSettingsItem({ key: oSortDef.key, text: oSortDef.text }));
+                    });
 
                     this.getView().addDependent(oDialog);
                     this[oMeta.dialogProp] = oDialog;
@@ -1388,7 +1442,7 @@ sap.ui.define([
 
 
             /* ************************************************************************************** */
-            /* *                              Confidential Expense                                * */
+            /* *                              Confidential Expense                                  * */
             /* ************************************************************************************** */
 
             /**
@@ -1425,7 +1479,6 @@ sap.ui.define([
                     return;
                 }
 
-
                 oData.ExpNo = "";
                 oData.Valid = true;
                 oData.Nifc = "";
@@ -1437,6 +1490,7 @@ sap.ui.define([
                 oData.Waers = "EUR";
                 this._cardnum = oTable[0].getBindingContext().getObject().Cardnumber;
                 this._chknum = oTable[0].getBindingContext().getObject().Chknum;
+                oData.Cardnumber = this._cardnum;
 
                 var sFormattedDate = oTable[0].getBindingContext().getObject().sDateFromated,
                     aParts = sFormattedDate.split("."),
@@ -1451,7 +1505,7 @@ sap.ui.define([
 
 
             /* ************************************************************************************** */
-            /* *                                   Reconciliation                                  * */
+            /* *                                   Reconciliation                                   * */
             /* ************************************************************************************** */
 
             /**
@@ -1562,7 +1616,7 @@ sap.ui.define([
                         this.getView().getModel("Main").setProperty("/ExpensesReconciled", []);
                         this.onCancelReconcile();
                         oTableSmart.removeSelections();
-                        sap.m.MessageBox.success(this.getResourceBundle().getText("reconciledSucess"));
+                        sap.m.MessageBox.success(this.getResourceBundle().getText("reconciledSuccess"));
                         oGlobalModel.setProperty("/busy", false);
                         oModel.refresh(true);
                         this.onChangeStateReconButtons(false, false);
@@ -1621,7 +1675,7 @@ sap.ui.define([
 
 
             /* ************************************************************************************** */
-            /* *                                     Decision                                     * */
+            /* *                                     Decision                                       * */
             /* ************************************************************************************** */
 
             /**
@@ -1700,7 +1754,7 @@ sap.ui.define([
 
 
             /* ************************************************************************************** */
-            /* *                                   Compensation                                   * */
+            /* *                                   Compensation                                     * */
             /* ************************************************************************************** */
 
             /**
@@ -1759,7 +1813,7 @@ sap.ui.define([
 
 
             /* ************************************************************************************** */
-            /* *                                    Devolution                                    * */
+            /* *                                    Devolution                                      * */
             /* ************************************************************************************** */
 
             /**
@@ -1912,7 +1966,7 @@ sap.ui.define([
 
 
             /* ************************************************************************************** */
-            /* *                                 Leader Management                                 * */
+            /* *                                 Leader Management                                  * */
             /* ************************************************************************************** */
 
             /**
@@ -2263,7 +2317,7 @@ sap.ui.define([
 
 
             /* ************************************************************************************** */
-            /* *                                    New Expense                                   * */
+            /* *                                    New Expense                                     * */
             /* ************************************************************************************** */
 
             /**
@@ -2564,17 +2618,25 @@ sap.ui.define([
              * initializing the camera, and binding click handlers for capture/upload/close actions.
              * Desktop: opens a chooser with 2 tiles (Camera / Upload).
              */
-            handleStartProcess: function () {
+            handleStartProcess: function (bPreserveExpenseState) {
                 var Device = sap.ui.Device;
                 var oView = this.getView();
+                var bPreserve = (typeof bPreserveExpenseState === "boolean") ? bPreserveExpenseState : false;
 
                 this._bError = false;
                 this._bSubmit = false;
                 this._cancel = false;
-                this._chknum = "";
-                this._cardnum = "";
+                this._bStartProcessPreserveState = bPreserve;
+                if (bPreserve) {
+                    this._skipDesktopChooser = true;
+                }
 
-                this.handleResetModels();
+                if (!bPreserve) {
+                    this.getView().getModel("Main").setProperty("/isAdvanceFillMode", false);
+                    this._chknum = "";
+                    this._cardnum = "";
+                    this.handleResetModels();
+                }
 
                 if (Device && Device.system && Device.system.desktop && !this._skipDesktopChooser) {
 
@@ -2597,7 +2659,7 @@ sap.ui.define([
                                     this.oDesktopChoiceDialog.close();
                                 }
 
-                                this.handleStartProcess();
+                                this.handleStartProcess(this._bStartProcessPreserveState);
                             };
                         }
 
@@ -2723,8 +2785,11 @@ sap.ui.define([
                         that.oExpensesModel.setProperty("/vatEditMode", true);
                     }
 
-                    if (oAction !== "M") that.handleLoadCreditCards();
+                    if (oAction !== "M" || (oData && oData.Exptype === "UE")) {
+                        that.handleLoadCreditCards();
+                    }
 
+                    that.handleApplyAdvanceFieldLocks(oAction);
                     oDialog.open();
 
                     that.handleSetupFieldsLogging();
@@ -2738,6 +2803,43 @@ sap.ui.define([
                         });
                     }
                 });
+            },
+
+            /**
+             * Locks/unlocks fields that must not be editable while completing an advance.
+             * @param {string} oAction - Process action code
+             */
+            handleApplyAdvanceFieldLocks: function (oAction) {
+                var oView = this.getView();
+                var bAdvanceFillMode = !!this.getView().getModel("Main").getProperty("/isAdvanceFillMode");
+                var bLockedMode = bAdvanceFillMode || oAction === "M";
+                var oAmountInput = Fragment.byId(oView.getId(), "expenseDialog:inputAmt");
+                var oCardSelect = Fragment.byId(oView.getId(), "expenseDialog:selectCreditCard");
+                var oCurrencySelect = Fragment.byId(oView.getId(), "expenseDialog:selectCurrency");
+                var oPaymentMethodSelect = Fragment.byId(oView.getId(), "expenseDialog:selectPymtMeth");
+
+                if (!bLockedMode) {
+                    return;
+                }
+
+                if (oAmountInput) {
+                    oAmountInput.setEnabled(false);
+                }
+
+                if (oCardSelect) {
+                    oCardSelect.setEnabled(false);
+                    if (this._cardnum) {
+                        oCardSelect.setSelectedKey(this._cardnum);
+                    }
+                }
+
+                if (oCurrencySelect) {
+                    oCurrencySelect.setEnabled(false);
+                }
+
+                if (oPaymentMethodSelect) {
+                    oPaymentMethodSelect.setEnabled(false);
+                }
             },
 
             /**
@@ -2785,9 +2887,8 @@ sap.ui.define([
                 fnById("expenseDialog:selectBP").setRequired(false);
                 fnById("expenseDialog:multiPlates").setRequired(false);
                 fnById("expenseDialog:inputFuelQuantity").setRequired(false);
-                fnById("expenseDialog:selectPymtMeth").setEnabled(false);
-                fnById("expenseDialog:inputAmt").setEnabled(false);
-                fnById("expenseDialog:selectCurrency").setEnabled(false);
+                fnById("expenseDialog:selectCreditCard").setVisible(true);
+                fnById("expenseDialog:selectCreditCard").setRequired(true);
                 fnById("expenseDialog:titleVatTable").setVisible(false);
                 fnById("expenseDialog:vatTable").setVisible(false);
                 fnById("expenseDialog:labelAttachment").setVisible(false);
@@ -2824,6 +2925,10 @@ sap.ui.define([
                     Fragment.byId(oView.getId(), "expenseDialog:datePicker").setDateValue(oData.Date);
                 } else {
                     Fragment.byId(oView.getId(), "expenseDialog:datePicker").setDateValue(new Date());
+                }
+
+                if (oData.Cardnumber) {
+                    Fragment.byId(oView.getId(), "expenseDialog:selectCreditCard").setSelectedKey(oData.Cardnumber);
                 }
 
                 try {
@@ -2880,6 +2985,7 @@ sap.ui.define([
                     "expenseDialog:multiCollaborators",
                     "expenseDialog:vatTable"
                 ];
+
                 var oView = this.getView(),
                     oEntry = {},
                     sExpType = Fragment.byId(oView.getId(), "expenseDialog:selectExpType").getSelectedKey(),
@@ -2887,6 +2993,7 @@ sap.ui.define([
                     sTotal = parseFloat((sAmt * 1.75).toFixed(2)),
                     sCheckBoxYes = Fragment.byId(oView.getId(), "expenseDialog:checkBoxProjectYes"),
                     sInputProject = Fragment.byId(oView.getId(), "expenseDialog:selectProject");
+
                 const sExpTypeKey = (sExpType || "").toString().trim().toUpperCase();
                 const oBPInput = Fragment.byId(oView.getId(), "expenseDialog:selectBP");
 
@@ -2911,6 +3018,13 @@ sap.ui.define([
                             return;
                         }
                     })
+                }
+
+                var bAdvanceFillMode = !!this.getView().getModel("Main").getProperty("/isAdvanceFillMode");
+
+                if (bAdvanceFillMode && !this.oExpensesModel.getProperty("/capturedImage")) {
+                    sap.m.MessageBox.warning(this.getResourceBundle().getText("adv.AttachmentRequired"));
+                    return;
                 }
 
                 if (sExpType !== "UE") {
@@ -3005,10 +3119,19 @@ sap.ui.define([
                     oEntry.Expsubtype = String(sValue);
                 }
 
-                var sCardnumber = this.byId("expenseDialog:selectCreditCard").getSelectedKey();
+                if (Fragment.byId(oView.getId(), "expenseDialog:selectCreditCard").getVisible()) {
+                    const sCardnumber = this.byId("expenseDialog:selectCreditCard").getSelectedKey();
+                    oEntry.Cardnumber = sCardnumber || this._cardnum;
+                }
 
-                oEntry.Cardnumber = sCardnumber || this._cardnum;
                 oEntry.Chknum = this._chknum;
+
+                if (bAdvanceFillMode) {
+                    var sAdvanceRefExp = this.getView().getModel("Main").getProperty("/advanceReferenceExp") || "";
+                    if (sAdvanceRefExp) {
+                        oEntry.AdvanceExp = sAdvanceRefExp;
+                    }
+                }
 
                 this.handleCheckTaxID(oEntry.Nif).then(function (canProceed) {
                     if (!canProceed) {
@@ -3059,8 +3182,14 @@ sap.ui.define([
                 var that = this;
                 var sNifCompany = this.oExpensesModel.getProperty("/nifCompany");
                 var bValid = this.oExpensesModel.getProperty("/valid");
+                var bAdvanceFillMode = !!this.getView().getModel("Main").getProperty("/isAdvanceFillMode");
 
                 return new Promise(function (resolve) {
+                    if (bAdvanceFillMode) {
+                        resolve(true);
+                        return;
+                    }
+
                     var isValidEmpty = bValid === "" || bValid === null || bValid === undefined || bValid === false;
 
                     if (isValidEmpty && that._bScan === true) {
@@ -3107,6 +3236,9 @@ sap.ui.define([
              * closes and destroys the dialog, and clears the captured image from the model.
              */
             onCancelProcess: function (bClearImage) {
+                this.getView().getModel("Main").setProperty("/isAdvanceFillMode", false);
+                this.getView().getModel("Main").setProperty("/advanceReferenceExp", "");
+
                 if (this._pExpenseDialog) {
                     this._pExpenseDialog.then(function (oDialog) {
                         oDialog.close();
@@ -3316,9 +3448,13 @@ sap.ui.define([
              * Handles the scanning of a photo by closing the camera and opening the scanning dialog.
              */
             handleScanPhoto: function () {
+                var bAdvanceFill = !!this.getView().getModel("Main").getProperty("/isAdvanceFillMode");
                 var vAiScan = this.oScanModel.getProperty("/aiScan");
 
                 this.onCloseCamera();
+                if (bAdvanceFill) {
+                    return;
+                }
                 if (!vAiScan) {
                     this.handleFinishProcess();
                     return;
@@ -3616,6 +3752,7 @@ sap.ui.define([
                 const sKey = oSel.getSelectedKey();
 
                 const bIsCash = sKey.toUpperCase() === "N";
+                const bAdvanceFillMode = !!this.getView().getModel("Main").getProperty("/isAdvanceFillMode");
 
                 const oCardLabel = this.byId("expenseDialog:labelCreditCard");
                 const oCardSelect = this.byId("expenseDialog:selectCreditCard");
@@ -3624,6 +3761,7 @@ sap.ui.define([
                 if (oCardSelect) {
                     oCardSelect.setVisible(!bIsCash);
                     oCardSelect.setRequired(!bIsCash);
+                    oCardSelect.setEnabled(!bIsCash && !bAdvanceFillMode);
                 }
             },
 
@@ -3669,17 +3807,7 @@ sap.ui.define([
                     const oContext = oItem.getBindingContext();
                     const oObject = oContext.getObject();
 
-                    // const isEur = oObject.Waers === "EUR";
                     const isPartOfEU = oObject.IsPartOfEU === true || oObject.IsPartOfEU === "X";
-                    // const text = this.getResourceBundle().getText("xexp.expValueWithCurr", [oObject.WaersDesc, oObject.Waers]);
-
-                    // if (!isEur && oObject.WaersDesc && oObject.Waers) {
-                    //     Fragment.byId(viewId, "expenseDialog:labelAmt").setText(text);
-                    // } else {
-                    //     Fragment.byId(viewId, "expenseDialog:labelAmt").setText(
-                    //         this.getResourceBundle().getText("xexp.expValue2")
-                    //     );
-                    // }
 
                     Fragment.byId(viewId, "expenseDialog:inputNif").setVisible(isPartOfEU ? true : false);
                 } catch (sError) {
@@ -3939,13 +4067,7 @@ sap.ui.define([
                     }, []);
 
                     if (sSearchQuery) {
-                        aFilters.push(new sap.ui.model.Filter({
-                            filters: [
-                                new sap.ui.model.Filter({ path: "pernr", operator: sap.ui.model.FilterOperator.Contains, value1: sSearchQuery }),
-                                new sap.ui.model.Filter({ path: "cname", operator: sap.ui.model.FilterOperator.Contains, value1: sSearchQuery })
-                            ],
-                            and: false
-                        }));
+                        aFilters.push(this.handleBuildCollaboratorSearchFilter(sSearchQuery));
                     }
 
                     this.handleFilterVhTable(
@@ -3977,18 +4099,57 @@ sap.ui.define([
                         return;
                     }
 
-                    var oFilter = new sap.ui.model.Filter({
-                        filters: [
-                            new sap.ui.model.Filter({ path: "pernr", operator: sap.ui.model.FilterOperator.Contains, value1: sValue }),
-                            new sap.ui.model.Filter({ path: "cname", operator: sap.ui.model.FilterOperator.Contains, value1: sValue })
-                        ],
-                        and: false
-                    });
-
-                    oBinding.filter([oFilter]);
+                    oBinding.filter([this.handleBuildCollaboratorSearchFilter(sValue)]);
                 } catch (e) {
                     this.handleErrorMessage(e.message);
                 }
+            },
+
+            /**
+             * Builds a flexible collaborators search filter.
+             * Supports searches like "primeiro ultimo" by splitting the input into terms
+             * and requiring each term to exist in the name while still allowing direct pernr lookup.
+             * @param {string} sValue - Search text entered by the user
+             * @returns {sap.ui.model.Filter} Combined filter for collaborators
+             */
+            handleBuildCollaboratorSearchFilter: function (sValue) {
+                var sSearch = (sValue || "").trim();
+                var aTerms = sSearch.split(/\s+/).filter(Boolean);
+
+                if (!aTerms.length) {
+                    return new sap.ui.model.Filter({
+                        path: "cname",
+                        operator: sap.ui.model.FilterOperator.Contains,
+                        value1: sSearch
+                    });
+                }
+
+                if (aTerms.length === 1) {
+                    return new sap.ui.model.Filter({
+                        filters: [
+                            new sap.ui.model.Filter({ path: "pernr", operator: sap.ui.model.FilterOperator.Contains, value1: aTerms[0] }),
+                            new sap.ui.model.Filter({ path: "cname", operator: sap.ui.model.FilterOperator.Contains, value1: aTerms[0] })
+                        ],
+                        and: false
+                    });
+                }
+
+                return new sap.ui.model.Filter({
+                    filters: [
+                        new sap.ui.model.Filter({ path: "pernr", operator: sap.ui.model.FilterOperator.Contains, value1: sSearch }),
+                        new sap.ui.model.Filter({
+                            filters: aTerms.map(function (sTerm) {
+                                return new sap.ui.model.Filter({
+                                    path: "cname",
+                                    operator: sap.ui.model.FilterOperator.Contains,
+                                    value1: sTerm
+                                });
+                            }),
+                            and: true
+                        })
+                    ],
+                    and: false
+                });
             },
 
             /**
@@ -4078,7 +4239,7 @@ sap.ui.define([
 
 
             /* ************************************************************************************** */
-            /* *                                     VAT Table                                    * */
+            /* *                                     VAT Table                                      * */
             /* ************************************************************************************** */
 
             /**
@@ -4154,7 +4315,7 @@ sap.ui.define([
             },
 
             /**
-             * VAT table cell–specific logging (bind to cells' change event).
+             * VAT table cell-specific logging (bind to cells' change event).
              * @param {sap.ui.base.Event} oEvent
              */
             onVatCellChange: function (oEvent) {
@@ -4193,7 +4354,7 @@ sap.ui.define([
 
 
             /* ************************************************************************************** */
-            /* *                                   Other Fields                                   * */
+            /* *                                   Other Fields                                     * */
             /* ************************************************************************************** */
 
             /**
@@ -4301,7 +4462,7 @@ sap.ui.define([
 
 
             /* ************************************************************************************** */
-            /* *                                      General                                     * */
+            /* *                                      General                                       * */
             /* ************************************************************************************** */
 
             /**
@@ -4735,10 +4896,9 @@ sap.ui.define([
                     oModel.read(sPath, {
                         success: function (oData) {
                             try {
-                                this.getModel("Main").setProperty("/projects", oData.results);
-                                if (oData.results.length > 0) {
-                                    this.getModel("Main").setProperty("/showCheckProjects", true);
-                                }
+                                var aProjects = (oData && oData.results) || [];
+                                this.getModel("Main").setProperty("/projects", aProjects);
+                                this.getModel("Main").setProperty("/showCheckProjects", aProjects.length > 0);
                                 resolve(oData);
                             } catch (e) {
                                 reject(e);
@@ -5187,6 +5347,14 @@ sap.ui.define([
              * Opens the partner value help dialog
              */
             onProjectValueHelpRequested: function () {
+                this._sProjectSelectionTarget = "expense";
+                this.handleOpenProjectValueHelp();
+            },
+
+            /**
+             * Opens the shared projects value help for the requested flow target.
+             */
+            handleOpenProjectValueHelp: function () {
                 this._oBasicSearchField = new sap.m.SearchField({
                     search: function () {
                         this.oProjectDialog.getFilterBar().search();
@@ -5294,9 +5462,33 @@ sap.ui.define([
                 }
 
                 if (sFinalValue) {
-                    oInput.setValue(sFinalValue);
-                    oInput.data("ProjectKey", sKey);
-                    oInput.setVisible(true);
+                    if (this._sProjectSelectionTarget === "advance") {
+                        var aProjects = this.getModel("Main").getProperty("/projects") || [];
+                        var oProject = aProjects.find(function (oItem) {
+                            return oItem.Network === sKey;
+                        });
+
+                        if (oProject) {
+                            this._oAdvanceProjectSelection = {
+                                Network: oProject.Network,
+                                Activity: oProject.Activity,
+                                Project: oProject.Project,
+                                Text: sFinalValue
+                            };
+                        }
+
+                        if (this._fnResolveAdvanceProjectSelection) {
+                            this._fnResolveAdvanceProjectSelection(this._oAdvanceProjectSelection);
+                            this._fnResolveAdvanceProjectSelection = null;
+                        }
+                    } else {
+                        oInput.setValue(sFinalValue);
+                        oInput.data("ProjectKey", sKey);
+                        oInput.setVisible(true);
+                    }
+                } else if (this._sProjectSelectionTarget === "advance" && this._fnResolveAdvanceProjectSelection) {
+                    this._fnResolveAdvanceProjectSelection(undefined);
+                    this._fnResolveAdvanceProjectSelection = null;
                 }
 
                 this.oProjectDialog.close();
@@ -5306,6 +5498,10 @@ sap.ui.define([
             * Handles the project value help cancel.
             */
             onProjectVhCancel: function () {
+                if (this._sProjectSelectionTarget === "advance" && this._fnResolveAdvanceProjectSelection) {
+                    this._fnResolveAdvanceProjectSelection(undefined);
+                    this._fnResolveAdvanceProjectSelection = null;
+                }
                 this.oProjectDialog.close();
             },
 
@@ -5314,6 +5510,8 @@ sap.ui.define([
             */
             onProjectVhAfterClose: function () {
                 this.oProjectDialog.destroy();
+                this._fnResolveAdvanceProjectSelection = null;
+                this._sProjectSelectionTarget = "expense";
             },
 
             /**
@@ -5355,7 +5553,339 @@ sap.ui.define([
                     }
                 });
             },
+
+            /* ************************************************************************************** */
+            /* *                                       Advances                                     * */
+            /* ************************************************************************************** */
+
+            /**
+             * Loads reconciliation credit card movements.
+             */
+            handleGetReconMovements: function () {
+                var oModel = this.getModel();
+                var oMainModel = this.getView().getModel("Main");
+                var oFilterBar = this.byId("sfbReconCC");
+                var aFilters = [];
+
+                if (!oModel || !oMainModel) {
+                    return Promise.resolve([]);
+                }
+
+                if (oFilterBar && oFilterBar.getFilters) {
+                    aFilters = oFilterBar.getFilters() || [];
+                }
+
+                return new Promise(function (resolve, reject) {
+                    oModel.read("/ZFI_EXPENSES_RECON", {
+                        filters: aFilters,
+                        success: function (oData) {
+                            var aMovements = (oData && oData.results ? oData.results : []).map(function (oRow) {
+                                return Object.assign({}, oRow);
+                            });
+
+                            oMainModel.setProperty("/AdvanceReconMovements", aMovements);
+
+                            resolve(aMovements);
+                        }.bind(this),
+                        error: function (oError) {
+                            var sError = JSON.parse(oError.responseText).error.message.value;
+                            this.handleErrorMessage(sError);
+
+                            reject(oError);
+                        }.bind(this)
+                    });
+                }.bind(this));
+            },
+
+            /**
+             * Asks whether the advance should be assigned to a project and, if needed, opens project selection.
+             * @returns {Promise<boolean>} True to continue opening the advance dialog, false to abort.
+             */
+            handleAskAdvanceProjectQuestion: function () {
+                if (!this.getModel("Main").getProperty("/showCheckProjects")) {
+                    this._oAdvanceProjectSelection = null;
+                    return Promise.resolve(true);
+                }
+
+                return new Promise(function (resolve) {
+                    MessageBox.show(this.getResourceBundle().getText("xexp.IsProjectExpenseQuestion"), {
+                        icon: MessageBox.Icon.QUESTION,
+                        title: this.getResourceBundle().getText("adv.CreateAdvanceTitle"),
+                        actions: [
+                            MessageBox.Action.YES,
+                            MessageBox.Action.NO,
+                            MessageBox.Action.CANCEL
+                        ],
+                        emphasizedAction: MessageBox.Action.YES,
+                        onClose: async function (sAction) {
+                            if (sAction === MessageBox.Action.CANCEL) {
+                                resolve(false);
+                                return;
+                            }
+
+                            if (sAction === MessageBox.Action.NO) {
+                                this._oAdvanceProjectSelection = null;
+                                resolve(true);
+                                return;
+                            }
+
+                            var oSelection = await this.handleSelectAdvanceProject();
+                            resolve(!!oSelection);
+                        }.bind(this)
+                    });
+                }.bind(this));
+            },
+
+            /**
+             * Opens the projects value help for advance creation.
+             * @returns {Promise<object|undefined>}
+             */
+            handleSelectAdvanceProject: function () {
+                this._oAdvanceProjectSelection = null;
+                this._sProjectSelectionTarget = "advance";
+
+                return new Promise(function (resolve) {
+                    this._fnResolveAdvanceProjectSelection = resolve;
+                    this.handleOpenProjectValueHelp();
+                }.bind(this));
+            },
+
+            /**
+             * Opens the create advance dialog with credit card movements.
+             */
+            handleCreateAdvance: function () {
+                var oView = this.getView();
+
+                this.handleGetReconMovements().then(async function (aMovements) {
+                    if (!aMovements || !aMovements.length) {
+                        MessageBox.warning(this.getResourceBundle().getText("adv.NoReconMovementsForAdvance"));
+                        return;
+                    }
+
+                    var bContinue = await this.handleAskAdvanceProjectQuestion();
+                    if (!bContinue) {
+                        return;
+                    }
+
+                    if (!this._pCreateAdvanceDialog) {
+                        this._pCreateAdvanceDialog = Fragment.load({
+                            id: oView.getId(),
+                            name: "zfiexpensesmanage.fragments.CreateAdvance",
+                            controller: this
+                        }).then(function (oDialog) {
+                            oView.addDependent(oDialog);
+                            return oDialog;
+                        });
+                    }
+
+                    this._pCreateAdvanceDialog.then(function (oDialog) {
+                        this.getView().getModel("Main").setProperty("/advanceMovementSearch", "");
+                        this._oAdvanceMovementTableSettings = null;
+
+                        oDialog.open();
+
+                        this.handleApplyDialogTableState("A");
+                    }.bind(this));
+                }.bind(this));
+            },
+
+            /**
+             * Handles live search for create advance movements table.
+             * @param {sap.ui.base.Event} oEvent - Search field liveChange event
+             */
+            onAdvanceMovementSearchLiveChange: function (oEvent) {
+                this.getView().getModel("Main").setProperty("/advanceMovementSearch", oEvent.getParameter("newValue") || "");
+                this.handleApplyDialogTableState("A");
+            },
+
+            /**
+             * Opens sort/filter settings for create advance movements.
+             */
+            handleOpenAdvanceMovementTableSettings: function () {
+                this.handleOpenDialogTableSettings("A");
+            },
+
+            /**
+             * Handles column click in create advance movements table.
+             * @param {sap.ui.base.Event} oEvent - Column header press event
+             */
+            onAdvanceMovementColumnPress: function (oEvent) {
+                var sColumnKey = oEvent.getSource().data("columnKey");
+                this.handleOpenDialogTableSettings("A", sColumnKey);
+            },
+
+            /**
+             * Builds the basic backend payload to create an advance draft.
+             * @param {object} oMovement - Selected movement row from advance dialog
+             * @returns {object} Entry payload for /Expense create
+             */
+            handleBuildAdvanceDraft: function (oMovement) {
+                var oSdate = new Date();
+                var sPostedDigits = String(oMovement && oMovement.Posteddt ? oMovement.Posteddt : "").replace(/\D/g, "");
+                if (sPostedDigits.length >= 8) {
+                    oSdate = new Date(
+                        Number(sPostedDigits.substring(0, 4)),
+                        Number(sPostedDigits.substring(4, 6)) - 1,
+                        Number(sPostedDigits.substring(6, 8))
+                    );
+                }
+
+                return {
+                    Sdate: oSdate,
+                    Value: oMovement.Amt,
+                    CardNumber: oMovement.Cardnumber,
+                    Checknum: oMovement.Chknum
+                };
+            },
+
+            /**
+             * Builds prefill data for completing an existing advance.
+             * @param {object} oAdvance
+             * @returns {object}
+             */
+            handleBuildAdvanceData: function (oAdvance) {
+                var oDate = new Date();
+                var vSdate = oAdvance && oAdvance.Sdate;
+
+                if (vSdate instanceof Date && !isNaN(vSdate.getTime())) {
+                    oDate = new Date(vSdate.getTime());
+                }
+
+                this._cardnum = oAdvance.CardNumber;
+                this._chknum = oAdvance.Checknum;
+                this.getView().getModel("Main").setProperty("/advanceReferenceExp", oAdvance.ExpNo || "");
+
+                return {
+                    Waers: oAdvance.Waers || "EUR",
+                    Date: oDate,
+                    Amt: oAdvance.Value
+                };
+            },
+
+            /**
+             * Creates advance draft from selected movement.
+             */
+            onCreateAdvance: function () {
+                var oModel = this.getModel();
+                var oGlobalModel = this.getModel("global");
+                var oTable = this.byId("advanceMovementTable");
+                var aSelectedItems = oTable ? oTable.getSelectedItems() : [];
+
+                if (!aSelectedItems || aSelectedItems.length !== 1) {
+                    MessageBox.warning(this.getResourceBundle().getText("noSelection"));
+                    return;
+                }
+
+                var oMovement = aSelectedItems[0].getBindingContext("Main").getObject();
+                var oEntry = this.handleBuildAdvanceDraft(oMovement);
+
+                if (this._pCreateAdvanceDialog) {
+                    this._pCreateAdvanceDialog.then(function (oDialog) {
+                        oDialog.close();
+                    });
+                }
+
+                if (this._oAdvanceProjectSelection) {
+                    oEntry.Network = this._oAdvanceProjectSelection.Network;
+                    oEntry.Activity = this._oAdvanceProjectSelection.Activity;
+                }
+
+                oGlobalModel.setProperty("/busy", true);
+                oModel.create("/ZFI_EXPENSES_ADVANCES", oEntry, {
+                    success: function () {
+                        this.onCancelCreateAdvance();
+                        oGlobalModel.setProperty("/busy", false);
+                        this.byId("smartTableTransRecon").rebindTable(true);
+                        sap.m.MessageBox.success(this.getResourceBundle().getText("adv.AdvanceDraftCreatedSuccess"));
+                    }.bind(this),
+                    error: function (oError) {
+                        oGlobalModel.setProperty("/busy", false);
+                        var sError = JSON.parse(oError.responseText).error.message.value;
+                        sap.m.MessageBox.alert(sError, {
+                            icon: "ERROR",
+                            onClose: null,
+                            styleClass: '',
+                            initialFocus: null,
+                            textDirection: sap.ui.core.TextDirection.Inherit
+                        });
+                    }.bind(this)
+                });
+
+            },
+
+            /**
+             * Closes and destroys create advance dialog.
+             */
+            onCancelCreateAdvance: function () {
+                if (this._pCreateAdvanceDialog) {
+                    this._pCreateAdvanceDialog.then(function (oDialog) {
+                        oDialog.close();
+                        oDialog.destroy();
+                    });
+                    this._pCreateAdvanceDialog = null;
+                }
+
+                this.getView().getModel("Main").setProperty("/advanceMovementSearch", "");
+                this._oAdvanceMovementTableSettings = null;
+                this._oAdvanceProjectSelection = null;
+                this._fnResolveAdvanceProjectSelection = null;
+                this._sProjectSelectionTarget = "expense";
+
+                if (this._oAdvanceMovementTableSettingsDialog) {
+                    this._oAdvanceMovementTableSettingsDialog.destroy();
+                    this._oAdvanceMovementTableSettingsDialog = null;
+                }
+            },
+
+            /**
+             * Opens camera/upload flow from NewExp while preserving current data.
+             */
+            onAdvanceTakePhoto: function () {
+                this.handleStartProcess(true);
+            },
+
+            /**
+             * Opens local file picker for advance attachment upload.
+             */
+            onAdvanceUploadDocument: function () {
+                var oUploader = this.byId("fileUploader");
+                if (!oUploader) {
+                    return;
+                }
+
+                var oDom = oUploader.getDomRef();
+                var oInput = oDom && oDom.querySelector && oDom.querySelector('input[type="file"]');
+                if (oInput && oInput.click) {
+                    oInput.click();
+                }
+            },
+
+            /**
+             * Enable/disable action button based on pending advances selection.
+             * @param {sap.ui.base.Event} oEvent
+             */
+            onSelectionChangePendingAdvances: function (oEvent) {
+                var aItems = oEvent.getSource().getSelectedItems();
+                this.byId("btnCompleteAdvance").setEnabled(aItems && aItems.length === 1);
+            },
+
+            /**
+             * Complete selected advance with expense details.
+             */
+            handleCompleteAdvance: function () {
+                var oTable = this.byId("smartTableAdvancesPending").getTable();
+                var aItems = oTable ? oTable.getSelectedItems() : [];
+
+                if (!aItems || aItems.length !== 1) {
+                    MessageBox.warning(this.getResourceBundle().getText("adv.SelectPendingAdvance"));
+                    return;
+                }
+
+                var oAdvance = aItems[0].getBindingContext().getObject();
+                var oData = this.handleBuildAdvanceData(oAdvance);
+
+                this.getView().getModel("Main").setProperty("/isAdvanceFillMode", true);
+                this.handleFinishProcess(oData, "ADV");
+            },
         });
     });
-
-

@@ -131,11 +131,11 @@
                         <Label text="{i18n>xexp.expUnitExt}" visible="{= ['DESREP','REF','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }"/>
                         <StepInput id="expenseDialog:inputUnitExt" min="{= ((${Expenses>/exptype} || '') === 'DESREP') ? 1 : 0 }" max="100" step="1" value="{= ((${Expenses>/exptype} || '') === 'DESREP') ? 1 : 0 }" visible="{= ['DESREP','REF','UE'].indexOf((${Expenses>/exptype} || '')) > -1 }" textAlign="Center" width="120px"/>
 
-                        <Label text="{i18n>xexp.IsProjectExpenseQuestion}" />
+                        <Label text="{i18n>xexp.IsProjectExpenseQuestion}" visible="{Main>/showCheckProjects}" />
                         <CheckBox id="expenseDialog:checkBoxProjectYes" visible="{Main>/showCheckProjects}" select=".onProjectChange" selected="false" text="{i18n>xexp.Yes}" />
                         <CheckBox id="expenseDialog:checkBoxProjectNo" visible="{Main>/showCheckProjects}" select=".onProjectChange" selected="true" text="{i18n>xexp.No}" />
 
-                        <Label id="expenseDialog:labelProjects" text="{i18n>xexp.Project}" />
+                        <Label id="expenseDialog:labelProjects" text="{i18n>xexp.Project}" visible="{Main>/showCheckProjects}" />
                         <Input id="expenseDialog:selectProject" showValueHelp="true" required="true" visible="false" valueHelpRequest=".onProjectValueHelpRequested" valueHelpOnly="true" />
 
                         <Label text="" visible="false"/>
@@ -202,9 +202,29 @@
                         <Label text=""/>
                         <Text text="{i18n>xexp.expAttn}" class="sapMText sapUiSelectable sapUshellFlpSettingsHint"/>
 
-                        <Label id="expenseDialog:labelAttachment" text="{i18n>xexp.expAttachment}" />
-                        <HBox alignItems="Center" justifyContent="Start">
-                            <u:FileUploader id="fileUploader" width="200px" visible="{= !${Expenses>/capturedImage} }" uploadOnChange="false" placeholder="{i18n>xexp.expSelectFile}" buttonText="{i18n>xexp.expBrowse}" change=".onFileSelected"/>
+                        <Label id="expenseDialog:labelAttachment" text="{i18n>xexp.expAttachment}" visible="{Main>/isAdvanceFillMode}" required="{Main>/isAdvanceFillMode}" />
+                        <HBox alignItems="Center" justifyContent="Start" visible="{Main>/isAdvanceFillMode}" wrap="Wrap">
+                            <GenericTile header="{i18n>xexp.takePhoto}" frameType="OneByOne" mode="ActionMode" press=".onAdvanceTakePhoto" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                <tileContent>
+                                    <TileContent>
+                                        <content>
+                                            <ImageContent src="sap-icon://camera" />
+                                        </content>
+                                    </TileContent>
+                                </tileContent>
+                            </GenericTile>
+
+                            <GenericTile header="{i18n>adv.AdvanceUploadDocument}" subheader="{i18n>adv.AdvanceUploadSubheader}" frameType="OneByOne" mode="ActionMode" press=".onAdvanceUploadDocument" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                                <tileContent>
+                                    <TileContent>
+                                        <content>
+                                            <ImageContent src="sap-icon://upload" />
+                                        </content>
+                                    </TileContent>
+                                </tileContent>
+                            </GenericTile>
+
+                            <u:FileUploader id="fileUploader" visible="{Main>/isAdvanceFillMode}" buttonOnly="true" sameFilenameAllowed="true" fileType="jpg,jpeg,png,pdf" mimeType="image/jpeg,image/png,application/pdf" uploadOnChange="false" placeholder="{i18n>xexp.expSelectFile}" buttonText="{i18n>xexp.expBrowse}" change=".onSelectFile" class="desktopHiddenUploader"/>
                             <Image src="{Expenses>/capturedImage}" width="230px" height="200px" visible="{= !!${Expenses>/capturedImage} }" class="sapUiTinyMarginBegin">
                                 <detailBox>
                                     <LightBox>

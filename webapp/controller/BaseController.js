@@ -320,6 +320,7 @@ sap.ui.define([
         onPressCloseDetail: function () {
             this.onButtonsState(false, true);
             this.getModel("global").setProperty("/layout", "OneColumn");
+            this.getModel("global").setProperty("/detailReadOnly", false);
             this.getRouter().navTo("RouteMain");
         },
 

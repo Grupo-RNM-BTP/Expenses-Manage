@@ -1,0 +1,1311 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+    <edmx:Reference Uri="../../catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_COMMON',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.Common.v1" Alias="Common"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="../../catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_UI',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.UI.v1" Alias="UI"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="../../catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_COMMUNICATION',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.Communication.v1" Alias="Communication"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="../../catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_PERSONALDATA',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.PersonalData.v1" Alias="PersonalData"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="../../catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_VALIDATION',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="Org.OData.Validation.V1" Alias="Validation"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="../../catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_ANALYTICS',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.Analytics.v1" Alias="Analytics"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="../../catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_HTML5',Version='0001',SAP__Origin='LOCAL')/$value">
+        <edmx:Include Namespace="com.sap.vocabularies.HTML5.v1" Alias="HTML5"/>
+    </edmx:Reference>
+    <edmx:Reference Uri="../../../sap/zfi_expenses_srv/$metadata">
+        <edmx:Include Namespace="ZFI_EXPENSES_SRV" Alias="SAP"/>
+    </edmx:Reference>
+    <edmx:DataServices>
+        <Schema Namespace="zfi_expenses_anno_mdl.v1" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+            <Annotations Target="ZFI_EXPENSES_SRV.C_ManageJournalEntryTaxItemType/TaxAmountInCoCodeCrcy">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_ManageJournalEntryTaxItemType/TaxAmount">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_ManageJournalEntryTaxItemType/TaxAmountInAdditionalCurrency1">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_ManageJournalEntryTaxItemType/TaxAmountInAdditionalCurrency2">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_ManageJournalEntryTaxItemType/TaxRegisterPercentageUnit">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_ManageJournalEntryTaxItemType/TaxAmountInCountryCrcy">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_ManageJournalEntryTaxItemType/CompanyCodeName">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_ManageJournalEntryTaxItemType/GLAccountName">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_ManageJournalEntryTaxItemType/TaxCodeName">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_ManageJournalEntryTaxItemType/AccountingDocument">
+                <Annotation Term="Common.SemanticObject" String="AccountingDocument"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_ManageJournalEntryTaxItemType/CompanyCode">
+                <Annotation Term="Common.Text" Path="CompanyCodeName">
+                    <Annotation Term="UI.TextArrangement" EnumMember="UI.TextArrangementType/TextLast"/>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_ManageJournalEntryTaxItemType/TaxCode">
+                <Annotation Term="Common.Text" Path="TaxCodeName">
+                    <Annotation Term="UI.TextArrangement" EnumMember="UI.TextArrangementType/TextLast"/>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_ManageJournalEntryTaxItemType/GLAccount">
+                <Annotation Term="Common.Text" Path="GLAccountName">
+                    <Annotation Term="UI.TextArrangement" EnumMember="UI.TextArrangementType/TextLast"/>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_ManageJournalEntryTaxItemType/TaxRate">
+                <Annotation Term="Common.Text" Path="TaxRegisterPercentageUnit">
+                    <Annotation Term="UI.TextArrangement" EnumMember="UI.TextArrangementType/TextLast"/>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_ManageJournalEntryTaxItemType">
+                <Annotation Term="UI.HeaderInfo">
+                    <Record>
+                        <PropertyValue Property="TypeName" String="Tax"/>
+                        <PropertyValue Property="TypeNamePlural" String="Taxes"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="TaxCode"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="GLAccount"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="TaxRate"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="UI.PresentationVariant">
+                    <Record>
+                        <PropertyValue Property="SortOrder">
+                            <Collection>
+                                <Record Type="Common.SortOrderType">
+                                    <PropertyValue Property="Property" PropertyPath="AccountingDocument"/>
+                                    <PropertyValue Property="Descending" Bool="false"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_MngJrnlEntrPrkdDocTaxItemType/TaxAmountInTransCrcy">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_MngJrnlEntrPrkdDocTaxItemType/TaxAmountInCoCodeCrcy">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_MngJrnlEntrPrkdDocTaxItemType/TaxAmountInAdditionalCurrency1">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_MngJrnlEntrPrkdDocTaxItemType/TaxAmountInAdditionalCurrency2">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_MngJrnlEntrPrkdDocTaxItemType/CompanyCodeName">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_MngJrnlEntrPrkdDocTaxItemType/TaxCodeName">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_MngJrnlEntrPrkdDocTaxItemType/AccountingDocument">
+                <Annotation Term="Common.SemanticObject" String="AccountingDocument"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_MngJrnlEntrPrkdDocTaxItemType/SourceCompanyCode">
+                <Annotation Term="Common.Text" Path="CompanyCodeName">
+                    <Annotation Term="UI.TextArrangement" EnumMember="UI.TextArrangementType/TextLast"/>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_MngJrnlEntrPrkdDocTaxItemType/TaxCode">
+                <Annotation Term="Common.Text" Path="TaxCodeName">
+                    <Annotation Term="UI.TextArrangement" EnumMember="UI.TextArrangementType/TextLast"/>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.C_MngJrnlEntrPrkdDocTaxItemType">
+                <Annotation Term="UI.HeaderInfo">
+                    <Record>
+                        <PropertyValue Property="TypeName" String="Tax"/>
+                        <PropertyValue Property="TypeNamePlural" String="Taxes"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="TaxCode"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="TaxAmountInCoCodeCrcy"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="UI.PresentationVariant">
+                    <Record>
+                        <PropertyValue Property="SortOrder">
+                            <Collection>
+                                <Record Type="Common.SortOrderType">
+                                    <PropertyValue Property="Property" PropertyPath="AccountingDocument"/>
+                                    <PropertyValue Property="Descending" Bool="false"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_BCP_MOVCCType/Namekey">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_BCP_MOVCCType/Curcode">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_BCP_MOVCCType/Trntype">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_BCP_MOVCCType/VYear">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_BCP_MOVCCType/VMonth">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_BCP_MOVCCType/VDay">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_BCP_MOVCCType/YearMonth">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_BCP_MOVCCType/MonthYear">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_BCP_MOVCCType/ReconciliationCriticality">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_BCP_MOVCCType">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Name"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Chknum"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Cardnumber"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Amt"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Currency"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="VYearMonthDay"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="ExpNo"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Criticality" Path="ReconciliationCriticality"/>
+                            <PropertyValue Property="Value" Path="Reconciliation"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="UI.SelectionFields">
+                    <Collection>
+                        <PropertyPath>Name</PropertyPath>
+                        <PropertyPath>Amt</PropertyPath>
+                        <PropertyPath>ExpNo</PropertyPath>
+                        <PropertyPath>Reconciliation</PropertyPath>
+                        <PropertyPath>VYearMonthDay</PropertyPath>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_BUSINESS_PARTNERType">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="BusinessPartner"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="BusinessPartnerName"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_CURRENCY2Type/Language">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSESCOUNTType">
+                <Annotation Term="UI.HeaderInfo">
+                    <Record>
+                        <PropertyValue Property="TypeName" String="Expenses"/>
+                        <PropertyValue Property="TypeNamePlural" String="Expenses Count"/>
+                        <PropertyValue Property="Title">
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="ExpenseCount"/>
+                            </Record>
+                        </PropertyValue>
+                        <PropertyValue Property="Description">
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="ExpenseCount"/>
+                            </Record>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/Pernr">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/FiStatus">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/Belnr">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/Checknum">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/CompanyCode">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/CompanyDsc">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/FiscalYear">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/ExpType">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/ApprvdValue">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/Pymtmeth">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/Nif">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/Value">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/Waers">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/Waers2">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/Reason">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/Doc">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/Network">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/NetworkDsc">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/Activity">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/ActivityDsc">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/VYearMonthDay">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/StatusCriticality">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType/ReconciliationCriticality">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_ADVANCESType">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Criticality" Path="StatusCriticality"/>
+                            <PropertyValue Property="Value" Path="ddtext"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Criticality" Path="ReconciliationCriticality"/>
+                            <PropertyValue Property="Value" Path="Reconciliation"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="UI.SelectionFields">
+                    <Collection>
+                        <PropertyPath>ddtext</PropertyPath>
+                        <PropertyPath>ExpNo</PropertyPath>
+                        <PropertyPath>ExpTypeDsc</PropertyPath>
+                        <PropertyPath>PayMethodDsc</PropertyPath>
+                        <PropertyPath>Sdate</PropertyPath>
+                        <PropertyPath>Erdat</PropertyPath>
+                        <PropertyPath>Reconciliation</PropertyPath>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_BCPType/Currency">
+                <Annotation Term="UI.HiddenFilter"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_BCPType/YearMonth">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_BCPType/VYear">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_BCPType/MonthYear">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_BCPType/ID">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_BCPType">
+                <Annotation Term="UI.Chart" Qualifier="Amount_ByMonthYearCard">
+                    <Record Type="UI.ChartDefinitionType">
+                        <PropertyValue Property="Title" String="By Amount per Card"/>
+                        <PropertyValue Property="ChartType" EnumMember="UI.ChartType/Line"/>
+                        <PropertyValue Property="Dimensions">
+                            <Collection>
+                                <PropertyPath>Cardnumber</PropertyPath>
+                                <PropertyPath>MonthYear</PropertyPath>
+                            </Collection>
+                        </PropertyValue>
+                        <PropertyValue Property="DimensionAttributes">
+                            <Collection>
+                                <Record Type="UI.ChartDimensionAttributeType">
+                                    <PropertyValue Property="Dimension" PropertyPath="Cardnumber"/>
+                                    <PropertyValue Property="Role" EnumMember="UI.ChartDimensionRoleType/Series"/>
+                                </Record>
+                                <Record Type="UI.ChartDimensionAttributeType">
+                                    <PropertyValue Property="Dimension" PropertyPath="MonthYear"/>
+                                    <PropertyValue Property="Role" EnumMember="UI.ChartDimensionRoleType/Category"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                        <PropertyValue Property="Measures">
+                            <Collection>
+                                <PropertyPath>Amount</PropertyPath>
+                            </Collection>
+                        </PropertyValue>
+                        <PropertyValue Property="MeasureAttributes">
+                            <Collection>
+                                <Record Type="UI.ChartMeasureAttributeType">
+                                    <PropertyValue Property="Measure" PropertyPath="Amount"/>
+                                    <PropertyValue Property="Role" EnumMember="UI.ChartMeasureRoleType/Axis1"/>
+                                    <PropertyValue Property="DataPoint" AnnotationPath="@UI.DataPoint#Amount"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="UI.Chart" Qualifier="Amount_ByMonthYear">
+                    <Record Type="UI.ChartDefinitionType">
+                        <PropertyValue Property="Title" String="By Amount"/>
+                        <PropertyValue Property="ChartType" EnumMember="UI.ChartType/Line"/>
+                        <PropertyValue Property="Dimensions">
+                            <Collection>
+                                <PropertyPath>MonthYear</PropertyPath>
+                            </Collection>
+                        </PropertyValue>
+                        <PropertyValue Property="DimensionAttributes">
+                            <Collection>
+                                <Record Type="UI.ChartDimensionAttributeType">
+                                    <PropertyValue Property="Dimension" PropertyPath="MonthYear"/>
+                                    <PropertyValue Property="Role" EnumMember="UI.ChartDimensionRoleType/Category"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                        <PropertyValue Property="Measures">
+                            <Collection>
+                                <PropertyPath>Amount</PropertyPath>
+                            </Collection>
+                        </PropertyValue>
+                        <PropertyValue Property="MeasureAttributes">
+                            <Collection>
+                                <Record Type="UI.ChartMeasureAttributeType">
+                                    <PropertyValue Property="Measure" PropertyPath="Amount"/>
+                                    <PropertyValue Property="Role" EnumMember="UI.ChartMeasureRoleType/Axis1"/>
+                                    <PropertyValue Property="DataPoint" AnnotationPath="@UI.DataPoint#Amount"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="UI.DataPoint" Qualifier="Amount">
+                    <Record>
+                        <PropertyValue Property="Value" Path="Amount"/>
+                        <PropertyValue Property="Title" String="Amount"/>
+                        <PropertyValue Property="ValueFormat">
+                            <Record>
+                                <PropertyValue Property="NumberOfFractionalDigits" Int="1"/>
+                            </Record>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="UI.HeaderInfo">
+                    <Record>
+                        <PropertyValue Property="TypeName" String="Data Definition for Expenses Credit Cards Transactions"/>
+                        <PropertyValue Property="Title">
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="Amount"/>
+                            </Record>
+                        </PropertyValue>
+                        <PropertyValue Property="Description">
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="MonthYear"/>
+                            </Record>
+                        </PropertyValue>
+                    </Record>
+                    <Annotation Term="Core.Messages">
+                        <Collection>
+                            <Record>
+                                <PropertyValue Property="message" String="UI.HEADERINFO: TypeNamePlural is mandatory"/>
+                                <PropertyValue Property="severity" String="error"/>
+                            </Record>
+                        </Collection>
+                    </Annotation>
+                </Annotation>
+                <Annotation Term="UI.Identification">
+                    <Collection>
+                        <Record Type="UI.DataFieldForAnnotation">
+                            <PropertyValue Property="Target" AnnotationPath="@UI.DataPoint#Amount"/>
+                        </Record>
+                        <Record Type="UI.DataFieldForAnnotation">
+                            <PropertyValue Property="Target" AnnotationPath="@UI.DataPoint#VYear"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Card"/>
+                            <PropertyValue Property="Value" Path="Cardnumber"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Month.Year"/>
+                            <PropertyValue Property="Value" Path="MonthYear"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Year"/>
+                            <PropertyValue Property="Value" Path="VYear"/>
+                        </Record>
+                        <Record Type="UI.DataFieldForAnnotation">
+                            <PropertyValue Property="Label" String="Amount"/>
+                            <PropertyValue Property="Target" AnnotationPath="@UI.DataPoint#Amount"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Currency"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="UI.PresentationVariant" Qualifier="Amount_ByMonthYearCard">
+                    <Record>
+                        <PropertyValue Property="Text" String="by MonthYear &amp; Card"/>
+                        <PropertyValue Property="MaxItems" Int="14"/>
+                        <PropertyValue Property="SortOrder">
+                            <Collection>
+                                <Record Type="Common.SortOrderType">
+                                    <PropertyValue Property="Property" PropertyPath="VYear"/>
+                                    <PropertyValue Property="Descending" Bool="true"/>
+                                </Record>
+                                <Record Type="Common.SortOrderType">
+                                    <PropertyValue Property="Property" PropertyPath="MonthYear"/>
+                                    <PropertyValue Property="Descending" Bool="true"/>
+                                </Record>
+                                <Record Type="Common.SortOrderType">
+                                    <PropertyValue Property="Property" PropertyPath="Cardnumber"/>
+                                    <PropertyValue Property="Descending" Bool="false"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                        <PropertyValue Property="Total">
+                            <Collection>
+                                <PropertyPath>Amount</PropertyPath>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="UI.PresentationVariant" Qualifier="Amount_ByMonthYear">
+                    <Record>
+                        <PropertyValue Property="Text" String="by MonthYear"/>
+                        <PropertyValue Property="MaxItems" Int="12"/>
+                        <PropertyValue Property="SortOrder">
+                            <Collection>
+                                <Record Type="Common.SortOrderType">
+                                    <PropertyValue Property="Property" PropertyPath="VYear"/>
+                                    <PropertyValue Property="Descending" Bool="true"/>
+                                </Record>
+                                <Record Type="Common.SortOrderType">
+                                    <PropertyValue Property="Property" PropertyPath="MonthYear"/>
+                                    <PropertyValue Property="Descending" Bool="true"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                        <PropertyValue Property="Total">
+                            <Collection>
+                                <PropertyPath>Amount</PropertyPath>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="UI.SelectionVariant" Qualifier="Amount_ByMonthYearCard">
+                    <Record>
+                        <PropertyValue Property="Text" String="By Amount per Card"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="UI.SelectionVariant" Qualifier="Amount_ByMonthYear">
+                    <Record>
+                        <PropertyValue Property="Text" String="By Amount"/>
+                    </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_BCP2Type/VYear">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_BCP2Type/ID">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_BCP2Type">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Cardnumber"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Currency"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_COLLABType">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Name"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="UI.SelectionFields">
+                    <Collection>
+                        <PropertyPath>Name</PropertyPath>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_CURRENTE_ACC_1Type/Pernr">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_CURRENTE_ACC_1Type/CompanyCode">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_CURRENTE_ACC_1Type/FiscalYear">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_CURRENTE_ACC_1Type/Totalvalue">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_CURRENTE_ACC_1Type/Waers">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_CURRENTE_ACC_1Type/DocCurrencyClearedOpen">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_CURRENTE_ACC_1Type/payment_status">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_CURRENTE_ACC_1Type/StatusCriticality">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_CURRENTE_ACC_1Type">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Doc/Reference No"/>
+                            <PropertyValue Property="Value" Path="ExpenseNo"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Expense Type"/>
+                            <PropertyValue Property="Value" Path="description"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Expense Description"/>
+                            <PropertyValue Property="Value" Path="DocumentHeader"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Invoice Date"/>
+                            <PropertyValue Property="Value" Path="CreationDate"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Local Currency"/>
+                            <PropertyValue Property="Value" Path="display_dmbtr"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Document Currency"/>
+                            <PropertyValue Property="Value" Path="display_wrbtr"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="State"/>
+                            <PropertyValue Property="Criticality" Path="StatusCriticality"/>
+                            <PropertyValue Property="Value" Path="StateDesc"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_CURRENTE_ACC_2Type/Pernr">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_CURRENTE_ACC_2Type/CompanyCode">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_CURRENTE_ACC_2Type/FiscalYear">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_CURRENTE_ACC_2Type/Totalvalue">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_CURRENTE_ACC_2Type/Waers">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_CURRENTE_ACC_2Type/DocCurrencyClearedOpen">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_CURRENTE_ACC_2Type/payment_status">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_CURRENTE_ACC_2Type/StatusCriticality">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_CURRENTE_ACC_2Type">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Doc/Reference No"/>
+                            <PropertyValue Property="Value" Path="ExpenseNo"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Expense Type"/>
+                            <PropertyValue Property="Value" Path="description"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Expense Description"/>
+                            <PropertyValue Property="Value" Path="DocumentHeader"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Invoice Date"/>
+                            <PropertyValue Property="Value" Path="CreationDate"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Local Currency"/>
+                            <PropertyValue Property="Value" Path="display_dmbtr"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Document Currency"/>
+                            <PropertyValue Property="Value" Path="display_wrbtr"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="State"/>
+                            <PropertyValue Property="Criticality" Path="StatusCriticality"/>
+                            <PropertyValue Property="Value" Path="StateDesc"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_LAPPRVDType/Chknum">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_LAPPRVDType/FiscalYear">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_LAPPRVDType/ApprvdValue">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_LAPPRVDType/Value">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_LAPPRVDType/CompanyDsc">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_LAPPRVDType/FirstName">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_LAPPRVDType/LastName">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_LAPPRVDType/ExpType">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_LAPPRVDType/Pymtmeth">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_LAPPRVDType/Waers">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_LAPPRVDType/Waers2">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_LAPPRVDType/FiStatus">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_LAPPRVDType/Ernam">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_LAPPRVDType/Aenam">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_LAPPRVDType/Aedat">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_LAPPRVDType/StatusCriticality">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_LAPPRVDType/ReconciliationCriticality">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_LAPPRVDType/Doc">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_LAPPRVDType">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="EmployeeName"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Criticality" Path="ReconciliationCriticality"/>
+                            <PropertyValue Property="Value" Path="Reconciliation"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Criticality" Path="StatusCriticality"/>
+                            <PropertyValue Property="Value" Path="ddtext"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="UI.SelectionFields">
+                    <Collection>
+                        <PropertyPath>ExpNo</PropertyPath>
+                        <PropertyPath>EmployeeName</PropertyPath>
+                        <PropertyPath>Pernr</PropertyPath>
+                        <PropertyPath>CompanyName</PropertyPath>
+                        <PropertyPath>ExpTypeDsc</PropertyPath>
+                        <PropertyPath>PayMethodDsc</PropertyPath>
+                        <PropertyPath>ddtext</PropertyPath>
+                        <PropertyPath>Reconciliation</PropertyPath>
+                        <PropertyPath>Erdat</PropertyPath>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_LSTType">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="ExpenseNo"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="PymtmethDesc"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Totalvalue"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="ExptypeDesc"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/Pernr">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/FiStatus">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/Belnr">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/Checknum">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/CompanyCode">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/CompanyDsc">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/FiscalYear">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/ExpType">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/ApprvdValue">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/Pymtmeth">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/Nif">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/Value">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/Waers">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/Waers2">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/Reason">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/Doc">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/Network">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/NetworkDsc">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/Activity">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/ActivityDsc">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/VYearMonthDay">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/StatusCriticality">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType/ReconciliationCriticality">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_MNGType">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Criticality" Path="StatusCriticality"/>
+                            <PropertyValue Property="Value" Path="ddtext"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Criticality" Path="ReconciliationCriticality"/>
+                            <PropertyValue Property="Value" Path="Reconciliation"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="UI.SelectionFields">
+                    <Collection>
+                        <PropertyPath>ddtext</PropertyPath>
+                        <PropertyPath>ExpNo</PropertyPath>
+                        <PropertyPath>ExpTypeDsc</PropertyPath>
+                        <PropertyPath>PayMethodDsc</PropertyPath>
+                        <PropertyPath>Sdate</PropertyPath>
+                        <PropertyPath>Erdat</PropertyPath>
+                        <PropertyPath>Reconciliation</PropertyPath>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_NAPPRVDType/Color">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_NAPPRVDType">
+                <Annotation Term="UI.DataPoint" Qualifier="StatusDesc">
+                    <Record>
+                        <PropertyValue Property="Value" Path="StatusDesc"/>
+                        <PropertyValue Property="Title" String=""/>
+                        <PropertyValue Property="Criticality" Path="Color"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Expense Number"/>
+                            <PropertyValue Property="Value" Path="ExpenseNo"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Reason"/>
+                            <PropertyValue Property="Value" Path="Reason"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                        <Record Type="UI.DataFieldForAnnotation">
+                            <PropertyValue Property="Label" String="Status"/>
+                            <PropertyValue Property="Target" AnnotationPath="@UI.DataPoint#StatusDesc"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Creation Date"/>
+                            <PropertyValue Property="Value" Path="CreationDate"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Changed By"/>
+                            <PropertyValue Property="Value" Path="ChangedBy"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_NDOCType">
+                <Annotation Term="UI.DataPoint" Qualifier="Totalvalue">
+                    <Record>
+                        <PropertyValue Property="Value" Path="Totalvalue"/>
+                        <PropertyValue Property="Title" String="Net Value"/>
+                    </Record>
+                </Annotation>
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="ExpenseNo"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                        <Record Type="UI.DataFieldForAnnotation">
+                            <PropertyValue Property="Target" AnnotationPath="@UI.DataPoint#Totalvalue"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_RECONType/Account">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_RECONType/Posteddt">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_RECONType/Name">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_RECONType/Curcode">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_RECONType/Trntype">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_RECONType/Effdt">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_RECONType/Cd">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_RECONType">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Description"/>
+                            <PropertyValue Property="Value" Path="Namekey"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Chknum"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Cardnumber"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Date"/>
+                            <PropertyValue Property="Value" Path="sDateFromated"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Amount"/>
+                            <PropertyValue Property="Value" Path="Amt"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="UI.SelectionFields">
+                    <Collection>
+                        <PropertyPath>Namekey</PropertyPath>
+                        <PropertyPath>sDateFromated</PropertyPath>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_RECON_VHType/Domname">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_RECON_VHType/Ddlanguage">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_RECON_VHType/Valpos">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_RECON_VHType/DomvalueL">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_RECON_VHType">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Ddtext"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_TTLType">
+                <Annotation Term="UI.Chart" Qualifier="TotalValue_ByPymtmeth">
+                    <Record Type="UI.ChartDefinitionType">
+                        <PropertyValue Property="Title" String="By Total Value"/>
+                        <PropertyValue Property="ChartType" EnumMember="UI.ChartType/Donut"/>
+                        <PropertyValue Property="Dimensions">
+                            <Collection>
+                                <PropertyPath>PymtmethDesc</PropertyPath>
+                            </Collection>
+                        </PropertyValue>
+                        <PropertyValue Property="DimensionAttributes">
+                            <Collection>
+                                <Record Type="UI.ChartDimensionAttributeType">
+                                    <PropertyValue Property="Dimension" PropertyPath="PymtmethDesc"/>
+                                    <PropertyValue Property="Role" EnumMember="UI.ChartDimensionRoleType/Category"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                        <PropertyValue Property="Measures">
+                            <Collection>
+                                <PropertyPath>TotalValue</PropertyPath>
+                            </Collection>
+                        </PropertyValue>
+                        <PropertyValue Property="MeasureAttributes">
+                            <Collection>
+                                <Record Type="UI.ChartMeasureAttributeType">
+                                    <PropertyValue Property="Measure" PropertyPath="TotalValue"/>
+                                    <PropertyValue Property="Role" EnumMember="UI.ChartMeasureRoleType/Axis1"/>
+                                    <PropertyValue Property="DataPoint" AnnotationPath="@UI.DataPoint#TotalValue"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="UI.DataPoint" Qualifier="TotalValue">
+                    <Record>
+                        <PropertyValue Property="Value" Path="TotalValue"/>
+                        <PropertyValue Property="Title" String="Value"/>
+                        <PropertyValue Property="ValueFormat">
+                            <Record>
+                                <PropertyValue Property="NumberOfFractionalDigits" Int="1"/>
+                            </Record>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="UI.HeaderInfo">
+                    <Record>
+                        <PropertyValue Property="TypeName" String="Data Definition for Expenses Total Value"/>
+                        <PropertyValue Property="Title">
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="TotalValue"/>
+                            </Record>
+                        </PropertyValue>
+                        <PropertyValue Property="Description">
+                            <Record Type="UI.DataField">
+                                <PropertyValue Property="Value" Path="PymtmethDesc"/>
+                            </Record>
+                        </PropertyValue>
+                    </Record>
+                    <Annotation Term="Core.Messages">
+                        <Collection>
+                            <Record>
+                                <PropertyValue Property="message" String="UI.HEADERINFO: TypeNamePlural is mandatory"/>
+                                <PropertyValue Property="severity" String="error"/>
+                            </Record>
+                        </Collection>
+                    </Annotation>
+                </Annotation>
+                <Annotation Term="UI.Identification">
+                    <Collection>
+                        <Record Type="UI.DataFieldForAnnotation">
+                            <PropertyValue Property="Target" AnnotationPath="@UI.DataPoint#TotalValue"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Label" String="Payment Method"/>
+                            <PropertyValue Property="Value" Path="PymtmethDesc"/>
+                        </Record>
+                        <Record Type="UI.DataFieldForAnnotation">
+                            <PropertyValue Property="Label" String="Total Value"/>
+                            <PropertyValue Property="Target" AnnotationPath="@UI.DataPoint#TotalValue"/>
+                            <Annotation Term="UI.Importance" EnumMember="UI.ImportanceType/High"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="UI.PresentationVariant" Qualifier="TotalValue_ByPymtmeth">
+                    <Record>
+                        <PropertyValue Property="Text" String="by Pymtmeth"/>
+                        <PropertyValue Property="SortOrder">
+                            <Collection>
+                                <Record Type="Common.SortOrderType">
+                                    <PropertyValue Property="Property" PropertyPath="TotalValue"/>
+                                    <PropertyValue Property="Descending" Bool="true"/>
+                                </Record>
+                            </Collection>
+                        </PropertyValue>
+                    </Record>
+                </Annotation>
+                <Annotation Term="UI.SelectionVariant" Qualifier="TotalValue_ByPymtmeth">
+                    <Record>
+                        <PropertyValue Property="Text" String="By Total Value"/>
+                    </Record>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_TYPESType/Spras">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_TYPESType/active">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_TYPESType/Caes">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_TYPESType/Snc">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_TYPES2Type/Exptype">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_TYPES2Type/Spras">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_TYPES2Type/active">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_TYPES2Type/Caes">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_TYPES2Type/Snc">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_TYPES2Type/Spras2">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_TYPES2Type">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Description"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_TYPES3Type/Exptype">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_TYPES3Type/Spras">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_TYPES3Type/Description">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_TYPES3Type/active">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_TYPES3Type/Caes">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_EXPENSES_TYPES3Type/Snc">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_MANAGER_VHType/endda">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_MANAGER_VHType">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="pernr"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="cname"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="UI.SelectionFields">
+                    <Collection>
+                        <PropertyPath>pernr</PropertyPath>
+                        <PropertyPath>cname</PropertyPath>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_PERNR_VHType/endda">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_PERNR_VHType">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="pernr"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="cname"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+                <Annotation Term="UI.SelectionFields">
+                    <Collection>
+                        <PropertyPath>pernr</PropertyPath>
+                        <PropertyPath>cname</PropertyPath>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_PYMTMETH_VHType/zlsch">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_PYMTMETH_VHType/spras">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_PYMTMETH_VHType/land1">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_PYMTMETH_VHType">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="text2"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_STATUS_VHType/Domname">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_STATUS_VHType/Valpos">
+                <Annotation Term="UI.Hidden"/>
+            </Annotations>
+            <Annotations Target="ZFI_EXPENSES_SRV.ZFI_STATUS_VHType">
+                <Annotation Term="UI.LineItem">
+                    <Collection>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="Ddtext"/>
+                        </Record>
+                        <Record Type="UI.DataField">
+                            <PropertyValue Property="Value" Path="DomvalueL"/>
+                        </Record>
+                    </Collection>
+                </Annotation>
+            </Annotations>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>

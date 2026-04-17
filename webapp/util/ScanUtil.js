@@ -139,6 +139,7 @@ sap.ui.define([
             const aHandlerNames = [
                 "handleEnsureOpenCVReady",
                 "handleCreateOverlayCanvas",
+                "handleClearOverlay",
                 "handleStopLiveDetect",
                 "handleClearAutoDetectTimer",
                 "handleStopAllDetect",
@@ -790,7 +791,6 @@ sap.ui.define([
             };
 
             let aPrevQuad = null;
-            let nPrevTs = null;
 
             const MOVE_PX_TOL = 6;
 
@@ -804,7 +804,6 @@ sap.ui.define([
                 if (!bDetected) {
                     nStableSinceMs = null;
                     aPrevQuad = null;
-                    nPrevTs = null;
                     return;
                 }
 
@@ -820,7 +819,6 @@ sap.ui.define([
                 }
 
                 aPrevQuad = aQ.map(p => ({ x: p.x, y: p.y }));
-                nPrevTs = nNow;
 
                 const bIsSteady = (nMove <= MOVE_PX_TOL);
 
@@ -1181,7 +1179,9 @@ sap.ui.define([
         handleEnsureHoldStillHint: function (oVideo) {
             try {
                 const oContainer = oVideo.parentElement || oVideo;
-                if (!oContainer) return null;
+                if (!oContainer) {
+                    return null;
+                }
 
                 const sPos = getComputedStyle(oContainer).position;
                 if (sPos === "static") {
@@ -1208,35 +1208,14 @@ sap.ui.define([
                     oHint.style.zIndex = "50";
                     oHint.style.pointerEvents = "none";
                     oHint.style.userSelect = "none";
-                    oHint.style.display = "none";
                     oHint.style.maxWidth = "60%";
 
                     oHint.style.display = "none";
                     oHint.style.alignItems = "center";
                     oHint.style.gap = "8px";
-                    oHint.style.display = "none";
                     oHint.style.flexDirection = "row";
                     oHint.style.justifyContent = "flex-start";
-                    oHint.style.display = "none";
                     oHint.style.whiteSpace = "normal";
-                    oHint.style.display = "none";
-                    oHint.style.setProperty("display", "none");
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
 
                     const oIcon = document.createElement("span");
                     oIcon.setAttribute("aria-hidden", "true");
@@ -1246,10 +1225,10 @@ sap.ui.define([
                     oIcon.style.flex = "0 0 auto";
 
                     oIcon.innerHTML = `
-                        <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
-                            <path fill="rgba(255,165,0,0.95)" d="M12 2 1 21h22L12 2zm1 14h-2v-2h2v2zm0-4h-2V8h2v4z"/>
-                        </svg>
-                    `;
+                <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="rgba(255,165,0,0.95)" d="M12 2 1 21h22L12 2zm1 14h-2v-2h2v2zm0-4h-2V8h2v4z"/>
+                </svg>
+            `;
 
                     const oText = document.createElement("span");
                     oText.id = "holdStillHintText";
@@ -1258,103 +1237,9 @@ sap.ui.define([
 
                     const sMsg = this.handleGetI18nText(
                         "scan.holdStillHint",
-                        [],
                         "Documento detetado — mantenha o telemóvel parado para recortar com nitidez."
                     );
                     oText.textContent = sMsg;
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
-                    oHint.style.display = "none";
 
                     oHint.appendChild(oIcon);
                     oHint.appendChild(oText);

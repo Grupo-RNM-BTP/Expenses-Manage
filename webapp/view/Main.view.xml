@@ -29,6 +29,7 @@
                     <tnt:NavigationListItem text="{i18n>ManageExpenses}" key="Manage" icon="sap-icon://credit-card"/>
                     <tnt:NavigationListItem text="{i18n>OverviewExpenses}" key="CardMovements" icon="sap-icon://collections-insight"/>
                     <tnt:NavigationListItem text="{i18n>TransactionReconciliation}" key="TransRecon" icon="sap-icon://unpaid-leave"/>
+                    <!-- <tnt:NavigationListItem text="{i18n>adv.Advances}" key="Advances" icon="sap-icon://money-bills"/> -->
                     <tnt:NavigationListItem text="{i18n>CurrentAccount}" key="CurrentAccount" icon="sap-icon://order-status"/>
                     <tnt:NavigationListItem id="idApproveExpenses" text="{i18n>ApproveExpenses}" visible="false" key="ApproveExpenses" icon="sap-icon://accept"/>
                 </tnt:NavigationList>
@@ -115,11 +116,6 @@
                                                 <Text text="{i18n>ExpenseType}" />
                                             </header>
                                         </Column>
-                                        <Column customData:p13nData='{"columnKey":"Erdat", "leadingProperty":"Erdat", "sortProperty":"Erdat", filterProperty:"Erdat"}'>
-                                            <header>
-                                                <Text text="{i18n>Date}" />
-                                            </header>
-                                        </Column>
                                         <Column customData:p13nData='{"columnKey":"Value", "leadingProperty":"Value", "sortProperty":"Value", filterProperty:"Value"}'>
                                             <header>
                                                 <Text text="{i18n>SubmittedValue}" />
@@ -128,6 +124,11 @@
                                         <Column customData:p13nData='{"columnKey":"ApprvdValue", "leadingProperty":"ApprvdValue", "sortProperty":"ApprvdValue", filterProperty:"ApprvdValue"}'>
                                             <header>
                                                 <Text text="{i18n>PostedValue}" />
+                                            </header>
+                                        </Column>
+                                        <Column customData:p13nData='{"columnKey":"Erdat", "leadingProperty":"Erdat", "sortProperty":"Erdat", filterProperty:"Erdat"}'>
+                                            <header>
+                                                <Text text="{i18n>Date}" />
                                             </header>
                                         </Column>
                                         <Column visible="false" customData:p13nData='{"columnKey":"Unit","leadingProperty":"Unit","sortProperty":"Unit","filterProperty":"Unit"}'>
@@ -161,9 +162,9 @@
                                                 <Link id="LinkDetail" text="{ExpNo}" press="handleExpensePress" />
                                                 <Text id="Pymtmeth" text="{PayMethodDsc}" />
                                                 <Text id="Exptype" text="{ExpTypeDsc}" />
-                                                <Text text="{path: 'Erdat', formatter: '.formatter.formatDateTime'}" />
                                                 <Text id="Totalvalue" text="{parts: [{path: 'Value'}, {path: 'Waers'}], formatter: '.formatter.formatValue'}" />
                                                 <Text id="ApprovedValue" text="{parts: [{path: 'ApprvdValue'}, {path: 'Waers'}], formatter: '.formatter.formatValue'}" />
+                                                <Text text="{path: 'Erdat', formatter: '.formatter.formatDateTime'}" />
                                                 <Link text="{Unit}" press="onUnitPress" />
                                                 <Link text="{Plate}" press="onPlatePress" />
                                                 <Link text="{PartnerNo}" press="onPartnerPress"/>
@@ -226,12 +227,12 @@
 
                             <smartFilterBar:SmartFilterBar id="sfbMovCC" entitySet="ZFI_BCP_MOVCC" />
 
-                            <smartTable:SmartTable id="smartTable" beforeRebindTable="onBeforeRebindTableCards" smartFilterId="sfbMovCC" entitySet="ZFI_BCP_MOVCC" tableType="ResponsiveTable" useExportToExcel="true" demandPopin="true" useVariantManagement="false" useTablePersonalisation="true" header="{i18n>AllMovements}" showRowCount="true" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
+                            <smartTable:SmartTable initiallyVisibleFields="Name,Chknum,Cardnumber,Amt,Currency,VYearMonthDay,ExpNo,Reconciliation" id="smartTable" beforeRebindTable="onBeforeRebindTableCards" smartFilterId="sfbMovCC" entitySet="ZFI_BCP_MOVCC" tableType="ResponsiveTable" useExportToExcel="true" demandPopin="true" useVariantManagement="false" useTablePersonalisation="true" header="{i18n>AllMovements}" showRowCount="true" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
                                 <smartTable:customToolbar>
                                     <OverflowToolbar design="Transparent">
                                         <ToolbarSpacer/>
                                         <Button text="{i18n>Synchronize}" icon="sap-icon://synchronize" press=".handleSynchronize" type="{= ${Sync>/syncInProgress} ? 'Attention' : 'Accept' }" />
-                                        <Button text="Logs de Sincronização" icon="sap-icon://list" press=".onSyncLogDialogOpen" enabled="{= ${syncLog>/items}.length > 0 }" />
+                                        <Button text="{i18n>SyncLogTitle}" icon="sap-icon://list" press=".onSyncLogDialogOpen" enabled="{= ${syncLog>/items}.length > 0 }" />
                                     </OverflowToolbar>
                                 </smartTable:customToolbar>
                                 <Table mode="None" growing="true" growingThreshold="50">
@@ -265,14 +266,14 @@
                         <VBox class="sapUiMediumMarginBeginEnd">
 
                             <FlexBox justifyContent="SpaceBetween" class="sapUiMediumMarginTop" wrap="Wrap" alignItems="Center">
-                                <Title text="{i18n>TitelCurrent}" titleStyle="H4" />
+                                <Title text="{i18n>TitleCurrent}" titleStyle="H4" />
                             </FlexBox>
 
                             <Toolbar style="Standard" design="Transparent" height="0.1rem" />
                             <l:Grid defaultSpan="XL4 L6 M12 S12" position="Center" hSpacing="1" vSpacing="1">
                                 <f:Card class="sapUiSmallMargin">
                                     <f:header>
-                                        <card:Header title="{i18n>TitleReceible}" />
+                                        <card:Header title="{i18n>TitleReceivable}" />
                                     </f:header>
                                     <f:content>
                                         <VBox class="sapUiSmallMargin">
@@ -322,6 +323,123 @@
                                     </smartTable:SmartTable>
                                 </layout:content>
                             </layout:Grid>
+                        </VBox>
+                    </ScrollContainer>
+
+                    <ScrollContainer id="pageAdvances" horizontal="false" vertical="true" height="100%">
+                        <VBox class="sapUiMediumMarginBeginEnd advancesPageWrapper">
+                            <VBox class="advancesHero sapUiLargeMarginTop sapUiSmallMarginBottom" width="100%">
+                                <Title text="{i18n>adv.AdvancesTitle}" titleStyle="H4" class="sapUiTinyMarginBottom" wrapping="true" />
+                                <Text text="{i18n>adv.AdvancesSubtitle}" wrapping="true" />
+                            </VBox>
+
+                            <layout:Grid defaultSpan="XL6 L6 M12 S12" hSpacing="2" vSpacing="2" class="sapUiSmallMarginTopBottom" width="100%">
+                                <layout:content>
+                                    <VBox class="advancesActionCard sapUiMediumMarginBottom" width="100%">
+                                        <HBox justifyContent="SpaceBetween" alignItems="Center" wrap="Wrap" class="advancesActionHeader">
+                                            <VBox width="85%">
+                                                <Title text="{i18n>adv.CreateAdvanceTitle}" titleStyle="H5" wrapping="true" />
+                                                <Text text="{i18n>adv.CreateAdvanceDescription}" wrapping="true" />
+                                            </VBox>
+                                            <core:Icon src="sap-icon://add-document" size="1.5rem" class="advancesActionIcon" />
+                                        </HBox>
+                                        <Button text="{i18n>adv.CreateAdvanceBtn}" type="Emphasized" press="handleCreateAdvance" class="sapUiSmallMarginTop" />
+                                    </VBox>
+                                </layout:content>
+                                <layout:content>
+                                    <VBox class="advancesInfoCard sapUiMediumMarginBottom" width="100%">
+                                        <Title text="{i18n>adv.PendingAdvancesTitle}" titleStyle="H5" wrapping="true" />
+                                        <Text text="{i18n>adv.PendingAdvancesDescription}" wrapping="true" />
+                                    </VBox>
+                                </layout:content>
+                            </layout:Grid>
+
+                            <smartFilterBar:SmartFilterBar id="sfbAdvancesPending" entitySet="ZFI_EXPENSES_ADVANCES" />
+
+                            <smartTable:SmartTable id="smartTableAdvancesPending" entitySet="ZFI_EXPENSES_ADVANCES" smartFilterId="sfbAdvancesPending" tableType="ResponsiveTable" demandPopin="true" useExportToExcel="false" useVariantManagement="false" useTablePersonalisation="true" enableAutoBinding="true" persistencyKey="smartTableAdvancesPending" requestAtLeastFields="Unit,Reason,ExpNo,ApprvdValue,PayMethodDsc,ExpTypeDsc,Erdat,Sdate,Value,Waers,FiStatus,PartnerNo,CardNumber">
+                                <smartTable:customToolbar>
+                                    <OverflowToolbar design="Transparent">
+                                        <ToolbarSpacer/>
+                                        <Button id="btnCompleteAdvance" text="{i18n>adv.CompleteAdvanceBtn}" enabled="false" type="Emphasized" press="handleCompleteAdvance" />
+                                    </OverflowToolbar>
+                                </smartTable:customToolbar>
+                                <Table mode="SingleSelectLeft" selectionChange="onSelectionChangePendingAdvances" growing="true" growingThreshold="20">
+                                    <columns>
+                                        <Column customData:p13nData='{"columnKey":"ExpNo", "leadingProperty":"ExpNo", "sortProperty":"ExpNo", filterProperty:"ExpNo"}'>
+                                            <header>
+                                                <Text text="{i18n>ExpensesNo}" />
+                                            </header>
+                                        </Column>
+                                        <Column customData:p13nData='{"columnKey":"PayMethodDsc", "leadingProperty":"PayMethodDsc", "sortProperty":"PayMethodDsc", filterProperty:"PayMethodDsc"}'>
+                                            <header>
+                                                <Text text="{i18n>PaymentMethod}" />
+                                            </header>
+                                        </Column>
+                                        <Column customData:p13nData='{"columnKey":"ExpTypeDsc", "leadingProperty":"ExpTypeDsc", "sortProperty":"ExpTypeDsc", filterProperty:"ExpTypeDsc"}'>
+                                            <header>
+                                                <Text text="{i18n>ExpenseType}" />
+                                            </header>
+                                        </Column>
+                                        <Column customData:p13nData='{"columnKey":"Value", "leadingProperty":"Value", "sortProperty":"Value", filterProperty:"Value"}'>
+                                            <header>
+                                                <Text text="{i18n>SubmittedValue}" />
+                                            </header>
+                                        </Column>
+                                        <Column customData:p13nData='{"columnKey":"ApprvdValue", "leadingProperty":"ApprvdValue", "sortProperty":"ApprvdValue", filterProperty:"ApprvdValue"}'>
+                                            <header>
+                                                <Text text="{i18n>PostedValue}" />
+                                            </header>
+                                        </Column>
+                                        <Column customData:p13nData='{"columnKey":"Erdat", "leadingProperty":"Erdat", "sortProperty":"Erdat", filterProperty:"Erdat"}'>
+                                            <header>
+                                                <Text text="{i18n>Date}" />
+                                            </header>
+                                        </Column>
+                                        <Column visible="false" customData:p13nData='{"columnKey":"Unit","leadingProperty":"Unit","sortProperty":"Unit","filterProperty":"Unit"}'>
+                                            <header>
+                                                <Text text="{i18n>xexp.expUnit}" />
+                                            </header>
+                                        </Column>
+                                        <Column visible="false" customData:p13nData='{"columnKey":"Plate","leadingProperty":"Plate","sortProperty":"Plate","filterProperty":"Plate"}'>
+                                            <header>
+                                                <Text text="{i18n>xexp.colPlate}" />
+                                            </header>
+                                        </Column>
+                                        <Column visible="false" customData:p13nData='{"columnKey":"PartnerNo","leadingProperty":"PartnerNo","sortProperty":"PartnerNo","filterProperty":"PartnerNo"}'>
+                                            <header>
+                                                <Text text="{i18n>xexp.expBP}" />
+                                            </header>
+                                        </Column>
+                                        <Column visible="false" customData:p13nData='{"columnKey":"Sdate","leadingProperty":"Sdate","sortProperty":"Sdate","filterProperty":"Sdate"}'>
+                                            <header>
+                                                <Text text="{i18n>Sdate}" />
+                                            </header>
+                                        </Column>
+                                        <Column visible="false" customData:p13nData='{"columnKey":"CardNumber","leadingProperty":"CardNumber","sortProperty":"CardNumber","filterProperty":"CardNumber"}'>
+                                            <header>
+                                                <Text text="{i18n>xexp.expCreditCard}" />
+                                            </header>
+                                        </Column>
+                                    </columns>
+                                    <items>
+                                        <ColumnListItem>
+                                            <cells>
+                                                <Link text="{ExpNo}" press="handleExpensePress" />
+                                                <Text text="{PayMethodDsc}" />
+                                                <Text text="{ExpTypeDsc}" />
+                                                <Text text="{parts: [{path: 'Value'}, {path: 'Waers'}], formatter: '.formatter.formatValue'}" />
+                                                <Text text="{parts: [{path: 'ApprvdValue'}, {path: 'Waers'}], formatter: '.formatter.formatValue'}" />
+                                                <Text text="{path: 'Erdat', formatter: '.formatter.formatDateTime'}" />
+                                                <Link text="{Unit}" press="onUnitPress" />
+                                                <Link text="{Plate}" press="onPlatePress" />
+                                                <Link text="{PartnerNo}" press="onPartnerPress"/>
+                                                <Text text="{Sdate}" />
+                                                <Text text="{CardNumber}" />
+                                            </cells>
+                                        </ColumnListItem>
+                                    </items>
+                                </Table>
+                            </smartTable:SmartTable>
                         </VBox>
                     </ScrollContainer>
 
