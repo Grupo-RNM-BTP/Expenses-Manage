@@ -4,22 +4,15 @@ specVersion: "3.1"
 metadata:
   name: zfiexpensesmanage
 type: application
+resources:
+  configuration:
+    propertiesFileSourceEncoding: UTF-8
 builder:
-  resources:
-    excludes:
-      - /test/**
-      - /localService/**
   customTasks:
-    - name: deploy-to-abap
+    - name: ui5-task-zipper
       afterTask: generateCachebusterInfo
       configuration:
-        target:
-          url: https://sapdev.grupornm.pt:44300/
-          client: "200"
-        app:
-          name: ZFI_EXP_MNG
-          description: ""
-          package: ZFI_EXPENSES
-          transport: DD2K908207
-        exclude:
-          - /test/
+        archiveName: zfiexpensesmanage
+        relativePaths: true
+        additionalFiles:
+          - xs-app.json

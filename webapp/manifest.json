@@ -5,31 +5,33 @@
     "type": "application",
     "i18n": "i18n/i18n.properties",
     "applicationVersion": {
-      "version": "0.0.1"
+      "version": "0.0.39"
     },
     "title": "{{appTitle}}",
     "description": "{{appDescription}}",
     "resources": "resources.json",
+    "crossNavigation": {
+      "inbounds": {
+        "ExpensesManagement-display": {
+          "semanticObject": "ZFI_EXPENSES_MNG",
+          "action": "display",
+          "title": "{{appTitle}}",
+          "icon": "sap-icon://crm-sales",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    },
     "sourceTemplate": {
       "id": "@sap/generator-fiori:basic",
       "version": "1.13.3",
       "toolsId": "db226d09-5d27-41dc-a405-13732cb7d503"
     },
     "dataSources": {
-      "mainService": {
-        "uri": "/sap/opu/odata/sap/ZFI_EXPENSES_SRV/",
-        "type": "OData",
-        "settings": {
-          "annotations": [
-            "ZFI_EXPENSES_ANNO_MDL",
-            "annotation"
-          ],
-          "localUri": "localService/metadata.xml",
-          "odataVersion": "2.0"
-        }
-      },
       "ZFI_EXPENSES_ANNO_MDL": {
-        "uri": "/zsrv_iwfnd/Annotations(TechnicalName='ZFI_EXPENSES_ANNO_MDL',Version='0001')/$value/",
+        "uri": "localService/mainService/ZFI_EXPENSES_ANNO_MDL.xml",
         "type": "ODataAnnotation",
         "settings": {
           "localUri": "localService/mainService/ZFI_EXPENSES_ANNO_MDL.xml"
@@ -40,6 +42,18 @@
         "uri": "annotations/annotation.xml",
         "settings": {
           "localUri": "annotations/annotation.xml"
+        }
+      },
+      "mainService": {
+        "uri": "/sap/opu/odata/sap/ZFI_EXPENSES_SRV/",
+        "type": "OData",
+        "settings": {
+          "annotations": [
+            "ZFI_EXPENSES_ANNO_MDL",
+            "annotation"
+          ],
+          "localUri": "localService/mainService/metadata.xml",
+          "odataVersion": "2.0"
         }
       }
     }
@@ -121,11 +135,6 @@
             "TargetMain",
             "Detail"
           ]
-        },
-        {
-          "name": "NotFound",
-          "pattern": "NotFound",
-          "target": "NotFound"
         }
       ],
       "targets": {
@@ -144,13 +153,6 @@
           "controlAggregation": "midColumnPages",
           "viewId": "Detail",
           "viewType": "XML"
-        },
-        "NotFound": {
-          "viewName": "NotFound",
-          "viewType": "XML",
-          "transition": "show",
-          "clearControlAggregation": false,
-          "viewId": "NotFound"
         }
       }
     },
@@ -160,5 +162,9 @@
       "async": true,
       "id": "App"
     }
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "zfiexpensesmanage"
   }
 }

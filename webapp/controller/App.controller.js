@@ -12,11 +12,11 @@ sap.ui.define([
      * @extends zfiexpensesmanage.controller.BaseController
      */
     return BaseController.extend("zfiexpensesmanage.controller.App", {
-      
+
       /**
        * Initialize the global model, resolve authentication source, and apply persisted language.
        */
-      onInit: function () {
+      onInit: async function () {
         var oModel = new JSONModel({
           layout: "OneColumn",
           busy: false,
@@ -26,21 +26,14 @@ sap.ui.define([
 
         this.setModel(oModel, "global");
 
-        var urlParams = new URLSearchParams(window.location.search),
-          token = urlParams.get('token'),
-          sEmail = this.getShellUserEmail();
+        var sEmail = this.handleGetUserEmail();
 
-        oModel.setProperty("/token", token || "");
-        oModel.setProperty("/userEmail", sEmail);
-        oModel.setProperty("/authSource", token ? "token" : (sEmail ? "shell" : "none"));
-
-        this.setModelCA(token, sEmail);
-
-        if (!sessionStorage.getItem("oLangu"))
-          sap.ui.getCore().getConfiguration().setLanguage("EN");
-        else {
-          sap.ui.getCore().getConfiguration().setLanguage(sessionStorage.getItem("oLangu"));
+        if (!sEmail) {
+          sap.m.MessageBox.error(this.handleGetResourceBundle().getText("errorUserEmail"));
+          return;
         }
+
+        this.handleSetModelCA(sEmail);
       }
     });
   });

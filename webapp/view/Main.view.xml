@@ -29,7 +29,7 @@
                     <tnt:NavigationListItem text="{i18n>ManageExpenses}" key="Manage" icon="sap-icon://credit-card"/>
                     <tnt:NavigationListItem text="{i18n>OverviewExpenses}" key="CardMovements" icon="sap-icon://collections-insight"/>
                     <tnt:NavigationListItem text="{i18n>TransactionReconciliation}" key="TransRecon" icon="sap-icon://unpaid-leave"/>
-                    <!-- <tnt:NavigationListItem text="{i18n>adv.Advances}" key="Advances" icon="sap-icon://money-bills"/> -->
+                    <tnt:NavigationListItem text="{i18n>adv.Advances}" key="Advances" icon="sap-icon://money-bills"/>
                     <tnt:NavigationListItem text="{i18n>CurrentAccount}" key="CurrentAccount" icon="sap-icon://order-status"/>
                     <tnt:NavigationListItem id="idApproveExpenses" text="{i18n>ApproveExpenses}" visible="false" key="ApproveExpenses" icon="sap-icon://accept"/>
                 </tnt:NavigationList>
@@ -307,7 +307,7 @@
 
                             <layout:Grid defaultSpan="L6 M12 S12" width="100%" vSpacing="1" hSpacing="1">
                                 <layout:content>
-                                    <smartTable:SmartTable id="smartTableCurrentAccount_1" entitySet="ZFI_EXPENSES_CURRENTE_ACC_1" tableType="ResponsiveTable" demandPopin="true" useExportToExcel="false" useVariantManagement="false" useTablePersonalisation="true" header="{i18n>CurrentAccount_1}" showRowCount="true" persistencyKey="123" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
+                                    <smartTable:SmartTable id="smartTableCurrentAccount_1" entitySet="ZFI_EXPENSES_CURRENTE_ACC_1" tableType="ResponsiveTable" demandPopin="true" useExportToExcel="false" useVariantManagement="false" useTablePersonalisation="true" header="{i18n>CurrentAccount_1}" showRowCount="true" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
                                         <Table class="sapUiResponsiveContentPadding" growing="true" growingThreshold="50">
                                             <ColumnListItem vAlign="Middle">
                                             </ColumnListItem>
@@ -315,7 +315,7 @@
                                     </smartTable:SmartTable>
                                 </layout:content>
                                 <layout:content>
-                                    <smartTable:SmartTable id="smartTableCurrentAccount_2" entitySet="ZFI_EXPENSES_CURRENTE_ACC_2" tableType="ResponsiveTable" demandPopin="true" useExportToExcel="false" useVariantManagement="false" useTablePersonalisation="true" header="{i18n>CurrentAccount_2}" showRowCount="true" persistencyKey="1234" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
+                                    <smartTable:SmartTable id="smartTableCurrentAccount_2" entitySet="ZFI_EXPENSES_CURRENTE_ACC_2" tableType="ResponsiveTable" demandPopin="true" useExportToExcel="false" useVariantManagement="false" useTablePersonalisation="true" header="{i18n>CurrentAccount_2}" showRowCount="true" enableAutoBinding="true" class="sapUiResponsiveContentPadding">
                                         <Table class="sapUiResponsiveContentPadding" growing="true" growingThreshold="50">
                                             <ColumnListItem vAlign="Middle">
                                             </ColumnListItem>

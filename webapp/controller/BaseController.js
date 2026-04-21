@@ -15,32 +15,25 @@ sap.ui.define([
     return Controller.extend("zfiexpensesmanage.controller.BaseController", {
 
         /**
-         * Set OData model with token/email and user language.
-         * @param {string} token Authentication token
+         * Set OData model with email and user language.
          * @param {string} sEmail User email
          */
-        setModelCA: function (token, sEmail) {
-            var userLanguage = sessionStorage.getItem("oLangu");
-            if (!userLanguage) {
-                userLanguage = "EN";
-            }
+        handleSetModelCA: function (sEmail) {
+            var sLanguage = sap.ui.getCore().getConfiguration().getLanguage();
+            var sSAPLanguage = (sLanguage || "EN").split("-")[0].toUpperCase();
 
-            var serviceUrlWithLanguage = this.getModel().sServiceUrl + (this.getModel().sServiceUrl.includes("?") ? "&" : "?") + "sap-language=" + userLanguage;
             var oHeaders = {
-                "applicationName": "ZFI_EXP_MNG"
+                "X-user-email": sEmail,
+                "X-user-language": sSAPLanguage
             };
 
-            if (token) {
-                oHeaders.authorization = token;
-            }
+            var serviceUrlWithLanguage = this.getModel().sServiceUrl + (this.getModel().sServiceUrl.includes("?") ? "&" : "?") + "sap-language=" + sSAPLanguage;
 
-            if (sEmail) {
-                oHeaders["X-user-email"] = sEmail;
-            }
+            var sAnnotationUrl = sap.ui.require.toUrl("zfiexpensesmanage/localService/mainService/ZFI_EXPENSES_ANNO_MDL.xml");
 
             CAModel = new sap.ui.model.odata.v2.ODataModel({
                 serviceUrl: serviceUrlWithLanguage,
-                annotationURI: "/zsrv_iwfnd/Annotations(TechnicalName='ZFI_EXPENSES_ANNO_MDL',Version='0001')/$value/",
+                annotationURI: sAnnotationUrl,
                 headers: oHeaders
             });
 
@@ -48,76 +41,11 @@ sap.ui.define([
         },
 
         /**
-         * Get current user email from FLP/Work Zone shell.
-         * @returns {string}
+         * Get the current user's email from shell or app router.
+         * @returns {Promise<string>}
          */
-        getShellUserEmail: function () {
-            return sap.ushell?.Container?.getUser()?.getEmail?.() || "";
-        },
-
-        /**
-         * Validate user authentication using backend service.
-         * @param {string} type Auth type
-         */
-        getUserAuthentication: function (type) {
-            var that = this,
-                urlParams = new URLSearchParams(window.location.search),
-                token = urlParams.get('token'),
-                sEmail = this.getShellUserEmail(),
-                sViewName = this.getView().getParent().getParent().getLayout();
-
-            if (sViewName.includes("OneColumn")) {
-                this.getCardValues();
-            }
-
-            if (sEmail) {
-                that.getModel("global").setProperty("/userEmail", sEmail);
-            }
-
-            if (token != null || sEmail) {
-                var headers = new Headers();
-                if (token != null) {
-                    headers.append("X-authorization", token);
-                }
-                if (sEmail) {
-                    headers.append("X-user-email", sEmail);
-                }
-
-                var requestOptions = {
-                    method: 'GET',
-                    headers: headers,
-                    redirect: 'follow'
-                };
-
-                fetch("/sap/opu/odata/sap/ZODCA_AUTHENTICATOR_SRV/USER_AUTHENTICATION", requestOptions)
-                    .then(function (response) {
-                        if (!response.ok) {
-                            throw new Error("Ocorreu um erro ao ler a entidade.");
-                        }
-                        return response.text();
-                    })
-                    .then(function (xml) {
-                        var parser = new DOMParser(),
-                            xmlDoc = parser.parseFromString(xml, "text/xml"),
-                            successResponseElement = xmlDoc.getElementsByTagName("d:SuccessResponse")[0],
-                            response = successResponseElement.textContent;
-
-                        if (response != 'X') {
-                            that.getRouter().navTo("NotFound");
-                        }
-                        else {
-                            that.getModel("global").setProperty("/token", token || "");
-                            that.getModel("global").setProperty("/userEmail", sEmail || "");
-                            that.getModel("global").setProperty("/authSource", token ? "token" : "shell");
-                        }
-                    })
-                    .catch(function (error) {
-                        console.error(error);
-                    });
-            } else {
-                that.getRouter().navTo("NotFound");
-                return;
-            }
+        handleGetUserEmail: function () {
+            return sap.ushell?.Container?.getUser?.()?.getEmail?.()?.trim?.() || "";
         },
 
         /**

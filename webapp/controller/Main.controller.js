@@ -94,17 +94,12 @@ sap.ui.define([
                 this.oCameraModel = this.getView().getModel("Camera");
                 this.oExpensesModel = this.getView().getModel("Expenses");
                 this.oScanningModel = this.getView().getModel("Scanning");
-
-                sessionStorage.setItem("goToLaunchpad", "X");
-                this.getRouter().attachRouteMatched(this.getUserAuthentication, this);
             },
 
             /**
              * Handle after rendering, get card values, and set theme.
              */
             onAfterRendering: async function () {
-                sessionStorage.setItem("goToLaunchpad", "X");
-
                 await this.onCheckLeader();
                 await this.getCardValues();
 
@@ -112,15 +107,7 @@ sap.ui.define([
 
                 this.handleSynchronize();
             },
-
-            /**
-             * Handle route matched, set goToLaunchpad and get user authentication.
-             */
-            onRouteMatched: function () {
-                sessionStorage.setItem("goToLaunchpad", "X");
-                this.getUserAuthentication();
-            },
-
+            
             /**
              * Handle navigation between pages based on side menu selection.
              * @param {sap.ui.base.Event} oEvent
