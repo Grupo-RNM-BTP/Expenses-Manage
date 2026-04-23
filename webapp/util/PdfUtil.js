@@ -1,67 +1,15 @@
 sap.ui.define([
-    "sap/ui/base/Object"
-], function (BaseObject,) {
+    "sap/ui/base/Object",
+    "zfiexpensesmanage/thirdparty/jspdf.umd.min"
+], function (BaseObject, jspdfLib) {
     "use strict";
 
-    let pJsPdf;
-
-    /**
-     * Loads the jsPDF library from CDN once and returns its constructor.
-     * @returns {Promise<function>} Promise that resolves to the jsPDF constructor.
-     */
-    function loadJsPdf() {
-        if (pJsPdf) return pJsPdf;
-
-        pJsPdf = new Promise((resolve, reject) => {
-            const sUrl = "https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js";
-            const sId = "thirdparty-jspdf";
-
-            const resolveIfReady = () => {
-                const JsPDF =
-                    (window.jspdf && window.jspdf.jsPDF) ||
-                    (window.jspdf && window.jspdf.default && window.jspdf.default.jsPDF) ||
-                    window.jsPDF;
-
-                if (JsPDF) {
-                    return resolve(JsPDF);
-                }
-
-                reject(new Error("jsPDF não disponível no window."));
-            };
-
-            const existing = document.getElementById(sId);
-
-            if (existing) {
-                if (existing.dataset.ready === "true") {
-                    return resolveIfReady();
-                }
-
-                existing.addEventListener("load", () => setTimeout(resolveIfReady, 0), { once: true });
-                existing.addEventListener("error", () => reject(new Error("Falha ao carregar jsPDF")), { once: true });
-
-                return;
-            }
-
-            const script = document.createElement("script");
-            script.id = sId;
-            script.src = sUrl;
-            script.async = true;
-
-            script.onload = () => {
-                setTimeout(() => {
-                    script.dataset.ready = "true";
-
-                    resolveIfReady();
-                }, 0);
-            };
-
-            script.onerror = () => reject(new Error("Falha ao carregar jsPDF"));
-
-            document.head.appendChild(script);
-        });
-
-        return pJsPdf;
-    }
+    const JsPDF =
+        jspdfLib && (
+            jspdfLib.jsPDF ||
+            (jspdfLib.default && jspdfLib.default.jsPDF) ||
+            jspdfLib.default
+        );
 
     /**
      * Prepares a base64 image to fit into an A4 PDF page.
@@ -74,10 +22,8 @@ sap.ui.define([
             const img = new Image();
 
             img.onload = function () {
-                const { width, height } = img;
-
-                const format = base64Str.startsWith("data:image/png") ? "PNG" : "JPEG";
-
+                const width = img.width;
+                const height = img.height;
                 const maxWidthMm = 180;
                 const maxHeightMm = 260;
                 const pxPerMm = 3.78;
@@ -89,43 +35,52 @@ sap.ui.define([
                 const displayWidthPx = Math.round(width * ratio);
                 const displayHeightPx = Math.round(height * ratio);
 
-                const scaleFactor = 3;
                 const canvas = document.createElement("canvas");
-                canvas.width = displayWidthPx * scaleFactor;
-                canvas.height = displayHeightPx * scaleFactor;
+                canvas.width = displayWidthPx;
+                canvas.height = displayHeightPx;
 
                 const ctx = canvas.getContext("2d");
-                ctx.scale(scaleFactor, scaleFactor);
                 ctx.imageSmoothingEnabled = true;
-                ctx.imageSmoothingQuality = "high";
-
-                ctx.filter = "contrast(105%) brightness(102%)";
+                ctx.imageSmoothingQuality = "medium";
+                ctx.filter = "contrast(103%) brightness(101%)";
                 ctx.drawImage(img, 0, 0, displayWidthPx, displayHeightPx);
 
-                const outputFormat = format === "PNG" ? "image/png" : "image/jpeg";
-                const quality = format === "PNG" ? 1.0 : 0.97;
-                const optimizedBase64 = canvas.toDataURL(outputFormat, quality);
+                const optimizedBase64 = canvas.toDataURL("image/jpeg", 0.75);
 
                 const widthMm = displayWidthPx / pxPerMm;
                 const heightMm = displayHeightPx / pxPerMm;
 
-                resolve({ optimizedBase64, format, widthMm, heightMm });
+                canvas.width = 0;
+                canvas.height = 0;
+                canvas.remove();
+
+                resolve({
+                    optimizedBase64: optimizedBase64,
+                    format: "JPEG",
+                    widthMm: widthMm,
+                    heightMm: heightMm
+                });
             };
 
-            img.onerror = () => reject(new Error("Não foi possível ler a imagem base64."));
+            img.onerror = function () {
+                reject(new Error("Não foi possível ler a imagem base64."));
+            };
+
             img.src = base64Str;
         });
     }
 
     return BaseObject.extend("my.app.util.PdfUtil", {
-
         /**
          * Attaches utility methods to the given controller instance.
          * @param {sap.ui.core.mvc.Controller} oController - The controller to augment.
          * @returns {sap.ui.core.mvc.Controller} The same controller for chaining.
          */
         handleAttachToController: function (oController) {
-            ["convertToPdf"].forEach((k) => { oController[k] = this[k]; });
+            const that = this;
+            ["convertToPdf"].forEach(function (k) {
+                oController[k] = that[k];
+            });
             return oController;
         },
 
@@ -138,17 +93,34 @@ sap.ui.define([
         convertToPdf: async function (base64Image) {
             sap.ui.core.BusyIndicator.show(0);
 
-            if (base64Image.startsWith("data:application/pdf") || base64Image.startsWith("JVBERi0x")) {
+            if (!base64Image) {
+                sap.ui.core.BusyIndicator.hide();
+                return "";
+            }
+
+            if (
+                base64Image.startsWith("data:application/pdf") ||
+                base64Image.startsWith("JVBERi0x")
+            ) {
+                sap.ui.core.BusyIndicator.hide();
                 return base64Image;
             }
 
             try {
-                const JsPDF = await loadJsPdf();
-                const { optimizedBase64, format, widthMm, heightMm } = await prepareImageForPdf(base64Image);
+                if (!JsPDF) {
+                    throw new Error("jsPDF module not available.");
+                }
+
+                const prepared = await prepareImageForPdf(base64Image);
+                const optimizedBase64 = prepared.optimizedBase64;
+                const format = prepared.format;
+                const widthMm = prepared.widthMm;
+                const heightMm = prepared.heightMm;
 
                 const orientation = widthMm > heightMm ? "landscape" : "portrait";
+
                 const doc = new JsPDF({
-                    orientation,
+                    orientation: orientation,
                     unit: "mm",
                     format: "a4",
                     compress: true
@@ -167,6 +139,6 @@ sap.ui.define([
             } finally {
                 sap.ui.core.BusyIndicator.hide();
             }
-        },
+        }
     });
 });

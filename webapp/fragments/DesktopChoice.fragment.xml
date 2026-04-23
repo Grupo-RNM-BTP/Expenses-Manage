@@ -2,7 +2,7 @@
     xmlns:core="sap.ui.core"
     xmlns:u="sap.ui.unified">
 
-    <Dialog id="desktopChoiceDialog" title="{i18n>New}" stretchOnPhone="true" contentWidth="34rem" class="sapUiContentPadding" draggable="true" resizable="false" horizontalScrolling="false" verticalScrolling="false">
+    <Dialog id="desktopChoiceDialog" title="{i18n>New}" stretchOnPhone="true" contentWidth="34rem" class="sapUiContentPadding" draggable="true" resizable="false" horizontalScrolling="false" verticalScrolling="false" afterClose=".onAfterCloseDesktopChoice">
 
         <content>
             <FlexBox width="100%" direction="Row" justifyContent="Center" alignItems="Center" wrap="NoWrap" renderType="Bare">

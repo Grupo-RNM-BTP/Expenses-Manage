@@ -107,7 +107,7 @@ sap.ui.define([
 
                 this.handleSynchronize();
             },
-            
+
             /**
              * Handle navigation between pages based on side menu selection.
              * @param {sap.ui.base.Event} oEvent
@@ -2627,7 +2627,7 @@ sap.ui.define([
 
                 if (Device && Device.system && Device.system.desktop && !this._skipDesktopChooser) {
 
-                    if (!this.oDesktopChoiceDialog) {
+                    if (!this.oDesktopChoiceDialog || this.oDesktopChoiceDialog.bIsDestroyed) {
                         this.oDesktopChoiceDialog = sap.ui.xmlfragment(oView.getId(), "zfiexpensesmanage.fragments.DesktopChoice", this);
 
                         if (this.oDesktopChoiceDialog) {
@@ -2642,10 +2642,7 @@ sap.ui.define([
                         if (!this._desktopTileCameraPress) {
                             this._desktopTileCameraPress = function () {
                                 this._skipDesktopChooser = true;
-                                if (this.oDesktopChoiceDialog) {
-                                    this.oDesktopChoiceDialog.close();
-                                }
-
+                                this.onCloseDesktopChoice();
                                 this.handleStartProcess(this._bStartProcessPreserveState);
                             };
                         }
@@ -3225,11 +3222,31 @@ sap.ui.define([
             onCancelProcess: function (bClearImage) {
                 this.getView().getModel("Main").setProperty("/isAdvanceFillMode", false);
                 this.getView().getModel("Main").setProperty("/advanceReferenceExp", "");
+                this._bClearExpenseImageOnClose = bClearImage;
 
                 if (this._pExpenseDialog) {
                     this._pExpenseDialog.then(function (oDialog) {
-                        oDialog.close();
-                        oDialog.destroy();
+                        if (oDialog && oDialog.isOpen && oDialog.isOpen()) {
+                            oDialog.close();
+                        } else if (oDialog) {
+                            this.onAfterCloseExpenseDialog();
+                        }
+                    }.bind(this));
+                }
+            },
+
+            /**
+             * Final cleanup after the expense dialog has fully closed.
+             */
+            onAfterCloseExpenseDialog: function () {
+                var bClearImage = !!this._bClearExpenseImageOnClose;
+                this._bClearExpenseImageOnClose = false;
+
+                if (this._pExpenseDialog) {
+                    this._pExpenseDialog.then(function (oDialog) {
+                        if (oDialog && !oDialog.bIsDestroyed) {
+                            oDialog.destroy();
+                        }
                     });
                     this._pExpenseDialog = null;
                 }
@@ -3425,10 +3442,18 @@ sap.ui.define([
             onCloseDesktopChoice: function () {
                 if (this.oDesktopChoiceDialog && this.oDesktopChoiceDialog.isOpen && this.oDesktopChoiceDialog.isOpen()) {
                     this.oDesktopChoiceDialog.close();
-                    this.oDesktopChoiceDialog.destroy();
-                    this.oDesktopChoiceDialog = null;
-                    return;
                 }
+            },
+
+            /**
+             * Destroys the desktop choice dialog only after it is fully closed.
+             */
+            onAfterCloseDesktopChoice: function () {
+                if (this.oDesktopChoiceDialog && !this.oDesktopChoiceDialog.bIsDestroyed) {
+                    this.oDesktopChoiceDialog.destroy();
+                }
+
+                this.oDesktopChoiceDialog = null;
             },
 
             /**
@@ -5845,6 +5870,31 @@ sap.ui.define([
                 if (oInput && oInput.click) {
                     oInput.click();
                 }
+            },
+
+            /**
+             * Opens the currently captured attachment from NewExp.
+             */
+            onOpenCapturedAttachment: function () {
+                var sSrc = this.oExpensesModel && this.oExpensesModel.getProperty("/capturedImage");
+                var sExt = this.oExpensesModel && this.oExpensesModel.getProperty("/imageExt");
+
+                if (!sSrc) {
+                    return;
+                }
+
+                if (sExt === "PDF" || sSrc.indexOf("data:application/pdf") === 0) {
+                    this.openPDF(sSrc);
+                    return;
+                }
+
+                var oLightBox = new sap.m.LightBox({
+                    imageContent: new sap.m.LightBoxItem({
+                        imageSrc: sSrc
+                    })
+                });
+
+                oLightBox.open();
             },
 
             /**

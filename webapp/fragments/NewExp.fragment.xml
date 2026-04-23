@@ -4,7 +4,7 @@
     xmlns:l="sap.ui.layout"
     xmlns:core="sap.ui.core"
     xmlns:tnt="sap.tnt">
-    <Dialog id="expenseDialog" title="{i18n>xexp.expNewExpTitle}" afterClose="onCancelProcess(true)" contentWidth="40rem" contentHeight="42rem" horizontalScrolling="false" verticalScrolling="false" resizable="false" draggable="false" closeOnNavigation="true" busyIndicatorDelay="1000" busyIndicatorSize="Medium">
+        <Dialog id="expenseDialog" title="{i18n>xexp.expNewExpTitle}" afterClose=".onAfterCloseExpenseDialog" contentWidth="40rem" contentHeight="42rem" horizontalScrolling="false" verticalScrolling="false" resizable="false" draggable="false" closeOnNavigation="true" busyIndicatorDelay="1000" busyIndicatorSize="Medium">
 
         <Page id="detail" backgroundDesign="List" titleLevel="Auto" showNavButton="false" showHeader="false" showSubHeader="true" enableScrolling="true" showFooter="true" contentOnlyBusy="false" floatingFooter="false" titleAlignment="Auto">
 
@@ -202,9 +202,9 @@
                         <Label text=""/>
                         <Text text="{i18n>xexp.expAttn}" class="sapMText sapUiSelectable sapUshellFlpSettingsHint"/>
 
-                        <Label id="expenseDialog:labelAttachment" text="{i18n>xexp.expAttachment}" visible="{Main>/isAdvanceFillMode}" required="{Main>/isAdvanceFillMode}" />
-                        <HBox alignItems="Center" justifyContent="Start" visible="{Main>/isAdvanceFillMode}" wrap="Wrap">
-                            <GenericTile header="{i18n>xexp.takePhoto}" frameType="OneByOne" mode="ActionMode" press=".onAdvanceTakePhoto" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                        <Label id="expenseDialog:labelAttachment" text="{i18n>xexp.expAttachment}" visible="{= !!${Main>/isAdvanceFillMode} || !!${Expenses>/capturedImage} }" required="{Main>/isAdvanceFillMode}" />
+                        <HBox alignItems="Center" justifyContent="Start" visible="{= !!${Main>/isAdvanceFillMode} || !!${Expenses>/capturedImage} }" wrap="Wrap">
+                            <GenericTile header="{i18n>xexp.takePhoto}" frameType="OneByOne" mode="ActionMode" press=".onAdvanceTakePhoto" visible="{Main>/isAdvanceFillMode}" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
                                 <tileContent>
                                     <TileContent>
                                         <content>
@@ -214,7 +214,7 @@
                                 </tileContent>
                             </GenericTile>
 
-                            <GenericTile header="{i18n>adv.AdvanceUploadDocument}" subheader="{i18n>adv.AdvanceUploadSubheader}" frameType="OneByOne" mode="ActionMode" press=".onAdvanceUploadDocument" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                            <GenericTile header="{i18n>adv.AdvanceUploadDocument}" subheader="{i18n>adv.AdvanceUploadSubheader}" frameType="OneByOne" mode="ActionMode" press=".onAdvanceUploadDocument" visible="{Main>/isAdvanceFillMode}" class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
                                 <tileContent>
                                     <TileContent>
                                         <content>
@@ -225,13 +225,22 @@
                             </GenericTile>
 
                             <u:FileUploader id="fileUploader" visible="{Main>/isAdvanceFillMode}" buttonOnly="true" sameFilenameAllowed="true" fileType="jpg,jpeg,png,pdf" mimeType="image/jpeg,image/png,application/pdf" uploadOnChange="false" placeholder="{i18n>xexp.expSelectFile}" buttonText="{i18n>xexp.expBrowse}" change=".onSelectFile" class="desktopHiddenUploader"/>
-                            <Image src="{Expenses>/capturedImage}" width="230px" height="200px" visible="{= !!${Expenses>/capturedImage} }" class="sapUiTinyMarginBegin">
+                            <Image src="{Expenses>/capturedImage}" width="230px" height="200px" visible="{= !!${Expenses>/capturedImage} &amp;&amp; (${Expenses>/imageExt} !== 'PDF') }" class="sapUiTinyMarginBegin">
                                 <detailBox>
                                     <LightBox>
                                         <LightBoxItem imageSrc="{Expenses>/capturedImage}"/>
                                     </LightBox>
                                 </detailBox>
                             </Image>
+                            <GenericTile header="{i18n>Document}" subheader="PDF" frameType="OneByHalf" mode="ActionMode" press=".onOpenCapturedAttachment" visible="{= !!${Expenses>/capturedImage} &amp;&amp; (${Expenses>/imageExt} === 'PDF') }" class="sapUiTinyMarginBegin sapUiTinyMarginBottom">
+                                <tileContent>
+                                    <TileContent>
+                                        <content>
+                                            <ImageContent src="sap-icon://pdf-attachment" />
+                                        </content>
+                                    </TileContent>
+                                </tileContent>
+                            </GenericTile>
                         </HBox>
                     </f:content>
                 </f:SimpleForm>
