@@ -317,24 +317,24 @@ sap.ui.define([
         /**
          * Open PDF document on mobile.
          */
-        openPDFMobile: function (sDocument) {
+        openPDF: function (sDocument) {
             try {
-                var base64PDF = sDocument.split(",")[1];
-                var arrayBuffer = this.base64ToArrayBuffer(base64PDF);
-                var blob = new Blob([arrayBuffer], { type: 'application/pdf' });
-                var url = URL.createObjectURL(blob);
-                // window.open(url);
+                var sPureBase64 = sDocument.includes(",") ? sDocument.split(",")[1] : sDocument;
+                var arrayBuffer = this.base64ToArrayBuffer(sPureBase64);
 
-                var win = window.open(url, "_blank");
+                if (sap.ui.Device.system.desktop) {
+                    var blob = new Blob([arrayBuffer], { type: 'application/pdf' });
+                    var sUrl = URL.createObjectURL(blob);
 
-                if (!win || win.closed || typeof win.closed === "undefined") {
-                    sap.m.MessageBox.error(this.getResourceBundle().getText("popUpBlocked"));
+                    window.open(sUrl, "_blank");
+                } else {
+                    sap.ui.require(["sap/ui/core/util/File"], function (File) {
+                        File.save(arrayBuffer, "Documento", "pdf", "application/pdf");
+                    });
                 }
+
             } catch (error) {
-                this.showErrorMessage({
-                    oText: error.message,
-                    oTitle: this.getResourceBundle().getText("errorTitle")
-                });
+                sap.m.MessageToast.show("Erro ao processar PDF: " + error.message);
             }
         },
 
