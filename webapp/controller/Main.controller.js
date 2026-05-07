@@ -1052,7 +1052,7 @@ sap.ui.define([
              */
             onGetExpenses: function (oAction) {
                 var oModel = this.getModel(),
-                    sPath = "/ZFI_EXPENSES_MNG",
+                    sPath = "/ZFI_EXPENSES_MNG2",
                     that = this;
 
                 this.getView().getModel("Main").setProperty("/ExpensesReconciled", []);
@@ -1063,11 +1063,29 @@ sap.ui.define([
                 return new Promise(function (resolve, reject) {
                     oModel.read(sPath, {
                         success: function (oData) {
+                            var fnParseExpenseDate = function (oExpense) {
+                                var sDate = String(
+                                    (oExpense && (oExpense.VYearMonthDay || oExpense.Posteddt || oExpense.Sdate || oExpense.Erdat)) || ""
+                                ).replace(/\D/g, "");
+
+                                if (sDate.length < 8) {
+                                    return 0;
+                                }
+
+                                return Number(sDate.substring(0, 8));
+                            };
+
+                            var fnSortByMostRecent = function (aExpenses) {
+                                return aExpenses.sort(function (a, b) {
+                                    return fnParseExpenseDate(b) - fnParseExpenseDate(a);
+                                });
+                            };
+
                             if (oAction === 'R') {
-                                var aFiltered = oData.results.filter(o => o.Checknum === "" && o.Pymtmeth === "A" && o.FiStatus !== "9" && o.FiStatus !== "1" && o.FiStatus !== "2" && o.FiStatus !== "4" && o.FiStatus !== "7");
+                                var aFiltered = fnSortByMostRecent(oData.results.filter(o => o.Checknum === "" && o.Pymtmeth === "A" && o.FiStatus !== "9" && o.FiStatus !== "1" && o.FiStatus !== "2" && o.FiStatus !== "4" && o.FiStatus !== "7"));
                                 that.getView().getModel("Main").setProperty("/ExpensesReconciled", aFiltered);
                             } else if (oAction === 'D') {
-                                var aFiltered = oData.results.filter(o => o.Checknum !== "" && o.ExpType != "DEV" && o.Pymtmeth === "A" && o.FiStatus !== "9" && o.FiStatus !== "1" && o.FiStatus !== "2" && o.FiStatus !== "4" && o.FiStatus !== "7");
+                                var aFiltered = fnSortByMostRecent(oData.results.filter(o => o.Checknum !== "" && o.ExpType != "DEV" && o.Pymtmeth === "A" && o.FiStatus !== "9" && o.FiStatus !== "1" && o.FiStatus !== "2" && o.FiStatus !== "4" && o.FiStatus !== "7"));
                                 that.getView().getModel("Main").setProperty("/ExpenseDevolution", aFiltered);
                             }
 
