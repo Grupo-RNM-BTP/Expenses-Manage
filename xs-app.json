@@ -5,7 +5,7 @@
     {
       "source": "^/sap/(.*)$",
       "target": "/sap/$1",
-      "destination": "PRD",
+      "destination": "DD2_200",
       "authenticationType": "xsuaa",
       "csrfProtection": false
     },

@@ -268,51 +268,6 @@ sap.ui.define([
             }
         },
 
-        /**
-         * Open PDF document.
-         */
-        openPDF: function (sDocument) {
-            try {
-                if (sap.ui.Device.system.phone || sap.ui.Device.system.tablet) {
-                    this.openPDFMobile(sDocument);
-                    return;
-                }
-
-                var sBase64 = sDocument.split(",")[1],
-                    decodedPdfContent = atob(sBase64),
-                    byteNumbers = new Array(decodedPdfContent.length);
-
-                for (var i = 0; i < decodedPdfContent.length; i++) {
-                    byteNumbers[i] = decodedPdfContent.charCodeAt(i);
-                }
-
-                var byteArray = new Uint8Array(byteNumbers),
-                    blob = new Blob([byteArray], { type: "application/pdf" }),
-                    _pdfurl = URL.createObjectURL(blob);
-
-                if (!this._PDFViewer) {
-                    this._PDFViewer = new sap.m.PDFViewer({
-                        width: "auto",
-                        title: "Visualização de Documento",
-                        showDownloadButton: false,
-                        source: _pdfurl,
-                        displayType: sap.m.PDFViewerDisplayType.Auto,
-                        isTrustedSource: true
-                    });
-                    this.getView().addDependent(this._PDFViewer);
-                } else {
-                    this._PDFViewer.setSource(_pdfurl);
-                }
-
-                jQuery.sap.addUrlWhitelist("blob");
-                this._PDFViewer.open();
-            } catch (error) {
-                this.showErrorMessage({
-                    oText: error.message,
-                    oTitle: this.getResourceBundle().getText("errorTitle")
-                });
-            }
-        },
 
         /**
          * Open PDF document on mobile.
