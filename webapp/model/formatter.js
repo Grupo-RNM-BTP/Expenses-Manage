@@ -306,6 +306,18 @@ sap.ui.define([], function () {
             return sBill === "X"
                 ? sYes
                 : sNo;
+        },
+
+        /**
+         * Formats the summary of selected advance credit card movements shown in the NewExp dialog.
+         * @param {Array} aMovements Selected movements.
+         * @param {string} sTotal Total value of the selected movements.
+         * @param {string} sCurrency Currency code of the selected movements.
+         * @returns {string} Localized summary text (count, total and currency).
+         */
+        formatAdvanceMovementsSummary: function (aMovements, sTotal, sCurrency) {
+            var iCount = (aMovements || []).length;
+            return this.getResourceBundle().getText("adv.AdvanceMovementsSummary", [iCount, sTotal || "0.00", sCurrency || ""]);
         }
     };
 });

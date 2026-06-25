@@ -1,0 +1,53 @@
+<core:FragmentDefinition xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+
+    <Dialog id="advanceMovementsDialog" title="{i18n>adv.AssociateMovements}" contentWidth="900px" contentHeight="550px" class="sapUiSizeCompact sapUiNoContentPadding" resizable="true" draggable="true">
+
+        <VBox class="sapUiSmallMargin sapUiNoContentPadding">
+
+            <MessageStrip text="{i18n>adv.AdvanceMovementsDialogMessage}" type="Information" showIcon="true" showCloseButton="false" class="sapUiSmallMarginBottom"/>
+
+            <SearchField width="22rem" placeholder="{i18n>Search}" liveChange=".onAdvanceMovSearchLiveChange" class="sapUiSmallMarginBottom"/>
+
+            <Table id="advanceMovementsSelectTable" mode="MultiSelect" inset="false" width="100%" demandPopin="true" growing="true" growingThreshold="50" items="{Main>/AdvanceReconMovements}">
+                <columns>
+                    <Column minScreenWidth="Small" demandPopin="true">
+                        <Text text="{i18n>adv.AdvanceMovementCardNo}"/>
+                    </Column>
+                    <Column minScreenWidth="Small" demandPopin="true">
+                        <Text text="{i18n>adv.AdvanceMovementCheckNo}"/>
+                    </Column>
+                    <Column minScreenWidth="Tablet" demandPopin="true">
+                        <Text text="{i18n>adv.AdvanceMovementName}"/>
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true" hAlign="End">
+                        <Text text="{i18n>Sdate}"/>
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true" hAlign="End">
+                        <Text text="{i18n>Value}"/>
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <Text text="{Main>Cardnumber}"/>
+                            <Text text="{Main>Chknum}"/>
+                            <Text text="{Main>Namekey}"/>
+                            <Text text="{Main>sDateFromated}"/>
+                            <ObjectNumber number="{Main>Amt}" unit="{Main>Curcode}"/>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </VBox>
+
+        <beginButton>
+            <Button text="{i18n>Confirm}" type="Emphasized" press=".onConfirmAdvanceMovements"/>
+        </beginButton>
+
+        <endButton>
+            <Button text="{i18n>xexp.expCancel}" press=".onCancelAdvanceMovements"/>
+        </endButton>
+
+    </Dialog>
+</core:FragmentDefinition>

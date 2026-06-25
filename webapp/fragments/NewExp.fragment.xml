@@ -196,6 +196,17 @@
                         </Table>
 
                         <Label text="" visible="false"/>
+                        <Title text="{i18n>adv.AdvanceExtraMovementsTitle}" level="H6" class="sapUiSmallMarginTop" visible="{Main>/isAdvanceFillMode}"/>
+
+                        <Label text="" visible="false"/>
+                        <VBox visible="{Main>/isAdvanceFillMode}">
+                            <Button text="{i18n>adv.AssociateMovements}" icon="sap-icon://add-coursebook" type="Transparent" press=".onOpenAdvanceMovementsSelect"/>
+                            <HBox class="sapUiTinyMarginTop" alignItems="Center" visible="{= (${Expenses>/advanceMovements} || []).length > 0 }">
+                                <ObjectStatus state="Information" text="{ parts: ['Expenses>/advanceMovements', 'Expenses>/advanceMovementsTotal', 'Expenses>/advanceMovementsCurrency'], formatter: '.formatter.formatAdvanceMovementsSummary' }"/>
+                            </HBox>
+                        </VBox>
+
+                        <Label text="" visible="false"/>
                         <tnt:InfoLabel id="expenseDialog:messageStrip" text="{i18n>xexp.expFillFields}" colorScheme="2" visible="false"/>
 
                         <core:InvisibleText text=""/>

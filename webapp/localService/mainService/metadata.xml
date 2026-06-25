@@ -203,6 +203,7 @@
                 <Property Name="Value" Type="Edm.Decimal" Nullable="false" Precision="16" Scale="3" sap:unicode="false" sap:label="Valor líquido" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
                 <Property Name="Doc" Type="Edm.String" Nullable="false" sap:unicode="false" sap:label="Cadeia" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
                 <Property Name="TableIva" Type="Edm.String" Nullable="false" sap:unicode="false" sap:label="Cadeia" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+                <Property Name="TableMovements" Type="Edm.String" Nullable="false" sap:unicode="false" sap:label="Movimentos" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
                 <Property Name="Exptype" Type="Edm.String" Nullable="false" MaxLength="10" sap:unicode="false" sap:label="Expense Type" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
                 <Property Name="Pymtmeth" Type="Edm.String" Nullable="false" MaxLength="1" sap:unicode="false" sap:label="FrmPgto" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
                 <Property Name="Land1" Type="Edm.String" Nullable="false" MaxLength="3" sap:unicode="false" sap:label="País/região" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>

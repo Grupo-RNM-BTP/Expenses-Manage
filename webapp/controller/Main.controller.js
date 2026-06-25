@@ -70,7 +70,15 @@ sap.ui.define([
 
                 this.getView().setModel(new JSONModel({}), "graficoModel");
                 this.getView().setModel(new JSONModel({}), "Camera");
-                this.getView().setModel(new JSONModel({ vatLines: [], vatEditMode: true, unitVisible: false }), "Expenses");
+                this.getView().setModel(new JSONModel({
+                    vatLines: [],
+                    vatEditMode: true,
+                    unitVisible: false,
+                    advanceMovements: [],
+                    advanceMovementsTotal: "0.00",
+                    advanceMovementsCurrency: "",
+                    advanceBaseAmount: 0
+                }), "Expenses");
 
                 this.getView().setModel(new JSONModel({ processingDialogBtnVisible: true, aiScan: true }), "Scan");
 
@@ -2539,7 +2547,7 @@ sap.ui.define([
             onAddVatLine: function (sT, sB) {
                 var aVatLines = this.oExpensesModel.getProperty("/vatLines");
 
-                aVatLines.push({ p: "", t: sT, v: "", b: sB });
+                aVatLines.push({ p: "", t: sT, v: "", b: sB, d: this.handleGetTaxTypeText(sT) });
                 this.oExpensesModel.setProperty("/vatLines", aVatLines);
 
                 var idx = aVatLines.length;
@@ -2601,6 +2609,58 @@ sap.ui.define([
                 oModel.setProperty(oCtx.getPath() + "/d", sDesc);
 
                 this.onVatCellChange(oEvent);
+            },
+
+            /**
+             * Returns the tax type text for the provided tax type key.
+             * @param {string} sTaxType - The selected tax type key
+             * @returns {string} The tax type description, or an empty string when not resolvable
+             */
+            handleGetTaxTypeText: function (sTaxType) {
+                if (!sTaxType) {
+                    return "";
+                }
+
+                var oTable = this.byId("expenseDialog:vatTable");
+                var sText = "";
+
+                if (!oTable) {
+                    return "";
+                }
+
+                oTable.getItems().some(function (oRow) {
+                    var aSelects = oRow.findAggregatedObjects(true, function (oCtrl) {
+                        return oCtrl instanceof sap.m.Select;
+                    });
+
+                    return aSelects.some(function (oSelect) {
+                        return oSelect.getItems().some(function (oOption) {
+                            if (oOption.getKey() === sTaxType) {
+                                sText = oOption.getText();
+                                return true;
+                            }
+                            return false;
+                        });
+                    });
+                });
+
+                return sText;
+            },
+
+            /**
+             * Ensures every VAT line carries the tax type description resolved from its key,
+             * so a default tax type kept unchanged by the user is still saved with its text.
+             */
+            handleEnsureVatLineTexts: function () {
+                var aVatLines = this.oExpensesModel.getProperty("/vatLines") || [];
+
+                aVatLines.forEach(function (oLine) {
+                    if (oLine && oLine.t && !oLine.d) {
+                        oLine.d = this.handleGetTaxTypeText(oLine.t);
+                    }
+                }, this);
+
+                this.oExpensesModel.setProperty("/vatLines", aVatLines);
             },
 
             /**
@@ -2919,6 +2979,8 @@ sap.ui.define([
                 Fragment.byId(oView.getId(), "expenseDialog:inputAmt").setValue(oData.Amt);
                 Fragment.byId(oView.getId(), "expenseDialog:selectCurrency").setSelectedKey(oData.Waers ? oData.Waers : "0");
 
+                this.oExpensesModel.setProperty("/advanceBaseAmount", parseFloat(oData.Amt) || 0);
+
                 if (oData.Plate) {
                     this.handleSetPlate(oData.Plate, oView);
                 }
@@ -3072,6 +3134,7 @@ sap.ui.define([
                 oEntry.Waers2 = Fragment.byId(oView.getId(), "expenseDialog:selectCurrency").getSelectedKey();
                 oEntry.Comments = Fragment.byId(oView.getId(), "expenseDialog:textAreaComments").getValue();
                 oEntry.TableIva = JSON.stringify(oView.getModel("Expenses").getProperty("/vatLines"));
+                oEntry.TableMovements = JSON.stringify(this.oExpensesModel.getProperty("/advanceMovements") || []);
                 oEntry.Collaborators = this.handleFillCollaborators();
                 oEntry.Exptype2 = this._exptype;
 
@@ -3241,6 +3304,11 @@ sap.ui.define([
                 this.getView().getModel("Main").setProperty("/isAdvanceFillMode", false);
                 this.getView().getModel("Main").setProperty("/advanceReferenceExp", "");
                 this._bClearExpenseImageOnClose = bClearImage;
+
+                this.oExpensesModel.setProperty("/advanceMovements", []);
+                this.oExpensesModel.setProperty("/advanceMovementsTotal", "0.00");
+                this.oExpensesModel.setProperty("/advanceMovementsCurrency", "");
+                this.oExpensesModel.setProperty("/advanceBaseAmount", 0);
 
                 if (this._pExpenseDialog) {
                     this._pExpenseDialog.then(function (oDialog) {
@@ -5625,6 +5693,159 @@ sap.ui.define([
                         }.bind(this)
                     });
                 }.bind(this));
+            },
+
+            /**
+             * Opens the popup to associate extra credit card movements while completing an advance.
+             */
+            onOpenAdvanceMovementsSelect: function () {
+                var oView = this.getView();
+
+                this.handleGetReconMovements().then(function (aMovements) {
+                    if (!aMovements || !aMovements.length) {
+                        MessageBox.warning(this.getResourceBundle().getText("adv.NoReconMovementsForAdvance"));
+                        return;
+                    }
+
+                    if (!this._pAdvanceMovementsDialog) {
+                        this._pAdvanceMovementsDialog = Fragment.load({
+                            id: oView.getId(),
+                            name: "zfiexpensesmanage.fragments.AdvanceMovementsSelect",
+                            controller: this
+                        }).then(function (oDialog) {
+                            oView.addDependent(oDialog);
+                            return oDialog;
+                        });
+                    }
+
+                    this._pAdvanceMovementsDialog.then(function (oDialog) {
+                        this.handleRestoreAdvanceMovementSelection();
+                        oDialog.open();
+                    }.bind(this));
+                }.bind(this));
+            },
+
+            /**
+             * Live search inside the advance movements selection table.
+             * @param {sap.ui.base.Event} oEvent - SearchField liveChange event
+             */
+            onAdvanceMovSearchLiveChange: function (oEvent) {
+                var oTable = Fragment.byId(this.getView().getId(), "advanceMovementsSelectTable");
+                if (!oTable) {
+                    return;
+                }
+
+                var sQuery = (oEvent.getParameter("newValue") || "").trim();
+                var aFilters = [];
+
+                if (sQuery) {
+                    aFilters.push(new Filter({
+                        filters: [
+                            new Filter("Cardnumber", FilterOperator.Contains, sQuery),
+                            new Filter("Chknum", FilterOperator.Contains, sQuery),
+                            new Filter("Namekey", FilterOperator.Contains, sQuery)
+                        ],
+                        and: false
+                    }));
+                }
+
+                oTable.getBinding("items").filter(aFilters);
+            },
+
+            /**
+             * Confirms the selection: stores movements in the form model, computes the total
+             * and recalculates the form amount. Mirrors the TableIva pattern (JSON string).
+             */
+            onConfirmAdvanceMovements: function () {
+                var oTable = Fragment.byId(this.getView().getId(), "advanceMovementsSelectTable");
+                var aSelected = (oTable ? oTable.getSelectedItems() : []).map(function (oItem) {
+                    var o = oItem.getBindingContext("Main").getObject();
+                    return {
+                        account: o.Account,
+                        cardnumber: o.Cardnumber,
+                        checknumber: o.Chknum,
+                        value: String(o.Amt),
+                        currency: o.Curcode,
+                        posteddt: o.Posteddt
+                    };
+                });
+
+                var fTotal = aSelected.reduce(function (acc, oMov) {
+                    return acc + (parseFloat(oMov.value) || 0);
+                }, 0);
+
+                this.oExpensesModel.setProperty("/advanceMovements", aSelected);
+                this.oExpensesModel.setProperty("/advanceMovementsTotal", fTotal.toFixed(2));
+                this.oExpensesModel.setProperty("/advanceMovementsCurrency", aSelected.length ? aSelected[0].currency : "");
+
+                this.handleRecalcAdvanceTotal();
+
+                if (this._pAdvanceMovementsDialog) {
+                    this._pAdvanceMovementsDialog.then(function (oDialog) {
+                        oDialog.close();
+                    });
+                }
+            },
+
+            /**
+             * Closes the advance movements selection popup without applying changes.
+             */
+            onCancelAdvanceMovements: function () {
+                if (this._pAdvanceMovementsDialog) {
+                    this._pAdvanceMovementsDialog.then(function (oDialog) {
+                        oDialog.close();
+                    });
+                }
+            },
+
+            /**
+             * Restores previously selected movements when the dialog is opened again.
+             */
+            handleRestoreAdvanceMovementSelection: function () {
+                var oTable = Fragment.byId(this.getView().getId(), "advanceMovementsSelectTable");
+                if (!oTable) {
+                    return;
+                }
+
+                var aSaved = this.oExpensesModel.getProperty("/advanceMovements") || [];
+                var mKeys = {};
+                aSaved.forEach(function (oMov) {
+                    mKeys[oMov.cardnumber + "|" + oMov.checknumber] = true;
+                });
+
+                oTable.removeSelections(true);
+                oTable.getItems().forEach(function (oItem) {
+                    var oCtx = oItem.getBindingContext("Main");
+                    var o = oCtx ? oCtx.getObject() : null;
+                    if (o && mKeys[o.Cardnumber + "|" + o.Chknum]) {
+                        oTable.setSelectedItem(oItem, true);
+                    }
+                });
+            },
+
+            /**
+             * Recalculates the advance amount using the base amount and selected movements.
+             */
+            handleRecalcAdvanceTotal: function () {
+                var fBase = parseFloat(this.oExpensesModel.getProperty("/advanceBaseAmount")) || 0;
+                var fMov = parseFloat(this.oExpensesModel.getProperty("/advanceMovementsTotal")) || 0;
+                var oInput = Fragment.byId(this.getView().getId(), "expenseDialog:inputAmt");
+
+                if (oInput) {
+                    oInput.setValue((fBase + fMov).toFixed(2));
+                }
+            },
+
+            /**
+             * Formats the summary of selected movements shown in the NewExp dialog.
+             * @param {Array} aMovements
+             * @param {string} sTotal
+             * @param {string} sCurrency
+             * @returns {string}
+             */
+            formatAdvanceMovementsSummary: function (aMovements, sTotal, sCurrency) {
+                var iCount = (aMovements || []).length;
+                return this.getResourceBundle().getText("adv.AdvanceMovementsSummary", [iCount, sTotal || "0.00", sCurrency || ""]);
             },
 
             /**
