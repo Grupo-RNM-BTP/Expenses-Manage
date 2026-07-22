@@ -32,6 +32,7 @@ sap.ui.define([
                     reconcileSearch: "",
                     devolutionSearch: "",
                     AdvanceReconMovements: [],
+                    AdvanceReconMovementsNew: [],
                     advanceMovementSearch: "",
                     isAdvanceFillMode: false,
                     advanceReferenceExp: "",
@@ -1317,14 +1318,14 @@ sap.ui.define([
             },
 
             /**
-             * Builds available filter values for the settings dialog.
-             * @param {sap.m.ViewSettingsDialog} oDialog - Settings dialog instance
-             * @param {string} sDialogType - "R" for Reconcile, "D" for Devolution
-             */
+         * Builds available filter values for the settings dialog.
+         * @param {sap.m.ViewSettingsDialog} oDialog - Settings dialog instance
+         * @param {string} sDialogType - "R" for Reconcile, "D" for Devolution
+         */
             handleBuildDialogFilterItems: function (oDialog, sDialogType) {
                 var oMeta = this.handleGetDialogTableMetadata(sDialogType);
                 var oMainModel = this.getView().getModel("Main");
-                var sPath = sDialogType === "R" ? "/ExpensesReconciled" : (sDialogType === "A" ? "/AdvanceReconMovements" : "/ExpenseDevolution");
+                var sPath = sDialogType === "R" ? "/ExpensesReconciled" : (sDialogType === "A" ? "/AdvanceReconMovementsNew" : "/ExpenseDevolution");
                 var aData = oMainModel.getProperty(sPath) || [];
                 var aFilterDefs = this.handleGetDialogTableDefinitions(sDialogType);
 
@@ -2697,10 +2698,14 @@ sap.ui.define([
                 }
 
                 if (!bPreserve) {
-                    this.getView().getModel("Main").setProperty("/isAdvanceFillMode", false);
-                    this._chknum = "";
-                    this._cardnum = "";
-                    this.handleResetModels();
+                    if (this._bAdvanceFillStarting) {
+                        this.handleResetModels();
+                    } else {
+                        this.getView().getModel("Main").setProperty("/isAdvanceFillMode", false);
+                        this._chknum = "";
+                        this._cardnum = "";
+                        this.handleResetModels();
+                    }
                 }
 
                 if (Device && Device.system && Device.system.desktop && !this._skipDesktopChooser) {
@@ -2902,6 +2907,17 @@ sap.ui.define([
                 if (oPaymentMethodSelect) {
                     oPaymentMethodSelect.setEnabled(false);
                 }
+
+                if (bAdvanceFillMode && this._oAdvancePrefill) {
+                    if (oAmountInput && this._oAdvancePrefill.Amt != null) {
+                        oAmountInput.setValue(this._oAdvancePrefill.Amt);
+                        this.oExpensesModel.setProperty("/advanceBaseAmount", parseFloat(this._oAdvancePrefill.Amt) || 0);
+                    }
+
+                    if (oCurrencySelect && this._oAdvancePrefill.Waers) {
+                        oCurrencySelect.setSelectedKey(this._oAdvancePrefill.Waers);
+                    }
+                }
             },
 
             /**
@@ -2954,7 +2970,6 @@ sap.ui.define([
                 fnById("expenseDialog:titleVatTable").setVisible(false);
                 fnById("expenseDialog:vatTable").setVisible(false);
                 fnById("expenseDialog:labelAttachment").setVisible(false);
-                fnById("fileUploader").setVisible(false);
             },
 
             /**
@@ -3303,7 +3318,8 @@ sap.ui.define([
             onCancelProcess: function (bClearImage) {
                 this.getView().getModel("Main").setProperty("/isAdvanceFillMode", false);
                 this.getView().getModel("Main").setProperty("/advanceReferenceExp", "");
-                this._bClearExpenseImageOnClose = bClearImage;
+                this._bAdvanceFillStarting = false;
+                this._oAdvancePrefill = null;
 
                 this.oExpensesModel.setProperty("/advanceMovements", []);
                 this.oExpensesModel.setProperty("/advanceMovementsTotal", "0.00");
@@ -3312,27 +3328,8 @@ sap.ui.define([
 
                 if (this._pExpenseDialog) {
                     this._pExpenseDialog.then(function (oDialog) {
-                        if (oDialog && oDialog.isOpen && oDialog.isOpen()) {
-                            oDialog.close();
-                        } else if (oDialog) {
-                            this.onAfterCloseExpenseDialog();
-                        }
-                    }.bind(this));
-                }
-            },
-
-            /**
-             * Final cleanup after the expense dialog has fully closed.
-             */
-            onAfterCloseExpenseDialog: function () {
-                var bClearImage = !!this._bClearExpenseImageOnClose;
-                this._bClearExpenseImageOnClose = false;
-
-                if (this._pExpenseDialog) {
-                    this._pExpenseDialog.then(function (oDialog) {
-                        if (oDialog && !oDialog.bIsDestroyed) {
-                            oDialog.destroy();
-                        }
+                        oDialog.close();
+                        oDialog.destroy();
                     });
                     this._pExpenseDialog = null;
                 }
@@ -3481,6 +3478,7 @@ sap.ui.define([
              * Stops the active camera stream and closes the camera dialog.
              */
             onCloseCamera: function () {
+                this._bAdvanceFillStarting = false;
                 try {
                     this.handleStopAllDetect();
 
@@ -3526,6 +3524,7 @@ sap.ui.define([
              * Closes the desktop choice dialog.
              */
             onCloseDesktopChoice: function () {
+                this._bAdvanceFillStarting = false;
                 if (this.oDesktopChoiceDialog && this.oDesktopChoiceDialog.isOpen && this.oDesktopChoiceDialog.isOpen()) {
                     this.oDesktopChoiceDialog.close();
                 }
@@ -3550,11 +3549,14 @@ sap.ui.define([
                 var vAiScan = this.oScanModel.getProperty("/aiScan");
 
                 this.onCloseCamera();
-                if (bAdvanceFill) {
-                    return;
-                }
+                this._bAdvanceFillStarting = false;
+
                 if (!vAiScan) {
-                    this.handleFinishProcess();
+                    if (bAdvanceFill) {
+                        this.handleFinishProcess(this._oAdvancePrefill, "ADV");
+                    } else {
+                        this.handleFinishProcess();
+                    }
                     return;
                 }
 
@@ -5683,6 +5685,12 @@ sap.ui.define([
 
                             oMainModel.setProperty("/AdvanceReconMovements", aMovements);
 
+                            // Criar adiantamento: apenas movimentos positivos. Os negativos são
+                            // devoluções e só podem ser associados ao preencher um adiantamento existente.
+                            oMainModel.setProperty("/AdvanceReconMovementsNew", aMovements.filter(function (oMov) {
+                                return parseFloat(oMov.Amt) > 0;
+                            }));
+
                             resolve(aMovements);
                         }.bind(this),
                         error: function (oError) {
@@ -6158,10 +6166,13 @@ sap.ui.define([
                 }
 
                 var oAdvance = aItems[0].getBindingContext().getObject();
-                var oData = this.handleBuildAdvanceData(oAdvance);
+
+                this._oAdvancePrefill = this.handleBuildAdvanceData(oAdvance);
 
                 this.getView().getModel("Main").setProperty("/isAdvanceFillMode", true);
-                this.handleFinishProcess(oData, "ADV");
+                this._bAdvanceFillStarting = true;
+
+                this.handleStartProcess();
             },
         });
     });

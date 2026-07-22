@@ -13,7 +13,7 @@
                 <Button icon="sap-icon://action-settings" type="Transparent" tooltip="{i18n>SortFilter}" press=".handleOpenAdvanceMovementTableSettings" />
             </OverflowToolbar>
 
-            <Table id="advanceMovementTable" mode="SingleSelectLeft" inset="false" width="100%" demandPopin="true" class="sapUiResponsiveContentPadding" fixedLayout="false" growing="true" growingThreshold="50" items="{Main>/AdvanceReconMovements}">
+            <Table id="advanceMovementTable" mode="SingleSelectLeft" inset="false" width="100%" demandPopin="true" class="sapUiResponsiveContentPadding" fixedLayout="false" growing="true" growingThreshold="50" items="{Main>/AdvanceReconMovementsNew}">
                 <columns>
                     <Column minScreenWidth="Tablet" demandPopin="true">
                         <Button type="Transparent" text="{i18n>adv.AdvanceMovementName}" press=".onAdvanceMovementColumnPress">
