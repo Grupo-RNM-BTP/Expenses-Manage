@@ -112,7 +112,7 @@
                         <StepInput id="expenseDialog:inputUnit" min="1" max="100" step="1" value="1" visible="{Expenses>/unitVisible}" change=".onUnitChange" textAlign="Center" width="120px"/>
 
                         <Label id="expenseDialog:labelCollaborators" text="{i18n>xexp.expCollaborators}" visible="{Collaborators>/showCollaborators}"/>
-                        <MultiInput id="expenseDialog:multiCollaborators" visible="{Collaborators>/showCollaborators}" showValueHelp="true" valueHelpRequest=".handleOpenCollaboratorsVH" showSuggestion="true" filterSuggests="false" suggest=".onSuggestCollaborators" suggestionItemSelected=".onCollaboratorSuggestionItemSelected" placeholder="{i18n>xexp.expCollaboratorsPlaceholder}" width="100%" suggestionItems="{ path: '/ZFI_MANAGER_VH', length: 50 }" required="true">
+                        <MultiInput id="expenseDialog:multiCollaborators" visible="{Collaborators>/showCollaborators}" showValueHelp="true" valueHelpRequest=".handleOpenCollaboratorsVH" showSuggestion="true" filterSuggests="false" suggest=".onSuggestCollaborators" suggestionItemSelected=".onCollaboratorSuggestionItemSelected" placeholder="{i18n>xexp.expCollaboratorsPlaceholder}" width="100%" suggestionItems="{ path: '/ZFI_PERNR_VH', length: 50 }" required="true">
                             <suggestionItems>
                                 <core:Item key="{pernr}" text="{cname}" />
                             </suggestionItems>

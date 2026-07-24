@@ -4005,7 +4005,7 @@ sap.ui.define([
             /**
              * Opens the collaborators value help dialog (multi-select).
              * Loads the fragment, configures the FilterBar (basic search + fields),
-             * binds the table to /ZFI_MANAGER_VH and pre-loads current tokens from the MultiInput.
+             * binds the table to /ZFI_PERNR_VH and pre-loads current tokens from the MultiInput.
              */
             handleOpenCollaboratorsVH: function () {
                 try {
@@ -4038,7 +4038,7 @@ sap.ui.define([
 
                             if (oTable.bindRows) {
                                 oTable.bindAggregation("rows", {
-                                    path: "/ZFI_MANAGER_VH",
+                                    path: "/ZFI_PERNR_VH",
                                     events: {
                                         dataReceived: function () {
                                             oDialogSuggestions.update();
@@ -4079,7 +4079,7 @@ sap.ui.define([
                                 oTable.addColumn(oColN);
 
                                 oTable.bindAggregation("items", {
-                                    path: "/ZFI_MANAGER_VH",
+                                    path: "/ZFI_PERNR_VH",
                                     template: new sap.m.ColumnListItem({
                                         cells: [
                                             new sap.m.Text({ text: "{pernr}" }),
